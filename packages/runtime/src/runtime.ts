@@ -1,7 +1,13 @@
 import type { CorrelationId, RuntimeMode, UtcTimestamp } from "@ate/domain";
 
 import { buildDependencyGraph, type RuntimeGraph } from "./graph.js";
-import { lifecycleError, systemClock, timeout, toErrorMessage } from "./primitives.js";
+import {
+  LifecycleTimeoutError,
+  lifecycleError,
+  systemClock,
+  timeout,
+  toErrorMessage,
+} from "./primitives.js";
 import type {
   DegradationReport,
   HealthReport,
@@ -247,7 +253,7 @@ export class ATERuntime {
       serviceId,
       reason: reasonMessage,
     });
-    await this.refreshDependencyReadiness();
+    this.refreshDependencyReadiness();
     const degradation = this.createDegradationReport(serviceId, error);
     this.degradations.push(degradation);
     this.transitionRuntime(
@@ -389,10 +395,10 @@ export class ATERuntime {
         await this.checkServiceReadiness(service, correlationId),
       );
     }
-    await this.refreshDependencyReadiness();
+    this.refreshDependencyReadiness();
   }
 
-  private async refreshDependencyReadiness(): Promise<void> {
+  private refreshDependencyReadiness(): void {
     for (const serviceId of this.graph.startupOrder) {
       const service = this.requireService(serviceId);
       for (const dependencyId of service.descriptor.dependencies) {
@@ -417,7 +423,12 @@ export class ATERuntime {
       return this.defaultHealth(service.descriptor.serviceId);
     }
     try {
-      return await this.invokeService(service, "checkHealth", "HEALTH_CHECK_FAILED", correlationId);
+      return (await this.invokeService(
+        service,
+        "checkHealth",
+        "HEALTH_CHECK_FAILED",
+        correlationId,
+      )) as HealthReport;
     } catch (error) {
       const normalized = this.normalizeError(
         error,
@@ -442,7 +453,12 @@ export class ATERuntime {
       return this.defaultReadiness(service.descriptor.serviceId);
     }
     try {
-      return await this.invokeService(service, "checkReadiness", "READINESS_FAILED", correlationId);
+      return (await this.invokeService(
+        service,
+        "checkReadiness",
+        "READINESS_FAILED",
+        correlationId,
+      )) as ReadinessReport;
     } catch (error) {
       const normalized = this.normalizeError(
         error,
@@ -459,9 +475,9 @@ export class ATERuntime {
     }
   }
 
-  private async invokeService<TMethod extends keyof RuntimeManagedService>(
+  private async invokeService(
     service: RuntimeManagedService,
-    method: TMethod,
+    method: keyof RuntimeManagedService,
     timeoutCode:
       | "INITIALIZATION_FAILED"
       | "STARTUP_FAILED"
@@ -471,20 +487,14 @@ export class ATERuntime {
       | "SHUTDOWN_FAILED",
     correlationId?: CorrelationId,
     ...args: readonly unknown[]
-  ): Promise<Awaited<ReturnType<NonNullable<RuntimeManagedService[TMethod]>>>> {
+  ): Promise<unknown> {
     const fn = service[method];
     if (typeof fn !== "function") {
-      return undefined as Awaited<ReturnType<NonNullable<RuntimeManagedService[TMethod]>>>;
+      return undefined;
     }
     const context = this.context(correlationId);
     return timeout(
-      Promise.resolve(
-        (
-          fn as (
-            ...values: unknown[]
-          ) => Awaited<ReturnType<NonNullable<RuntimeManagedService[TMethod]>>>
-        )(context, ...args),
-      ),
+      Promise.resolve((fn as (...values: unknown[]) => unknown)(context, ...args)),
       this.timeoutMs,
       () =>
         lifecycleError(
@@ -547,7 +557,7 @@ export class ATERuntime {
     return {
       status,
       timestamp: this.now(),
-      reason: reasons.length === 0 ? undefined : reasons.join("; "),
+      ...(reasons.length === 0 ? {} : { reason: reasons.join("; ") }),
     };
   }
 
@@ -558,9 +568,14 @@ export class ATERuntime {
       const readiness =
         this.serviceReadiness.get(service.descriptor.serviceId) ??
         this.defaultReadiness(service.descriptor.serviceId);
+      const health =
+        this.serviceHealth.get(service.descriptor.serviceId) ??
+        this.defaultHealth(service.descriptor.serviceId);
       if (
         service.descriptor.criticality !== "OPTIONAL" &&
-        (readiness.status === "NOT_READY" ||
+        (health.status === "UNHEALTHY" ||
+          health.status === "UNKNOWN" ||
+          readiness.status === "NOT_READY" ||
           this.serviceStates.get(service.descriptor.serviceId) === "FAILED")
       ) {
         status = "NOT_READY";
@@ -574,7 +589,7 @@ export class ATERuntime {
     return {
       status,
       timestamp: this.now(),
-      reason: reasons.length === 0 ? undefined : reasons.join("; "),
+      ...(reasons.length === 0 ? {} : { reason: reasons.join("; ") }),
     };
   }
 
@@ -703,6 +718,9 @@ export class ATERuntime {
   ): LifecycleError {
     if (isLifecycleError(error)) {
       return error;
+    }
+    if (error instanceof LifecycleTimeoutError) {
+      return error.lifecycleError;
     }
     return lifecycleError(code, toErrorMessage(error), this.now(), serviceId);
   }

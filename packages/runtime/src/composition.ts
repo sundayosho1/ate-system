@@ -82,8 +82,8 @@ export const buildRuntime = (input: BuildRuntimeInput): BuildRuntimeResult => {
     runtimeVersion: input.runtimeVersion,
     mode,
     services: input.services,
-    capabilities: input.capabilities,
-    defaultTimeoutMs: input.defaultTimeoutMs,
+    ...(input.capabilities === undefined ? {} : { capabilities: input.capabilities }),
+    ...(input.defaultTimeoutMs === undefined ? {} : { defaultTimeoutMs: input.defaultTimeoutMs }),
     clock,
   });
 };
@@ -103,13 +103,13 @@ export const serviceDescriptor = (input: {
   description: string;
   criticality: ServiceCriticality;
   supportedModes: readonly RuntimeMode[];
-  dependencies?: readonly ServiceId[];
-  optionalDependencies?: readonly ServiceId[];
-  capabilities?: readonly RuntimeCapability[];
-  degradationPolicy?: DegradationPolicy;
-  healthCapability?: boolean;
-  readinessCapability?: boolean;
-  recoverable?: boolean;
+  dependencies?: readonly ServiceId[] | undefined;
+  optionalDependencies?: readonly ServiceId[] | undefined;
+  capabilities?: readonly RuntimeCapability[] | undefined;
+  degradationPolicy?: DegradationPolicy | undefined;
+  healthCapability?: boolean | undefined;
+  readinessCapability?: boolean | undefined;
+  recoverable?: boolean | undefined;
 }): ServiceDescriptor => ({
   serviceId: input.serviceId,
   name: input.name,

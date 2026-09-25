@@ -8,6 +8,13 @@ import type {
   ServiceId,
 } from "./types.js";
 
+export class LifecycleTimeoutError extends Error {
+  public constructor(public readonly lifecycleError: LifecycleError) {
+    super(lifecycleError.message);
+    this.name = "LifecycleTimeoutError";
+  }
+}
+
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 const serviceIdPattern = /^[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)*$/u;
 
@@ -52,7 +59,7 @@ export const timeout = <T>(
   onTimeout: () => LifecycleError,
 ): Promise<T> =>
   new Promise<T>((resolve, reject) => {
-    const timer = setTimeout(() => reject(onTimeout()), timeoutMs);
+    const timer = setTimeout(() => reject(new LifecycleTimeoutError(onTimeout())), timeoutMs);
     operation.then(
       (value) => {
         clearTimeout(timer);
@@ -60,7 +67,7 @@ export const timeout = <T>(
       },
       (error: unknown) => {
         clearTimeout(timer);
-        reject(error);
+        reject(error instanceof Error ? error : new Error(String(error)));
       },
     );
   });

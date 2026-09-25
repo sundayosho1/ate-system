@@ -512,10 +512,11 @@ describe("timeouts, concurrency, cancellation, host boundary, and architecture",
       name: "test-task",
       clock,
       stopTimeoutMs: 25,
-      run: async (signal) => {
+      run: (signal) => {
         signal.addEventListener("abort", () => {
           aborted = true;
         });
+        return Promise.resolve();
       },
     });
 

@@ -23,9 +23,9 @@ export const createBackgroundTask = (input: {
   return {
     name: input.name,
     state: () => state,
-    start: async () => {
+    start: () => {
       if (state === "RUNNING") {
-        return;
+        return Promise.resolve();
       }
       controller = new AbortController();
       state = "RUNNING";
@@ -33,6 +33,7 @@ export const createBackgroundTask = (input: {
         state = "FAILED";
         throw error;
       });
+      return Promise.resolve();
     },
     stop: async () => {
       if (state === "STOPPED") {

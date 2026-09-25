@@ -97,7 +97,7 @@ describe("Prompt 1 repository foundation", () => {
       "Master Architecture, Repository Foundation & Engineering Constitution",
     );
     expect(ledger).toContain("Completed");
-    expect(ledger).not.toMatch(/\|\s*3\s*\|.*Completed/i);
+    expect(ledger).not.toMatch(/\|\s*4\s*\|.*Completed/i);
   });
 
   it("does not claim live trading capability in the README", () => {
