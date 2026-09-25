@@ -322,7 +322,7 @@ describe("Prompt 8 configuration schema, validation, and rejection gates", () =>
     });
     const eventBus = new InternalEventBus({ registry: eventRegistry, factory, clock });
     eventBus.start();
-    expect(eventBus.diagnostics().status).toBe("RUNNING");
+    expect(eventBus.diagnostics().pending).toBe(0);
 
     const authority = new StateAuthorityRegistry(clock);
     expect(registerConfigurationStateAuthority(authority, ["SIMULATION"]).ok).toBe(true);

@@ -108,14 +108,14 @@ export const runtimeModeFromContext = (context: ConfigurationContext): RuntimeMo
   context.runtimeMode;
 
 const validateTypedValue = (input: {
-  key?: ConfigurationKey;
+  key?: ConfigurationKey | undefined;
   value: ConfigurationValue | undefined;
   valueType: ConfigurationValueType;
-  constraints?: ConfigurationValueConstraints;
+  constraints?: ConfigurationValueConstraints | undefined;
   phase: ConfigurationValidationPhase;
-  scope?: ConfigurationScope;
-  path?: string;
-  sensitivity?: string;
+  scope?: ConfigurationScope | undefined;
+  path?: string | undefined;
+  sensitivity?: string | undefined;
 }): readonly ConfigurationValidationIssue[] => {
   const issues: ConfigurationValidationIssue[] = [];
   if (!matchesValueType(input.value, input.valueType)) {
@@ -193,13 +193,13 @@ const matchesValueType = (
 };
 
 const validateConstraints = (input: {
-  key?: ConfigurationKey;
+  key?: ConfigurationKey | undefined;
   value: ConfigurationValue | undefined;
   valueType: ConfigurationValueType;
-  constraints?: ConfigurationValueConstraints;
+  constraints?: ConfigurationValueConstraints | undefined;
   phase: ConfigurationValidationPhase;
-  scope?: ConfigurationScope;
-  path?: string;
+  scope?: ConfigurationScope | undefined;
+  path?: string | undefined;
 }): readonly ConfigurationValidationIssue[] => {
   if (input.value === undefined || input.constraints === undefined) {
     return [];
@@ -424,9 +424,9 @@ const validateConstraints = (input: {
 
 const issue = (
   input: {
-    key?: ConfigurationKey;
-    scope?: ConfigurationScope;
-    path?: string;
+    key?: ConfigurationKey | undefined;
+    scope?: ConfigurationScope | undefined;
+    path?: string | undefined;
   },
   details: {
     message: string;
