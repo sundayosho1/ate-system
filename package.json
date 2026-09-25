@@ -1,0 +1,37 @@
+{
+  "name": "ate-system",
+  "version": "0.1.0-foundation.1",
+  "private": true,
+  "description": "ATE Autonomous Trading Engine repository foundation and engineering constitution.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:foundation": "vitest run tests/foundation",
+    "security:audit": "npm audit --audit-level=moderate",
+    "security:secrets": "node scripts/check-secret-hygiene.mjs",
+    "verify": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run security:secrets && npm run security:audit"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.2",
+    "@vitest/coverage-v8": "^5.0.1",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.9",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.70.1",
+    "vitest": "^5.0.1"
+  }
+}
