@@ -38,13 +38,14 @@ Prompt 1 implements only:
 
 - repository foundation and documentation hierarchy;
 - engineering constitution and safety invariants;
+- core domain language contracts and runtime validation;
 - architecture decision records;
 - development, testing, security, configuration, help, and contribution standards;
 - capability manifest and prompt ledger;
 - minimal npm/TypeScript quality tooling and foundation tests.
 
-No source module currently performs trading, account management, market data ingestion, strategy
-evaluation, risk calculation, portfolio management, or MT5 execution.
+No source module currently performs trading, market data ingestion, strategy evaluation, risk
+calculation, portfolio management, account allocation, broker order submission, or MT5 execution.
 
 ## Repository structure
 
@@ -104,6 +105,7 @@ Start with:
 
 - [Engineering Constitution](docs/architecture/engineering-constitution.md)
 - [System Architecture](docs/architecture/system-architecture.md)
+- [Core Domain Contracts](docs/architecture/core-domain-contracts.md)
 - [Safety Invariants](docs/architecture/safety-invariants.md)
 - [Authority Hierarchy](docs/architecture/authority-hierarchy.md)
 - [Environment & Runtime Modes](docs/architecture/environment-runtime-modes.md)

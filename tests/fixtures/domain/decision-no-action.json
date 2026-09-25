@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decisionId": "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+  "outcome": "NO_ACTION",
+  "decidedAt": "2026-09-25T00:02:00.000Z",
+  "authority": "SYSTEM",
+  "reason": {
+    "code": "DATA.INSUFFICIENT_DATA",
+    "category": "DATA",
+    "summary": "Insufficient qualified market data for a capital-bearing decision.",
+    "authority": "SYSTEM",
+    "severity": "WARNING",
+    "evidenceRefs": ["quote:22222222-2222-4222-8222-222222222222"]
+  },
+  "explanation": "ATE records NO_ACTION explicitly when data is insufficient.",
+  "correlationId": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+  "evidenceRefs": ["quote:22222222-2222-4222-8222-222222222222"]
+}

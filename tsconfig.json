@@ -19,5 +19,11 @@
     "target": "ES2023",
     "types": ["node", "vitest/globals"]
   },
-  "include": ["eslint.config.js", "scripts/**/*.mjs", "tests/**/*.ts", "vitest.config.ts"]
+  "include": [
+    "eslint.config.js",
+    "packages/**/*.ts",
+    "scripts/**/*.mjs",
+    "tests/**/*.ts",
+    "vitest.config.ts"
+  ]
 }

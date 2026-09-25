@@ -31,6 +31,23 @@ Prompt 1 includes foundation tests that verify:
 - prompt ledger records Prompt 1 and does not mark future prompts complete;
 - README does not claim live trading capability.
 
+## Prompt 2 tests
+
+Prompt 2 adds domain-contract tests that verify:
+
+- branded identifiers;
+- decimal, money, price, quantity, percentage, ratio, and time primitives;
+- canonical instruments and broker references;
+- market quotes and bars;
+- accounts, snapshots, and mandates;
+- strategies, setups, signals, candidates, scores, and decisions;
+- explicit `NO_ACTION`;
+- master decisions, execution intents, orders, fills, positions, trades, portfolios, and events;
+- serialization round trips;
+- invalid input rejection;
+- multi-asset and multi-account representation;
+- domain-package dependency boundaries.
+
 ## Naming
 
 Test names should describe behavior. Avoid opaque names.

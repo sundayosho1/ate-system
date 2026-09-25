@@ -1,6 +1,11 @@
 # Packages
 
-This directory will contain future shared packages for domain logic, application contracts,
+This directory contains or will contain shared packages for domain logic, application contracts,
 infrastructure adapters, UI/design-system components, and test utilities.
 
-Prompt 1 does not implement domain contracts or trading behavior.
+Currently implemented:
+
+- `@ate/domain` — core domain language contracts, primitives, validation, and serialization support.
+
+No package currently implements trading behavior, risk calculations, portfolio calculations, MT5
+connectivity, broker execution, persistence, APIs, or frontend UI.

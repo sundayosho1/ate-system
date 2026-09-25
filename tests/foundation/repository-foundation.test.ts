@@ -56,7 +56,7 @@ describe("Prompt 1 repository foundation", () => {
   it("keeps the capability manifest truthful about unimplemented trading features", () => {
     const manifest = readJson<CapabilityManifest>("config/capabilities.json");
 
-    expect(manifest.completed_prompt).toBe(1);
+    expect(manifest.completed_prompt).toBeGreaterThanOrEqual(1);
     expect(manifest.capabilities.repository_foundation).toBe(true);
     expect(manifest.capabilities.engineering_constitution).toBe(true);
 
@@ -97,8 +97,7 @@ describe("Prompt 1 repository foundation", () => {
       "Master Architecture, Repository Foundation & Engineering Constitution",
     );
     expect(ledger).toContain("Completed");
-    expect(ledger).toContain("Future prompts remain unimplemented");
-    expect(ledger).not.toMatch(/\|\s*2\s*\|.*Completed/i);
+    expect(ledger).not.toMatch(/\|\s*3\s*\|.*Completed/i);
   });
 
   it("does not claim live trading capability in the README", () => {

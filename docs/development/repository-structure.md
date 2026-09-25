@@ -44,7 +44,10 @@ application is implemented in Prompt 1.
 ### `packages/`
 
 Future shared packages for domain, application contracts, infrastructure adapters, UI/design system,
-and test utilities. No trading package is implemented in Prompt 1.
+and test utilities.
+
+Prompt 2 adds `packages/domain` as the authoritative core domain-language package. It defines
+contracts and validation only; it does not implement trading behavior.
 
 ### `mt5/`
 
