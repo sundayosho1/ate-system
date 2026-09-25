@@ -122,6 +122,24 @@ Prompt 6 adds time/clock authority tests that verify:
 - injected-clock integration through events and persistence records;
 - constrained direct use of current-time APIs outside approved infrastructure seams.
 
+## Prompt 7 tests
+
+Prompt 7 adds hierarchical configuration tests that verify:
+
+- canonical configuration domains, keys, scopes and bootstrap boundary;
+- partial multidimensional context;
+- inheritance, sparse overrides and provenance;
+- explicit scope precedence and equal-precedence conflict detection;
+- input-order independent snapshots and effective configuration fingerprints;
+- unknown key, duplicate entry, invalid scope, missing required value and secret misuse handling;
+- explicit merge and unset semantics;
+- environment isolation across runtime modes;
+- atomic runtime-service publication, last-known-good preservation on failed refresh and
+  context-aware cache diagnostics;
+- runtime, time, event and persistence integration foundations;
+- architecture constraints against uncontrolled `process.env` reads and domain dependency on
+  configuration infrastructure.
+
 ## Naming
 
 Test names should describe behavior. Avoid opaque names.

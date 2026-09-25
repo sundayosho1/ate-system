@@ -61,7 +61,7 @@ Prompt 1 documents boundaries only. Future prompts implement functionality.
 | Boundary                        | Ownership                                                                               |
 | ------------------------------- | --------------------------------------------------------------------------------------- |
 | Core Runtime                    | Process lifecycle, runtime mode, startup/shutdown conventions                           |
-| Configuration                   | Typed, validated, versionable, auditable configuration                                  |
+| Configuration                   | Hierarchical control-plane authority, scopes, precedence, snapshots and provenance      |
 | Events                          | Event contracts, registry, routing, correlation, causation, delivery diagnostics        |
 | Persistence                     | State ownership, migrations, transactions, history, audit, outbox/inbox                 |
 | Time                            | Clock authority, UTC instants, timezone conversion, freshness, deterministic scheduling |
@@ -237,6 +237,16 @@ explains how authoritative state changed. Audit explains who or what caused mean
 transactional outbox prevents committed state changes from being separated from required events. The
 durable inbox protects subscribers from duplicate effects. Caches and projections never become
 authority.
+
+## Configuration principles
+
+Prompt 7 implements the hierarchical configuration foundation. Managed configuration has one
+authority. Domains describe what is configured; scopes describe where entries apply; context selects
+applicable scopes; explicit precedence decides the winner; provenance explains the result.
+
+Configuration cannot override the Engineering Constitution or safety invariants. Bootstrap
+configuration remains minimal and separate from managed configuration. Secrets are references, not
+ordinary configuration values.
 
 ## Frontend principles
 

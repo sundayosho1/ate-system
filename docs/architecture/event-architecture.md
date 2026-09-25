@@ -149,3 +149,10 @@ Prompt 5 adds the persistence/state authority foundation:
 
 Current state authority does not come from in-memory events. Events describe occurrences;
 persistence/state authority decides durable current truth, history and audit evidence.
+
+## Configuration integration
+
+Prompt 7 adds safe configuration event registrations for snapshot publication, resolution failure
+and source degradation. Configuration events carry snapshot IDs, fingerprints, source health and
+safe metadata only. They must not dump full configuration values or secret material into event
+payloads. Events do not become configuration authority.

@@ -70,6 +70,13 @@ conversion, freshness calculation, clock-quality monitoring, deterministic sched
 integration only; it does not implement market calendars, sessions, market-data replay engines,
 trading services, MT5 or live trading.
 
+Prompt 7 adds `packages/configuration` as the authoritative hierarchical configuration foundation.
+It implements domains, keys, scopes, context, source abstraction, deterministic precedence,
+inheritance, conflict detection, provenance, explanations, immutable snapshots, fingerprints,
+bounded cache, runtime integration and safe diagnostics only; it does not implement Prompt 8's full
+schema engine, Prompt 9 version lifecycle, feature flags, approvals, promotion/rollback or frontend
+editing.
+
 ### `mt5/`
 
 Future MetaTrader 5 gateway and Connector EA artifacts. Prompt 1 documents the boundary only.
@@ -89,7 +96,7 @@ configuration does not belong here.
 Automated tests. Prompt 1 adds foundation tests validating documentation and capability
 truthfulness. Prompt 4 adds event architecture tests under `tests/events`. Prompt 5 adds
 persistence/state authority tests under `tests/persistence`. Prompt 6 adds temporal integrity tests
-under `tests/time`.
+under `tests/time`. Prompt 7 adds hierarchical configuration tests under `tests/configuration`.
 
 ### `scripts/`
 

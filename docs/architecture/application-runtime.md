@@ -208,8 +208,13 @@ Prompt 3 does not install or configure Windows services.
 
 ## Configuration boundary
 
-Prompt 3 consumes explicit typed construction options only. Prompt 7 remains authoritative for
-layered configuration, promotion, rollback, and governance.
+Prompt 3 consumes explicit typed construction options only. Prompt 7 establishes hierarchical
+configuration resolution. Prompt 8 remains responsible for comprehensive schemas, and Prompts 9-12
+remain responsible for versioning, approval, promotion and rollback.
+
+Prompt 7 now provides the configuration runtime service foundation. Future services should depend on
+that managed service for configuration rather than reading environment variables or local files
+directly.
 
 ## Time service integration
 
@@ -228,3 +233,10 @@ Runtime lifecycle timestamps continue to come from the runtime's injected clock.
 durations in the Prompt 3 implementation still use infrastructure-level host duration measurement;
 business services should consume `@ate/time` clocks and scheduler APIs instead of direct ambient
 time.
+
+## Configuration service integration
+
+`@ate/configuration` can run as a runtime-managed service. It depends on time authority, loads
+configuration sources, publishes a coherent active snapshot, exposes a resolver, reports
+health/readiness and clears its non-authoritative cache on shutdown. It must not report `READY`
+until a coherent snapshot exists and blocking conflicts are absent.

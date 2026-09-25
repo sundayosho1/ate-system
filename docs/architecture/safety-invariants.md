@@ -184,6 +184,90 @@ Replay stepping must not move backward except through an explicit reset before r
 Healthy time service readiness does not authorize market data ingestion, strategy execution, broker
 order submission or live trading.
 
+## Prompt 7 configuration invariants
+
+These invariants specialize the general safety rules for managed configuration.
+
+## CFG-001 — Single Configuration Authority
+
+Managed configuration has one authoritative control plane.
+
+## CFG-002 — Deterministic Resolution
+
+Identical inputs must produce equivalent effective configuration.
+
+## CFG-003 — Explicit Scope
+
+Overrides must declare explicit scope.
+
+## CFG-004 — Explicit Precedence
+
+Precedence is policy, not insertion order.
+
+## CFG-005 — Conflict Fails Closed
+
+Unresolved equal-precedence conflicts are never silently selected.
+
+## CFG-006 — Provenance Required
+
+Every effective value can explain its source, scope and override chain.
+
+## CFG-007 — Atomic Publication
+
+Consumers never observe partially applied snapshots.
+
+## CFG-008 — Immutable Effective Snapshot
+
+Published snapshots and effective configurations are immutable.
+
+## CFG-009 — Environment Isolation
+
+Research, backtest or simulation configuration cannot silently contaminate live operation.
+
+## CFG-010 — Secrets Excluded
+
+Secret material is not ordinary configuration.
+
+## CFG-011 — Unknown Keys Rejected
+
+Unknown authoritative configuration does not silently become active.
+
+## CFG-012 — Safe Missing-Value Semantics
+
+Missing values never produce undocumented permissive behavior.
+
+## CFG-013 — Configuration Cannot Override Safety Constitution
+
+Configuration operates within permanent safety invariants.
+
+## CFG-014 — Cache Is Non-Authoritative
+
+Cache accelerates resolution but never owns configuration.
+
+## CFG-015 — Snapshot Identity
+
+Effective configuration has deterministic snapshot/fingerprint identity.
+
+## CFG-016 — No Silent Last-Write-Wins
+
+Conflicts are resolved by policy or rejected.
+
+## CFG-017 — No Arbitrary Code Execution
+
+Configuration cannot execute code.
+
+## CFG-018 — Bootstrap Is Minimal
+
+Bootstrap configuration remains separate and intentionally small.
+
+## CFG-019 — Runtime Context Is Explicit
+
+Resolution never relies on hidden mutable operational context.
+
+## CFG-020 — Failed Candidate Is Never Partially Published
+
+Invalid refreshes leave active configuration coherent where policy permits continued operation.
+
 ## Prompt 1 test coverage
 
 Prompt 1 includes foundation tests that verify:

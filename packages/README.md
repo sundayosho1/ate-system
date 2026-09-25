@@ -16,7 +16,10 @@ Currently implemented:
 - `@ate/time` — clock/time authority foundation with UTC instants, monotonic duration,
   virtual/simulation/replay clocks, IANA timezone conversion, freshness, clock-quality monitoring,
   deterministic scheduling, and runtime-service integration.
+- `@ate/configuration` — hierarchical configuration control-plane foundation with canonical domains,
+  scopes, context, source abstraction, deterministic precedence, provenance, immutable snapshots,
+  fingerprints, bounded cache, runtime-service integration, and safe diagnostics.
 
 No package currently implements trading behavior, risk calculations, portfolio calculations, MT5
-connectivity, broker execution, market calendars, market-data storage, external message brokers,
-APIs, or frontend UI.
+connectivity, broker execution, market calendars, market-data storage, configuration version
+lifecycle, approval workflow, promotion/rollback, external message brokers, APIs, or frontend UI.

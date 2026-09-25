@@ -96,6 +96,14 @@ This glossary defines canonical ATE terminology. Future prompts should use these
 | IANA Timezone                | Canonical timezone identifier such as `America/New_York`; abbreviations such as `EST` are not accepted as authoritative identifiers.                                      |
 | Deterministic Scheduler      | Clock-driven scheduler that runs due tasks in stable due-time, priority and sequence order.                                                                               |
 | Freshness                    | Classification of observed data age relative to the authoritative clock, such as fresh, stale, expired or future-skewed.                                                  |
+| Configuration Domain         | Category of what is configured, such as SYSTEM, DATA, RISK or EXECUTION; not the same as scope.                                                                           |
+| Configuration Scope          | Explicit location where a configuration entry applies, such as SYSTEM, ENVIRONMENT:PAPER or INSTRUMENT:FX:EURUSD.                                                         |
+| Configuration Context        | Multidimensional request context used to select applicable configuration scopes.                                                                                          |
+| Effective Configuration      | Immutable resolved configuration for one context and snapshot.                                                                                                            |
+| Configuration Provenance     | Explanation of which source/scope supplied a value, what was considered, what was overridden and why the winner won.                                                      |
+| Configuration Snapshot       | Immutable coherent configuration view produced by source loading and atomic publication.                                                                                  |
+| Configuration Fingerprint    | Deterministic semantic identity for a configuration snapshot or effective configuration.                                                                                  |
+| Bootstrap Configuration      | Minimal startup configuration needed before the managed configuration authority is available.                                                                             |
 
 ## Identifier conventions
 

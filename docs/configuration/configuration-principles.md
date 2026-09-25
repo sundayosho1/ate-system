@@ -2,7 +2,8 @@
 
 ATE must be highly configurable without becoming unsafe or unexplained.
 
-Prompt 1 documents principles only. The configuration engine belongs to a later prompt.
+Prompt 1 documented principles. Prompt 7 implements the first authoritative hierarchical
+configuration engine foundation in `@ate/configuration`.
 
 ## Configuration hierarchy
 
@@ -28,6 +29,10 @@ Configuration scopes should be designed around:
 
 Future configuration must be scope-aware and override-aware. A more specific override must not
 silently bypass higher authority.
+
+Prompt 7 distinguishes domains from scopes. A domain such as `RISK` describes what is configured. A
+scope such as `ACCOUNT:account-a` describes where an entry applies. Context and explicit precedence
+determine the effective value.
 
 ## Required characteristics
 
@@ -75,3 +80,9 @@ explicit operator configuration and validation.
 
 Secrets must use environment-appropriate secret management. They must not be stored in committed
 configuration files, logged, exposed through APIs, or rendered in frontend responses.
+
+## Prompt 7 boundaries
+
+Prompt 7 provides keys, domains, scopes, entries, sources, resolution, provenance, snapshots,
+fingerprints, cache semantics and runtime integration. Prompt 8 owns comprehensive schema
+validation. Prompt 9 owns version history. Prompts 11-12 own approval, promotion and rollback.

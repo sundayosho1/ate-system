@@ -30,6 +30,9 @@ classes, instruments, and strategies.
 Prevents operation when infrastructure, data, queues, time, connectivity, configuration,
 persistence, or reconciliation state is unsafe.
 
+Prompt 7 makes configuration a control-plane input to these authorities. Configuration can supply
+governed values, but it cannot reorder or bypass this hierarchy.
+
 ## 4. Account Mandate
 
 Defines what each account may do, including account-level risk, eligible instruments, eligible

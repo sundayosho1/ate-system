@@ -20,6 +20,10 @@ Prompt 6 supplies persistence with an injected clock authority. State records, h
 outbox claims, inbox leases and dead-letter replay metadata should derive timestamps from that
 clock, not from ambient wall-clock calls.
 
+Prompt 7 declares `configuration.controlplane` as the configuration control-plane state authority
+for current managed configuration snapshots. Full immutable configuration version history, diffs and
+lifecycle states remain Prompt 9 scope.
+
 ## State authority rule
 
 ```text

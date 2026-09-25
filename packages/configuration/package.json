@@ -1,0 +1,20 @@
+{
+  "name": "@ate/configuration",
+  "version": "0.7.0-config.1",
+  "private": true,
+  "description": "ATE hierarchical configuration authority, scope resolution, effective configuration, provenance, snapshots, and runtime service foundation.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@ate/domain": "0.2.0-domain.1",
+    "@ate/events": "0.4.0-events.1",
+    "@ate/persistence": "0.5.0-persistence.1",
+    "@ate/runtime": "0.3.0-runtime.1",
+    "@ate/time": "0.6.0-time.1",
+    "zod": "^4.1.13"
+  }
+}
