@@ -313,11 +313,12 @@ const validateConstraints = (input: {
       );
     }
     if (constraints.itemValueType !== undefined) {
+      const itemValueType = constraints.itemValueType;
       input.value.forEach((item, index) => {
         issues.push(
           ...validateTypedValue({
             value: item,
-            valueType: constraints.itemValueType!,
+            valueType: itemValueType,
             phase: "CONSTRAINT",
             path: pathJoin(input.path, String(index)),
             key: input.key,

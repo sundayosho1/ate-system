@@ -8,7 +8,6 @@ import { fingerprint } from "./serialization.js";
 import type { ConfigurationSchema } from "./schema-types.js";
 import { validateValueAgainstSchema } from "./validators.js";
 import type {
-  ConfigurationDefinition,
   ConfigurationFingerprint,
   ConfigurationKey,
   ConfigurationResult,
@@ -21,10 +20,7 @@ export class ConfigurationSchemaRegistry {
   public constructor(private readonly clock: Clock) {}
 
   public register(schema: ConfigurationSchema): ConfigurationResult<ConfigurationSchema> {
-    const definitionCheck = assertDefinitionKeyMatchesDomain(
-      schema as ConfigurationDefinition,
-      this.clock.now(),
-    );
+    const definitionCheck = assertDefinitionKeyMatchesDomain(schema, this.clock.now());
     if (!definitionCheck.ok) {
       return definitionCheck;
     }
