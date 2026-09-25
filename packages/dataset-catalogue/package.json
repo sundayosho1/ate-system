@@ -1,0 +1,21 @@
+{
+  "name": "@ate/dataset-catalogue",
+  "version": "0.16.0-dataset-catalogue.1",
+  "private": true,
+  "description": "ATE Dataset Catalogue and Lineage authority for governed data-asset identity, immutable versions, provenance, lineage, integrity, quality references, lifecycle, eligibility and reproducibility metadata.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@ate/data-quality": "0.15.0-data-quality.1",
+    "@ate/domain": "0.13.0-market-data-contracts.1",
+    "@ate/events": "0.4.0-events.1",
+    "@ate/historical-data": "0.14.0-historical-data.1",
+    "@ate/runtime": "0.3.0-runtime.1",
+    "@ate/time": "0.6.0-time.1",
+    "zod": "^4.1.13"
+  }
+}

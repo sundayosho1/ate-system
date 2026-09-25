@@ -95,5 +95,6 @@ when the provider does not supply it.
 ## Related Features
 
 Historical storage is implemented in `@ate/historical-data`; historical quality reporting is
-implemented in `@ate/data-quality`. Dataset catalogue, real-time ingestion, aggregation, replay,
-instrument registry, MOSE, strategies, risk and execution remain future prompts.
+implemented in `@ate/data-quality`; dataset catalogue/lineage is implemented in
+`@ate/dataset-catalogue`. Real-time ingestion, aggregation, replay, instrument registry, MOSE,
+strategies, risk and execution remain future prompts.

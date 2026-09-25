@@ -69,7 +69,9 @@ not a trading account, instrument registry, risk state, portfolio state or execu
   configuration release authority.
 - Offline historical dataset manifests and published research datasets are owned by the Historical
   Data Laboratory. Historical dataset quality reports are owned by the Data Quality Engine. Global
-  catalogue lineage remains a future authority.
+  dataset family/version identity, lineage relationships, lifecycle records, active pointers,
+  integrity verification records, quality references and catalogue snapshots are owned by the
+  Dataset Catalogue and Lineage authority.
 
 These domains are not implemented in Prompt 5.
 

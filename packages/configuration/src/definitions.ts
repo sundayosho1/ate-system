@@ -335,6 +335,130 @@ export const foundationalConfigurationDefinitions = (
       reloadRequirement: "RESTART",
     },
   },
+  {
+    key: foundationalConfigurationKey("data.catalogue.maxQueryPageSize", clock),
+    domain: "DATA",
+    displayName: "Dataset Catalogue Maximum Query Page Size",
+    description: "Maximum number of dataset catalogue entries returned by one bounded query.",
+    valueType: "INTEGER",
+    required: false,
+    failClosed: true,
+    allowedScopes: ["SYSTEM", "ENVIRONMENT"],
+    mergePolicy: "REPLACE",
+    sensitivity: "INTERNAL",
+    defaultValue: 1000,
+    metadata: {
+      purpose: "Prevent unbounded catalogue discovery reads.",
+      riskImplication:
+        "Unbounded catalogue queries can exhaust memory and obscure deterministic ordering.",
+      reloadRequirement: "REFRESH",
+    },
+  },
+  {
+    key: foundationalConfigurationKey("data.catalogue.maxLineageDepth", clock),
+    domain: "DATA",
+    displayName: "Dataset Catalogue Maximum Lineage Depth",
+    description: "Maximum traversal depth for ancestry, descendants and impact analysis.",
+    valueType: "INTEGER",
+    required: false,
+    failClosed: true,
+    allowedScopes: ["SYSTEM", "ENVIRONMENT"],
+    mergePolicy: "REPLACE",
+    sensitivity: "INTERNAL",
+    defaultValue: 25,
+    metadata: {
+      purpose: "Bound lineage graph traversal.",
+      riskImplication: "Unbounded lineage traversal can hide cycles or overload diagnostics.",
+      reloadRequirement: "REFRESH",
+    },
+  },
+  {
+    key: foundationalConfigurationKey("data.catalogue.maxLineageNodes", clock),
+    domain: "DATA",
+    displayName: "Dataset Catalogue Maximum Lineage Nodes",
+    description: "Maximum nodes returned by a lineage traversal or impact analysis.",
+    valueType: "INTEGER",
+    required: false,
+    failClosed: true,
+    allowedScopes: ["SYSTEM", "ENVIRONMENT"],
+    mergePolicy: "REPLACE",
+    sensitivity: "INTERNAL",
+    defaultValue: 100,
+    metadata: {
+      purpose: "Keep lineage explanations bounded and deterministic.",
+      reloadRequirement: "REFRESH",
+    },
+  },
+  {
+    key: foundationalConfigurationKey("data.catalogue.maxParentsPerDataset", clock),
+    domain: "DATA",
+    displayName: "Dataset Catalogue Maximum Parents Per Dataset",
+    description: "Maximum governed parent dataset versions allowed during registration.",
+    valueType: "INTEGER",
+    required: false,
+    failClosed: true,
+    allowedScopes: ["SYSTEM", "ENVIRONMENT"],
+    mergePolicy: "REPLACE",
+    sensitivity: "INTERNAL",
+    defaultValue: 16,
+    metadata: {
+      purpose: "Bound many-to-one lineage fan-in.",
+      reloadRequirement: "REFRESH",
+    },
+  },
+  {
+    key: foundationalConfigurationKey("data.catalogue.requireQualityForQualification", clock),
+    domain: "DATA",
+    displayName: "Dataset Catalogue Require Quality For Qualification",
+    description:
+      "Requires a Prompt 15 quality report before catalogue eligibility can qualify data.",
+    valueType: "BOOLEAN",
+    required: false,
+    failClosed: true,
+    allowedScopes: ["SYSTEM", "ENVIRONMENT"],
+    mergePolicy: "REPLACE",
+    sensitivity: "INTERNAL",
+    defaultValue: false,
+    metadata: {
+      purpose: "Control whether catalogue eligibility requires Prompt 15 evidence.",
+      riskImplication: "Even when true, qualification remains non-trading evidence.",
+      reloadRequirement: "REFRESH",
+    },
+  },
+  {
+    key: foundationalConfigurationKey("data.catalogue.requireVerifiedIntegrity", clock),
+    domain: "DATA",
+    displayName: "Dataset Catalogue Require Verified Integrity",
+    description: "Requires verified integrity for eligible catalogue results.",
+    valueType: "BOOLEAN",
+    required: false,
+    failClosed: true,
+    allowedScopes: ["SYSTEM", "ENVIRONMENT"],
+    mergePolicy: "REPLACE",
+    sensitivity: "INTERNAL",
+    defaultValue: true,
+    metadata: {
+      purpose: "Fail closed when registered dataset integrity cannot be verified.",
+      reloadRequirement: "REFRESH",
+    },
+  },
+  {
+    key: foundationalConfigurationKey("data.catalogue.storageRoot", clock),
+    domain: "DATA",
+    displayName: "Dataset Catalogue Storage Root",
+    description: "Managed root for local dataset catalogue metadata records.",
+    valueType: "STRING",
+    required: false,
+    failClosed: true,
+    allowedScopes: ["SYSTEM", "ENVIRONMENT"],
+    mergePolicy: "REPLACE",
+    sensitivity: "INTERNAL",
+    defaultValue: ".ate/dataset-catalogue",
+    metadata: {
+      purpose: "Keep filesystem-backed catalogue metadata under a managed root.",
+      reloadRequirement: "RESTART",
+    },
+  },
 ];
 
 export const foundationalConfigurationSchemas = (clock: Clock): readonly ConfigurationSchema[] => {
@@ -391,6 +515,34 @@ export const foundationalConfigurationSchemas = (clock: Clock): readonly Configu
   );
   const dataQualityReportStorageRoot = foundationalConfigurationKey(
     "data.quality.reportStorageRoot",
+    clock,
+  );
+  const datasetCatalogueMaxQueryPageSize = foundationalConfigurationKey(
+    "data.catalogue.maxQueryPageSize",
+    clock,
+  );
+  const datasetCatalogueMaxLineageDepth = foundationalConfigurationKey(
+    "data.catalogue.maxLineageDepth",
+    clock,
+  );
+  const datasetCatalogueMaxLineageNodes = foundationalConfigurationKey(
+    "data.catalogue.maxLineageNodes",
+    clock,
+  );
+  const datasetCatalogueMaxParentsPerDataset = foundationalConfigurationKey(
+    "data.catalogue.maxParentsPerDataset",
+    clock,
+  );
+  const datasetCatalogueRequireQualityForQualification = foundationalConfigurationKey(
+    "data.catalogue.requireQualityForQualification",
+    clock,
+  );
+  const datasetCatalogueRequireVerifiedIntegrity = foundationalConfigurationKey(
+    "data.catalogue.requireVerifiedIntegrity",
+    clock,
+  );
+  const datasetCatalogueStorageRoot = foundationalConfigurationKey(
+    "data.catalogue.storageRoot",
     clock,
   );
 
@@ -587,6 +739,71 @@ export const foundationalConfigurationSchemas = (clock: Clock): readonly Configu
         ...requireDefinition(byKey, dataQualityReportStorageRoot).metadata,
         helpText: "Managed local root for immutable data-quality report staging and publication.",
         examples: [".ate/data-quality/reports"],
+      },
+    }),
+    configurationSchemaFromDefinition(requireDefinition(byKey, datasetCatalogueMaxQueryPageSize), {
+      constraints: { minimum: 1, maximum: 10_000, unit: "count" },
+      metadata: {
+        ...requireDefinition(byKey, datasetCatalogueMaxQueryPageSize).metadata,
+        helpText: "Bounds dataset catalogue discovery result pages.",
+        examples: [100, 1000],
+      },
+    }),
+    configurationSchemaFromDefinition(requireDefinition(byKey, datasetCatalogueMaxLineageDepth), {
+      constraints: { minimum: 1, maximum: 100, unit: "count" },
+      metadata: {
+        ...requireDefinition(byKey, datasetCatalogueMaxLineageDepth).metadata,
+        helpText: "Caps ancestry, descendant and impact-analysis traversal depth.",
+        examples: [10, 25],
+      },
+    }),
+    configurationSchemaFromDefinition(requireDefinition(byKey, datasetCatalogueMaxLineageNodes), {
+      constraints: { minimum: 1, maximum: 10_000, unit: "count" },
+      metadata: {
+        ...requireDefinition(byKey, datasetCatalogueMaxLineageNodes).metadata,
+        helpText:
+          "Caps lineage traversal node counts and returns truncation evidence when exceeded.",
+        examples: [100, 500],
+      },
+    }),
+    configurationSchemaFromDefinition(
+      requireDefinition(byKey, datasetCatalogueMaxParentsPerDataset),
+      {
+        constraints: { minimum: 0, maximum: 1000, unit: "count" },
+        metadata: {
+          ...requireDefinition(byKey, datasetCatalogueMaxParentsPerDataset).metadata,
+          helpText: "Bounds governed parent dataset fan-in during registration.",
+          examples: [4, 16],
+        },
+      },
+    ),
+    configurationSchemaFromDefinition(
+      requireDefinition(byKey, datasetCatalogueRequireQualityForQualification),
+      {
+        metadata: {
+          ...requireDefinition(byKey, datasetCatalogueRequireQualityForQualification).metadata,
+          helpText:
+            "When enabled, eligibility reports insufficient evidence without a matching Prompt 15 quality report.",
+          examples: [true, false],
+        },
+      },
+    ),
+    configurationSchemaFromDefinition(
+      requireDefinition(byKey, datasetCatalogueRequireVerifiedIntegrity),
+      {
+        metadata: {
+          ...requireDefinition(byKey, datasetCatalogueRequireVerifiedIntegrity).metadata,
+          helpText: "When enabled, integrity mismatch or unverifiable data blocks eligibility.",
+          examples: [true, false],
+        },
+      },
+    ),
+    configurationSchemaFromDefinition(requireDefinition(byKey, datasetCatalogueStorageRoot), {
+      constraints: { minLength: 1, maxLength: 512 },
+      metadata: {
+        ...requireDefinition(byKey, datasetCatalogueStorageRoot).metadata,
+        helpText: "Managed local root for catalogue metadata. It is not dataset content storage.",
+        examples: [".ate/dataset-catalogue"],
       },
     }),
   ];
