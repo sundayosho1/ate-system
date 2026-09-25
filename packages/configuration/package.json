@@ -1,8 +1,8 @@
 {
   "name": "@ate/configuration",
-  "version": "0.9.0-config-versioning.1",
+  "version": "0.10.0-capabilities.1",
   "private": true,
-  "description": "ATE hierarchical configuration authority, schema validation, immutable version history, lineage, change sets, diffs, reconstruction, provenance, snapshots, and runtime service foundation.",
+  "description": "ATE hierarchical configuration authority with schema validation, immutable version history, feature flags, capability control, provenance, snapshots, and runtime service foundation.",
   "license": "UNLICENSED",
   "type": "module",
   "sideEffects": false,
