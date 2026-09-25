@@ -68,7 +68,8 @@ not a trading account, instrument registry, risk state, portfolio state or execu
 - Configuration promotion, activation, known-good and rollback evidence are owned by the
   configuration release authority.
 - Offline historical dataset manifests and published research datasets are owned by the Historical
-  Data Laboratory. Dataset quality scoring and global catalogue lineage remain future authorities.
+  Data Laboratory. Historical dataset quality reports are owned by the Data Quality Engine. Global
+  catalogue lineage remains a future authority.
 
 These domains are not implemented in Prompt 5.
 

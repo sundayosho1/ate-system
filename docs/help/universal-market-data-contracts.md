@@ -60,8 +60,8 @@ timestamp precision, sequence scope, origin, delivery mode and safe bounded meta
 ## Quality Annotations
 
 Prompt 13 supports structural flags such as missing quote side, crossed quote, source time absent,
-sequence absent, correction and incomplete bar. Prompt 15 will own scoring, anomaly detection and
-trust decisions.
+sequence absent, correction and incomplete bar. Prompt 15 owns historical dataset quality scoring
+and anomaly reports in `@ate/data-quality`.
 
 ## Corrections
 
@@ -92,7 +92,8 @@ when the provider does not supply it.
 - Provenance failure: ensure source, origin and derived transformation evidence are present.
 - Metadata failure: keep metadata shallow, bounded and free of raw payloads or secrets.
 
-## Related Future Features
+## Related Features
 
-Historical storage, data quality scoring, dataset catalogue, real-time ingestion, aggregation,
-replay, instrument registry, MOSE, strategies, risk and execution remain future prompts.
+Historical storage is implemented in `@ate/historical-data`; historical quality reporting is
+implemented in `@ate/data-quality`. Dataset catalogue, real-time ingestion, aggregation, replay,
+instrument registry, MOSE, strategies, risk and execution remain future prompts.

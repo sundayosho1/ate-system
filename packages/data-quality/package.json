@@ -1,0 +1,21 @@
+{
+  "name": "@ate/data-quality",
+  "version": "0.15.0-data-quality.1",
+  "private": true,
+  "description": "ATE Data Quality Engine for deterministic historical dataset quality assessment, findings, scoring, and non-trading qualification reports.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@ate/domain": "0.13.0-market-data-contracts.1",
+    "@ate/events": "0.4.0-events.1",
+    "@ate/historical-data": "0.14.0-historical-data.1",
+    "@ate/runtime": "0.3.0-runtime.1",
+    "@ate/time": "0.6.0-time.1",
+    "decimal.js": "^10.6.0",
+    "zod": "^4.1.13"
+  }
+}

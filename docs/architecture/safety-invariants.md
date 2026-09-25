@@ -983,6 +983,133 @@ Historical datasets cannot grant strategy, execution, paper or live trading auth
 
 Quality scoring, outlier detection and gap assessment remain Prompt 15 scope.
 
+## Prompt 15 data-quality invariants
+
+These invariants specialize the data rules for historical dataset quality assessment.
+
+## DATA-061 — Quality Engine Has One Authority
+
+Quality findings, scores and quality reports are owned by `@ate/data-quality`.
+
+## DATA-062 — Quality Does Not Mutate Data
+
+Quality analysis detects and reports issues only; it never repairs, rewrites or deletes
+observations.
+
+## DATA-063 — Structural Validity Remains Distinct
+
+Prompt 13 structural validity is not the same as Prompt 15 data quality.
+
+## DATA-064 — Import Validity Remains Distinct
+
+Prompt 14 import success or rejection counts are not quality scores.
+
+## DATA-065 — Fitness For Purpose Remains Distinct
+
+A quality report does not automatically prove fitness for any downstream workflow.
+
+## DATA-066 — Quality Cannot Authorize Trading
+
+Quality scores and qualifications cannot authorize strategy, risk, execution, paper or live trading.
+
+## DATA-067 — No Live Eligibility Category
+
+Prompt 15 intended-use categories must not include live trading eligibility.
+
+## DATA-068 — Quality Consumes Public Historical APIs
+
+Quality analysis must consume historical datasets through public repository/query contracts.
+
+## DATA-069 — No Private Historical Storage Reads
+
+Quality rules must not depend on private historical storage file layouts.
+
+## DATA-070 — Rule Outcomes Are Explicit
+
+Rules must distinguish pass, findings, not applicable, insufficient evidence and failed execution.
+
+## DATA-071 — Evidence Is Bounded
+
+Quality reports must cap retained evidence and expose suppressed finding counts.
+
+## DATA-072 — Findings Are Stablely Categorized
+
+Findings must carry stable category, dimension and severity fields.
+
+## DATA-073 — Report Publication Is Atomic
+
+Staged quality reports are not authoritative until published coherently.
+
+## DATA-074 — Published Reports Are Immutable
+
+Published quality reports are append-only evidence.
+
+## DATA-075 — Report Fingerprints Exclude Volatile Metadata
+
+Semantic report fingerprints must not depend on generation timestamp or runtime durations.
+
+## DATA-076 — Dataset Identity Is Bound
+
+Quality reports must bind the dataset ID and dataset content fingerprint they assessed.
+
+## DATA-077 — Profile Identity Is Bound
+
+Quality reports must bind the quality profile identity, version and fingerprint.
+
+## DATA-078 — Quality Failures Are Not Silent Passes
+
+Rule or analysis failures must be visible as failed status or explicit errors.
+
+## DATA-079 — Insufficient Evidence Fails Visible
+
+Insufficient evidence must not be reported as clean data.
+
+## DATA-080 — Gaps Are Findings, Not Fills
+
+Gap detection must not synthesize missing observations.
+
+## DATA-081 — Duplicates Are Findings, Not Deletions
+
+Duplicate detection must preserve duplicate evidence instead of silently deduplicating data.
+
+## DATA-082 — Outliers Are Findings, Not Corrections
+
+Outlier detection must not clamp, smooth or replace prices.
+
+## DATA-083 — Staleness Is Clock Relative
+
+Freshness and staleness assessment must state the analysis clock/as-of basis.
+
+## DATA-084 — Quality Events Are Summaries
+
+Quality events must not flood per-finding or row-level payloads.
+
+## DATA-085 — Quality Configuration Is Central
+
+Quality thresholds and storage roots must be declared through managed configuration.
+
+## DATA-086 — Capability Truth Is Dependency-Gated
+
+The data-quality capability depends on market-data contracts and historical-data laboratory
+capabilities.
+
+## DATA-087 — Quality Is Not Catalogue Authority
+
+Quality reports do not implement the future Dataset Catalogue or lineage graph.
+
+## DATA-088 — Quality Is Not Ingestion
+
+Quality analysis does not connect to providers, APIs, WebSockets or live feeds.
+
+## DATA-089 — Quality Is Not Replay Or Aggregation
+
+Quality analysis does not replay market data or aggregate new bars.
+
+## DATA-090 — Quality Is Not Intelligence Or Execution
+
+Quality analysis does not implement MOSE, indicators, strategies, risk, portfolio, account
+allocation, MT5 or execution.
+
 ## Prompt 1 test coverage
 
 Prompt 1 includes foundation tests that verify:

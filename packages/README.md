@@ -28,7 +28,11 @@ Currently implemented:
   intake, safe format adapters, declarative mapping, Prompt 13 canonical normalization, rejection
   quarantine, immutable dataset manifests, local storage adapters, bounded queries and runtime
   diagnostics.
+- `@ate/data-quality` — Data Quality Engine foundation with deterministic historical dataset quality
+  profiles, rule statuses, bounded findings/evidence, immutable reports, non-trading qualification
+  diagnostics, local report storage adapters and runtime diagnostics.
 
 No package currently implements trading behavior, risk calculations, portfolio calculations, MT5
-connectivity, broker execution, market calendars, live market-data ingestion, data-quality scoring,
-market-data replay, external message brokers, APIs, or frontend UI.
+connectivity, broker execution, market calendars, live market-data ingestion, market-data replay,
+external message brokers, APIs, or frontend UI. Data-quality reports are diagnostics only and do not
+authorize trading.
