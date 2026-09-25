@@ -18,6 +18,7 @@ export const foundationalCapabilityDefinitions = (): readonly CapabilityDefiniti
   const configurationSchemaValidation = capabilityId("configuration.schemaValidation");
   const configurationVersioning = capabilityId("configuration.versioning");
   const configurationCapabilityControl = capabilityId("configuration.capabilityControl");
+  const configurationRelease = capabilityId("configuration.release");
   const configurationHistoryInspection = capabilityId("configuration.historyInspection");
   const configurationCapabilityDiagnostics = capabilityId("configuration.capabilityDiagnostics");
   const dataMarketData = capabilityId("data.marketData");
@@ -119,6 +120,21 @@ export const foundationalCapabilityDefinitions = (): readonly CapabilityDefiniti
       supportedRuntimeModes: runtimeModes,
       dependencies: [configurationVersioning],
       versionIntroduced: "0.10.0-capabilities.1",
+    },
+    {
+      capabilityId: configurationRelease,
+      displayName: "Configuration Release Governance",
+      description:
+        "Prompt 12 controlled configuration promotion, activation, known-good and rollback authority.",
+      owner: "@ate/configuration",
+      capabilityClass: "MANDATORY_CORE",
+      implementationStatus: "IMPLEMENTED",
+      reloadBehavior: "STARTUP_ONLY",
+      supportedRuntimeModes: runtimeModes,
+      dependencies: [configurationCapabilityControl],
+      versionIntroduced: "0.12.0-config-promotion.1",
+      safetyNotes:
+        "Environment promotion governs configuration only and does not authorize paper or live trading.",
     },
     {
       capabilityId: configurationHistoryInspection,

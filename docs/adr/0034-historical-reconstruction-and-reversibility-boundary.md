@@ -19,4 +19,5 @@ not by itself activate or promote configuration.
 
 - Prompt 9 supports future rollback workflows without implementing them.
 - History is never rewritten to make old versions appear current.
-- Prompt 12 remains responsible for governed rollback activation.
+- Prompt 12 implements governed rollback activation through release evidence rather than
+  reconstruction itself.

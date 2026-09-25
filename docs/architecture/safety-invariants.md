@@ -608,6 +608,130 @@ Approval cannot silently transfer across environment boundaries.
 
 Approval provenance must remain inspectable without exposing secrets.
 
+## Prompt 12 configuration release invariants
+
+These invariants specialize controlled promotion, activation and rollback.
+
+## CFG-101 — Promotion Uses Explicit Environment Transitions
+
+Environment promotion cannot rely on implicit enum ordering.
+
+## CFG-102 — Promotion Binds to Exact Source Version
+
+Promotion cannot float to a newer source version.
+
+## CFG-103 — Promotion Binds to Destination Baseline
+
+A stale destination baseline invalidates the plan.
+
+## CFG-104 — Destination Configuration Must Validate
+
+Source validity does not substitute for destination validation.
+
+## CFG-105 — Promotion Cannot Create Capability Truth
+
+Promotion cannot make unavailable functionality implemented.
+
+## CFG-106 — Destination Governance Must Be Satisfied
+
+Required destination approval cannot be bypassed.
+
+## CFG-107 — Promotion Is Atomic
+
+Destination cannot observe partially promoted configuration.
+
+## CFG-108 — Latest Is Not Active
+
+Configuration creation order cannot determine active authority.
+
+## CFG-109 — Active Pointer Is Explicit Authority
+
+Environment active state must be explicitly recorded.
+
+## CFG-110 — Promotion History Is Immutable
+
+Promotion evidence cannot be rewritten.
+
+## CFG-111 — Environment Promotion Isolated
+
+Promotion to one environment cannot silently activate another.
+
+## CFG-112 — Promotion Policy Cannot Self-Downgrade
+
+Candidate configuration cannot weaken its own release gate.
+
+## CFG-113 — Non-Promotable Configuration Cannot Cross Environments
+
+Environment-local values remain local.
+
+## CFG-114 — Secrets Are Never Promoted as Resolved Values
+
+Secret material remains protected.
+
+## CFG-115 — Promotion Requires Final Pre-Activation Recheck
+
+Eligibility cannot rely solely on stale planning-time state.
+
+## CFG-116 — Known-Good State Requires Verification
+
+Active does not automatically mean known-good.
+
+## CFG-117 — Rollback Targets Exact Known-Good State
+
+Rollback cannot restore approximate historical configuration.
+
+## CFG-118 — Rollback Does Not Rewrite History
+
+Rollback creates new evidence while preserving failed/replaced versions.
+
+## CFG-119 — Rollback Is Governed
+
+Rollback cannot bypass applicable approval and safety policies.
+
+## CFG-120 — Rollback Must Revalidate Target
+
+Historical success does not guarantee current eligibility.
+
+## CFG-121 — Promotion Concurrency Fails Closed
+
+Concurrent stale plans cannot silently overwrite active state.
+
+## CFG-122 — Rollback Concurrency Fails Closed
+
+Concurrent stale rollback plans cannot silently overwrite active state.
+
+## CFG-123 — Restart-Required State Must Be Truthful
+
+Configuration cannot be reported operationally effective before required restart.
+
+## CFG-124 — Promotion Lineage Must Be Traceable
+
+Release evidence must preserve promotion ancestry.
+
+## CFG-125 — Release Events Must Follow Durable State
+
+Release events must describe committed authoritative state.
+
+## CFG-126 — Promotion Cannot Authorize Trading
+
+Configuration promotion cannot imply trading authority.
+
+## CFG-127 — Cross-Environment Approval Is Not Implicit
+
+Approval in one environment does not silently authorize another environment.
+
+## CFG-128 — Failed Promotion Preserves Previous Active State
+
+Failed promotion cannot corrupt the destination active pointer.
+
+## CFG-129 — Failed Rollback Preserves Coherent Authoritative State
+
+Failed rollback cannot leave mixed active state.
+
+## CFG-130 — Unknown Activation Outcome Fails Closed
+
+Uncertain activation state must block readiness until recovered.
+
 ## Prompt 1 test coverage
 
 Prompt 1 includes foundation tests that verify:

@@ -87,6 +87,8 @@ export type ConfigurationSchemaMetadata = ConfigurationDefinitionMetadata &
       | "SENSITIVE_CONFIGURATION_CHECKER"
       | "CRITICAL_CONFIGURATION_CHECKER";
     governanceHelpText?: string;
+    releaseScope?: "PROMOTABLE" | "DESTINATION_LOCAL" | "NON_PROMOTABLE";
+    promotionHelpText?: string;
   }>;
 
 export type ConfigurationSchema = Readonly<{

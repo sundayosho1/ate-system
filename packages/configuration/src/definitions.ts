@@ -210,6 +210,9 @@ export const foundationalConfigurationSchemas = (clock: Clock): readonly Configu
         ...requireDefinition(byKey, runtimeMode).metadata,
         helpText: "Choose one Prompt 3 runtime mode and keep environment overrides isolated.",
         examples: ["SIMULATION", "PAPER", "LIVE"],
+        releaseScope: "DESTINATION_LOCAL",
+        promotionHelpText:
+          "Destination runtime mode is environment-local and is preserved during promotion.",
       },
     }),
     configurationSchemaFromDefinition(requireDefinition(byKey, logLevel), {

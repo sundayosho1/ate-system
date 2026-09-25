@@ -6,8 +6,8 @@ validation phases, safe validation reports and runtime publication gates.
 Prompt 8 itself did not implement configuration version history, approval workflows,
 promotion/rollback, feature flags, frontend editing, market data, risk, portfolio, execution, MT5 or
 live trading. Prompts 9-11 now add immutable version history, capability-control and approval
-governance foundations; promotion/rollback, frontend editing, market data, risk, portfolio,
-execution, MT5 and live trading remain future scope.
+governance foundations. Prompt 12 adds controlled promotion/rollback release governance; frontend
+editing, market data, risk, portfolio, execution, MT5 and live trading remain future scope.
 
 ## Authority model
 

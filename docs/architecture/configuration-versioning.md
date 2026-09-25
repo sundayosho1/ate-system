@@ -6,8 +6,9 @@ structured diffs, lineage and historical reconstruction.
 
 Prompt 9 itself did not implement feature flags or approval. Prompt 10 consumes version/schema
 provenance for capability-control snapshots. Prompt 11 binds maker-checker approval evidence to
-exact immutable versions. Promotion, environment promotion, operational rollback, market data, risk,
-portfolio, MT5, execution and live trading remain future scope.
+exact immutable versions. Prompt 12 adds controlled promotion, active release state, known-good and
+rollback governance. Market data, risk, portfolio, MT5, execution and live trading remain future
+scope.
 
 ## Authority model
 
@@ -33,7 +34,8 @@ The initial stream model is runtime-mode scoped:
 configuration.<runtime-mode>.default
 ```
 
-This preserves environment isolation. Cross-environment promotion remains Prompt 12 scope.
+This preserves environment isolation. Cross-environment activation now goes through Prompt 12
+release authority rather than the version-history current pointer.
 
 ## Lineage
 
@@ -51,7 +53,7 @@ where `V4.derivedFromVersionId = V1` without rewriting V2 or V3.
 
 Historical reconstruction returns canonical historical content and verifies its fingerprint. It does
 not publish, activate, promote or roll back configuration. A previous version can become the content
-basis for a new version, but operational rollback belongs to Prompt 12.
+basis for a new version, but operational rollback activation belongs to Prompt 12 release authority.
 
 ## Concurrency and idempotency
 

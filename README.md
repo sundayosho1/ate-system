@@ -8,11 +8,11 @@ ATE is **not** currently a trading bot, MetaTrader Expert Advisor, or live execu
 ## Current development status
 
 - Phase: II — Configuration & Control Plane
-- Prompt: 11 of 84
+- Prompt: 12 of 84
 - Status: foundation, domain contracts, runtime lifecycle, internal event architecture,
   persistence/state authority, temporal integrity, hierarchical configuration, and configuration
   schema validation, immutable configuration version-history, feature-flag/capability-control, and
-  maker-checker approval governance foundation
+  maker-checker approval governance, and controlled configuration promotion/rollback foundation
 - Trading capability: **not implemented**
 - MT5 connectivity: **not implemented**
 - Live execution: **not implemented**
@@ -36,7 +36,7 @@ ATE must always be able to return `NO_ACTION` when conditions do not justify cap
 
 ## Currently implemented functionality
 
-Prompts 1-11 implement only:
+Prompts 1-12 implement only:
 
 - repository foundation and documentation hierarchy;
 - engineering constitution and safety invariants;
@@ -68,6 +68,10 @@ Prompts 1-11 implement only:
   classification, exact-version approval requests and decisions, checker authority resolution,
   separation of duties, expiry, revocation, reapproval, approval eligibility diagnostics, safe
   events, state authority registration, and a proposed-vs-applied governance gate;
+- controlled configuration promotion and rollback release governance with an explicit environment
+  graph, immutable promotion requests/plans/decisions/executions, destination validation, capability
+  and approval checks, drift detection, atomic active release state, known-good records, rollback
+  planning/execution, restart-pending truth, safe events, diagnostics, and release lineage;
 - architecture decision records;
 - development, testing, security, configuration, help, and contribution standards;
 - capability manifest and prompt ledger;
@@ -145,6 +149,7 @@ Start with:
 - [Configuration Versioning](docs/architecture/configuration-versioning.md)
 - [Feature Flags and Capability Control](docs/architecture/feature-flags-and-capabilities.md)
 - [Configuration Approval](docs/architecture/configuration-approval.md)
+- [Configuration Promotion and Rollback](docs/architecture/configuration-promotion-and-rollback.md)
 - [Safety Invariants](docs/architecture/safety-invariants.md)
 - [Authority Hierarchy](docs/architecture/authority-hierarchy.md)
 - [Environment & Runtime Modes](docs/architecture/environment-runtime-modes.md)
@@ -161,6 +166,7 @@ Start with:
 - [Configuration Versioning Help](docs/help/configuration-versioning.md)
 - [Feature Flags and Capability Control Help](docs/help/feature-flags-and-capabilities.md)
 - [Configuration Approval Help](docs/help/configuration-approval.md)
+- [Configuration Promotion and Rollback Help](docs/help/configuration-promotion-and-rollback.md)
 
 ## Security warning
 

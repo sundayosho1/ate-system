@@ -90,4 +90,5 @@ Prompts 7-11 provide keys, domains, scopes, entries, sources, resolution, proven
 fingerprints, cache semantics, runtime integration, schemas, validation reports, invalid
 configuration rejection, immutable version records, lineage, change sets, diffs, historical
 reconstruction, feature flags, capability-control snapshots, approval policies, maker-checker
-requests/decisions and governance eligibility. Prompt 12 owns promotion and rollback.
+requests/decisions, governance eligibility, controlled promotion, active release state, known-good
+records and rollback evidence.

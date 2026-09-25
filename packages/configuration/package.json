@@ -1,8 +1,8 @@
 {
   "name": "@ate/configuration",
-  "version": "0.11.0-config-approval.1",
+  "version": "0.12.0-config-promotion.1",
   "private": true,
-  "description": "ATE hierarchical configuration authority with schema validation, immutable version history, feature flags, capability control, maker-checker approval governance, provenance, snapshots, and runtime service foundation.",
+  "description": "ATE hierarchical configuration authority with schema validation, immutable version history, capability control, maker-checker approval, promotion and rollback governance foundation.",
   "license": "UNLICENSED",
   "type": "module",
   "sideEffects": false,

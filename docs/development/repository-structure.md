@@ -95,8 +95,16 @@ Prompt 11 extends `packages/configuration` with maker-checker configuration appr
 implements approval policies, sensitivity classification, exact-version approval requests and
 decisions, checker authority resolution, separation of duties, expiry, revocation, reapproval,
 approval eligibility, state-authority registration, safe events and a proposed-vs-applied governance
-gate; it does not implement Prompt 12 promotion/rollback, enterprise RBAC/IAM, frontend editing,
-market data, MT5, execution or trading.
+gate; it does not implement enterprise RBAC/IAM, frontend editing, market data, MT5, execution or
+trading.
+
+Prompt 12 extends `packages/configuration` with controlled configuration promotion and rollback
+release governance. It implements an explicit environment graph, promotion policy, immutable
+requests/plans/decisions/executions, destination validation, capability and approval integration,
+drift detection, atomic active release state, known-good records, rollback planning/execution,
+restart-pending truth, state-authority registration, safe events, diagnostics and lineage; it does
+not implement enterprise RBAC/IAM, frontend editing, market data, MT5, execution, paper/live trading
+or production deployment.
 
 ### `mt5/`
 

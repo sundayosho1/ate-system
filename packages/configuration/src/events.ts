@@ -238,6 +238,188 @@ export const configurationApprovalInvalidatedEvent = {
   owner: "@ate/configuration",
 } satisfies EventTypeRegistration;
 
+export const configurationPromotionRequestedEvent = {
+  eventType: "configuration.promotion.requested.v1",
+  category: "AUDIT",
+  version: 1,
+  schema: z
+    .object({
+      requestId: z.string(),
+      sourceEnvironment: z.string(),
+      sourceVersionId: z.string(),
+      destinationEnvironment: z.string(),
+      destinationBaselineVersionId: z.string().optional(),
+      policyId: z.string(),
+      policyFingerprint: z.string(),
+      requestedByActorId: z.string().optional(),
+      correlationId: z.string().optional(),
+      causationId: z.string().optional(),
+    })
+    .strict(),
+  description: "A configuration promotion request was recorded for an exact source version.",
+  owner: "@ate/configuration",
+} satisfies EventTypeRegistration;
+
+export const configurationPromotionPlannedEvent = {
+  eventType: "configuration.promotion.planned.v1",
+  category: "AUDIT",
+  version: 1,
+  schema: z
+    .object({
+      requestId: z.string(),
+      planId: z.string(),
+      sourceVersionId: z.string(),
+      destinationEnvironment: z.string(),
+      resultingFingerprint: z.string(),
+      status: z.string(),
+      reasonCodes: z.array(z.string()).min(1),
+    })
+    .strict(),
+  description: "A deterministic configuration promotion plan was recorded.",
+  owner: "@ate/configuration",
+} satisfies EventTypeRegistration;
+
+export const configurationPromotionBlockedEvent = {
+  eventType: "configuration.promotion.blocked.v1",
+  category: "OPERATIONAL",
+  version: 1,
+  schema: z
+    .object({
+      requestId: z.string(),
+      planId: z.string().optional(),
+      destinationEnvironment: z.string(),
+      reasonCodes: z.array(z.string()).min(1),
+      safeMessage: z.string(),
+    })
+    .strict(),
+  description: "A configuration promotion was blocked without exposing configuration values.",
+  owner: "@ate/configuration",
+} satisfies EventTypeRegistration;
+
+export const configurationPromotedEvent = {
+  eventType: "configuration.promotion.promoted.v1",
+  category: "AUDIT",
+  version: 1,
+  schema: z
+    .object({
+      activationId: z.string(),
+      requestId: z.string(),
+      planId: z.string(),
+      destinationEnvironment: z.string(),
+      resultingVersionId: z.string(),
+      resultingFingerprint: z.string(),
+      restartPending: z.boolean(),
+    })
+    .strict(),
+  description: "A configuration promotion activated a destination release atomically.",
+  owner: "@ate/configuration",
+} satisfies EventTypeRegistration;
+
+export const configurationPromotionFailedEvent = {
+  eventType: "configuration.promotion.failed.v1",
+  category: "OPERATIONAL",
+  version: 1,
+  schema: z
+    .object({
+      requestId: z.string(),
+      planId: z.string().optional(),
+      destinationEnvironment: z.string(),
+      reasonCodes: z.array(z.string()).min(1),
+      safeMessage: z.string(),
+    })
+    .strict(),
+  description: "A configuration promotion failed while preserving previous active state.",
+  owner: "@ate/configuration",
+} satisfies EventTypeRegistration;
+
+export const configurationPromotionStaleEvent = {
+  eventType: "configuration.promotion.stale.v1",
+  category: "OPERATIONAL",
+  version: 1,
+  schema: z
+    .object({
+      requestId: z.string(),
+      planId: z.string().optional(),
+      destinationEnvironment: z.string(),
+      expectedVersionId: z.string().optional(),
+      actualVersionId: z.string().optional(),
+    })
+    .strict(),
+  description: "A configuration promotion became stale due to destination drift.",
+  owner: "@ate/configuration",
+} satisfies EventTypeRegistration;
+
+export const configurationRollbackRequestedEvent = {
+  eventType: "configuration.rollback.requested.v1",
+  category: "AUDIT",
+  version: 1,
+  schema: z
+    .object({
+      requestId: z.string(),
+      environment: z.string(),
+      currentVersionId: z.string(),
+      targetVersionId: z.string(),
+      policyId: z.string(),
+      requestedByActorId: z.string().optional(),
+    })
+    .strict(),
+  description: "A controlled configuration rollback request was recorded.",
+  owner: "@ate/configuration",
+} satisfies EventTypeRegistration;
+
+export const configurationRollbackCompletedEvent = {
+  eventType: "configuration.rollback.completed.v1",
+  category: "AUDIT",
+  version: 1,
+  schema: z
+    .object({
+      requestId: z.string(),
+      planId: z.string(),
+      activationId: z.string(),
+      environment: z.string(),
+      targetVersionId: z.string(),
+      resultingFingerprint: z.string(),
+    })
+    .strict(),
+  description: "A controlled configuration rollback restored an exact known-good target.",
+  owner: "@ate/configuration",
+} satisfies EventTypeRegistration;
+
+export const configurationRollbackFailedEvent = {
+  eventType: "configuration.rollback.failed.v1",
+  category: "OPERATIONAL",
+  version: 1,
+  schema: z
+    .object({
+      requestId: z.string(),
+      planId: z.string().optional(),
+      environment: z.string(),
+      reasonCodes: z.array(z.string()).min(1),
+      safeMessage: z.string(),
+    })
+    .strict(),
+  description: "A controlled configuration rollback failed without corrupting active state.",
+  owner: "@ate/configuration",
+} satisfies EventTypeRegistration;
+
+export const configurationKnownGoodRecordedEvent = {
+  eventType: "configuration.known-good.recorded.v1",
+  category: "AUDIT",
+  version: 1,
+  schema: z
+    .object({
+      knownGoodId: z.string(),
+      environment: z.string(),
+      versionId: z.string(),
+      activationId: z.string(),
+      configurationFingerprint: z.string(),
+      policyId: z.string(),
+    })
+    .strict(),
+  description: "A configuration version became known-good after release verification.",
+  owner: "@ate/configuration",
+} satisfies EventTypeRegistration;
+
 export const configurationEventRegistrations: readonly EventTypeRegistration[] = [
   configurationSnapshotPublishedEvent,
   configurationResolutionFailedEvent,
@@ -251,4 +433,14 @@ export const configurationEventRegistrations: readonly EventTypeRegistration[] =
   configurationRejectedEvent,
   configurationApprovalRevokedEvent,
   configurationApprovalInvalidatedEvent,
+  configurationPromotionRequestedEvent,
+  configurationPromotionPlannedEvent,
+  configurationPromotionBlockedEvent,
+  configurationPromotedEvent,
+  configurationPromotionFailedEvent,
+  configurationPromotionStaleEvent,
+  configurationRollbackRequestedEvent,
+  configurationRollbackCompletedEvent,
+  configurationRollbackFailedEvent,
+  configurationKnownGoodRecordedEvent,
 ];

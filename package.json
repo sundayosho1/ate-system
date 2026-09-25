@@ -1,8 +1,8 @@
 {
   "name": "ate-system",
-  "version": "0.11.0-config-approval.1",
+  "version": "0.12.0-config-promotion.1",
   "private": true,
-  "description": "ATE Autonomous Trading Engine repository foundation through maker-checker configuration approval governance foundation.",
+  "description": "ATE Autonomous Trading Engine repository foundation through controlled configuration promotion and rollback governance foundation.",
   "license": "UNLICENSED",
   "type": "module",
   "engines": {

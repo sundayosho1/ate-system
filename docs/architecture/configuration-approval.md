@@ -4,8 +4,8 @@ Prompt 11 adds the configuration approval governance authority. It determines wh
 configuration version requires independent review, records maker/checker evidence, and answers
 whether that exact version is governance-eligible for future governed operations.
 
-It does not implement Prompt 12 configuration promotion, environment promotion, rollback, emergency
-bypass, enterprise RBAC/IAM, market data, MT5, execution or trading.
+It does not implement emergency bypass, enterprise RBAC/IAM, market data, MT5, execution or trading.
+Prompt 12 consumes approval eligibility for controlled promotion and rollback governance.
 
 ## Authority sequence
 

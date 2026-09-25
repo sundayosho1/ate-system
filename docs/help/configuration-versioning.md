@@ -46,7 +46,7 @@ Reconstruction returns the historical configuration represented by a version and
 recorded fingerprint. Reconstruction is read-only.
 
 Reconstruction is not rollback. It does not activate configuration, promote configuration or replace
-current runtime state.
+current runtime state. Prompt 12 release authority owns those governed actions.
 
 ## Candidate from history
 
@@ -57,7 +57,7 @@ A previous version can be used as the basis for a new version. The new version r
 - current schema validation evidence;
 - a new version ID.
 
-This preserves history and does not implement operational rollback.
+This preserves history; operational rollback creates separate release evidence.
 
 ## Attribution vs approval
 
@@ -74,6 +74,6 @@ This preserves history and does not implement operational rollback.
 - `CONFIGURATION_VERSION_RECONSTRUCTION_FAILED`: historical content cannot be safely reconstructed.
 - `CONFIGURATION_VERSION_DIFF_LIMIT_EXCEEDED`: requested diff exceeded configured bounds.
 
-Configuration versioning does not provide promotion, rollback, MT5, execution or live trading.
-Prompt 10 capability control and Prompt 11 approval governance can reference version provenance, but
-neither activates historical versions.
+Configuration versioning itself does not provide promotion, rollback, MT5, execution or live
+trading. Prompt 12 release authority can promote or roll back exact versions without rewriting
+version history.

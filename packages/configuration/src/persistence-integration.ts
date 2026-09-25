@@ -8,10 +8,12 @@ export const configurationCapabilityControlStateDomain = stateDomain(
   "configuration.capabilitycontrol",
 );
 export const configurationApprovalStateDomain = stateDomain("configuration.approval");
+export const configurationReleaseStateDomain = stateDomain("configuration.release");
 export const configurationStateOwner = stateOwner("configuration");
 export const configurationVersionHistoryStateOwner = stateOwner("configuration.versioning");
 export const configurationCapabilityControlStateOwner = stateOwner("configuration.capabilities");
 export const configurationApprovalStateOwner = stateOwner("configuration.approval");
+export const configurationReleaseStateOwner = stateOwner("configuration.release");
 
 export const registerConfigurationStateAuthority = (
   authority: StateAuthorityRegistry,
@@ -83,4 +85,22 @@ export const registerConfigurationApprovalStateAuthority = (
     runtimeModes,
     description:
       "Maker-checker configuration approval authority for policies, requests, decisions, revocations, derived eligibility and exact-version governance evidence.",
+  });
+
+export const registerConfigurationReleaseStateAuthority = (
+  authority: StateAuthorityRegistry,
+  runtimeModes: readonly RuntimeMode[],
+): ReturnType<StateAuthorityRegistry["register"]> =>
+  authority.register({
+    stateDomain: configurationReleaseStateDomain,
+    owner: configurationReleaseStateOwner,
+    authorityType: "INTERNAL_AUTHORITATIVE",
+    writeAuthority: "@ate/configuration",
+    readers: ["@ate/runtime", "@ate/events", "future-control-center"],
+    durable: true,
+    historyRequired: true,
+    reconciliationRequired: false,
+    runtimeModes,
+    description:
+      "Configuration release authority for promotion requests, plans, activation records, active environment state, known-good records, rollback evidence and release lineage.",
   });

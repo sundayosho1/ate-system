@@ -23,8 +23,9 @@ clock, not from ambient wall-clock calls.
 Prompt 7 declares `configuration.controlplane` as the configuration control-plane state authority
 for current managed configuration snapshots. Prompt 9 declares `configuration.versionhistory` as the
 append-only immutable configuration history authority, including current-version pointer, lineage,
-change sets, diffs and reconstruction metadata. Approval, promotion and operational rollback remain
-future prompt scope.
+change sets, diffs and reconstruction metadata. Prompt 11 adds approval state authority and Prompt
+12 adds configuration release state authority for promotion, active pointers, known-good records and
+rollback evidence.
 
 ## State authority rule
 

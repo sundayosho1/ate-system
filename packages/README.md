@@ -21,8 +21,9 @@ Currently implemented:
   schema validation, constraints, dependency and cross-field rules, fingerprints, bounded cache,
   immutable version history, lineage, change sets, semantic diffs, historical reconstruction,
   feature-flag and capability-control registry/evaluation, maker-checker approval governance,
-  runtime-service integration, invalid-candidate rejection, and safe diagnostics.
+  controlled promotion/rollback release governance, runtime-service integration, invalid-candidate
+  rejection, and safe diagnostics.
 
 No package currently implements trading behavior, risk calculations, portfolio calculations, MT5
-connectivity, broker execution, market calendars, market-data storage, configuration promotion,
-operational rollback, external message brokers, APIs, or frontend UI.
+connectivity, broker execution, market calendars, market-data storage, external message brokers,
+APIs, or frontend UI.

@@ -198,6 +198,20 @@ Prompt 11 adds maker-checker approval governance tests that verify:
 - proposed-vs-applied governance gate blocks approval-required changes before approval;
 - approval events, state authority and diagnostics.
 
+## Prompt 12 tests
+
+Prompt 12 adds controlled promotion and rollback tests that verify:
+
+- explicit environment graph transitions and skipped-transition rejection;
+- immutable promotion request and deterministic plan creation without destination mutation;
+- latest version is not active without release authority activation;
+- destination drift and stale-plan concurrency protection;
+- non-promotable configuration blocking and destination-local runtime mode preservation;
+- approval integration and promotion-specific checker separation;
+- restart-required release state with running and target post-restart versions;
+- known-good rollback to an exact target without rewriting replaced versions;
+- release state authority and safe promotion/rollback/known-good events.
+
 ## Naming
 
 Test names should describe behavior. Avoid opaque names.

@@ -129,6 +129,11 @@ This glossary defines canonical ATE terminology. Future prompts should use these
 | Approval Decision             | Prompt 11 immutable approve/reject evidence from an authorized checker.                                                                                                   |
 | Approval Eligibility          | Current Prompt 11 result showing whether a version satisfies governance requirements.                                                                                     |
 | Proposed Configuration        | Validated/versioned configuration candidate that is not yet applied because governance or later promotion gates are unsatisfied.                                          |
+| Promotion Request             | Prompt 12 immutable request to move an exact source configuration version toward a destination environment.                                                               |
+| Promotion Plan                | Deterministic Prompt 12 explanation of destination validation, diff, capabilities, approvals, drift and restart impact before activation.                                 |
+| Active Release State          | Prompt 12 authoritative active configuration pointer and fingerprints for one governed environment.                                                                       |
+| Known-Good Configuration      | Prompt 12 verified active release eligible as an exact rollback target.                                                                                                   |
+| Rollback Request              | Prompt 12 immutable request to restore an exact known-good configuration without rewriting history.                                                                       |
 
 ## Identifier conventions
 
