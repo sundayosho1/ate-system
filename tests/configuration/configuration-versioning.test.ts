@@ -440,7 +440,7 @@ describe("Prompt 9 immutable configuration versioning and history", () => {
     expect(eventRegistry.all().map((registration) => registration.eventType)).toEqual(
       expect.arrayContaining([
         "configuration.version.created.v1",
-        "configuration.version.integrity_failed.v1",
+        "configuration.version.integrity-failed.v1",
       ]),
     );
   });

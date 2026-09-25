@@ -77,7 +77,7 @@ export const configurationVersionCreatedEvent = {
 } satisfies EventTypeRegistration;
 
 export const configurationVersionIntegrityFailedEvent = {
-  eventType: "configuration.version.integrity_failed.v1",
+  eventType: "configuration.version.integrity-failed.v1",
   category: "OPERATIONAL",
   version: 1,
   schema: z

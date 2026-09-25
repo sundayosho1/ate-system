@@ -406,6 +406,7 @@ const validateConstraints = (input: {
     }
     if (
       constraints.secretRefPattern !== undefined &&
+      input.value.ref !== "[REDACTED]" &&
       !new RegExp(constraints.secretRefPattern, "u").test(input.value.ref)
     ) {
       issues.push(
