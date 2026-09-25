@@ -7,12 +7,14 @@ ATE is **not** currently a trading bot, MetaTrader Expert Advisor, or live execu
 
 ## Current development status
 
-- Phase: II — Configuration & Control Plane
-- Prompt: 12 of 84
+- Phase: III — Universal Data Platform
+- Prompt: 13 of 84
 - Status: foundation, domain contracts, runtime lifecycle, internal event architecture,
   persistence/state authority, temporal integrity, hierarchical configuration, and configuration
   schema validation, immutable configuration version-history, feature-flag/capability-control, and
-  maker-checker approval governance, and controlled configuration promotion/rollback foundation
+  maker-checker approval governance, controlled configuration promotion/rollback foundation, and
+  universal market-data contract authority
+- Market-data ingestion: **not implemented**
 - Trading capability: **not implemented**
 - MT5 connectivity: **not implemented**
 - Live execution: **not implemented**
@@ -36,7 +38,7 @@ ATE must always be able to return `NO_ACTION` when conditions do not justify cap
 
 ## Currently implemented functionality
 
-Prompts 1-12 implement only:
+Prompts 1-13 implement only:
 
 - repository foundation and documentation hierarchy;
 - engineering constitution and safety invariants;
@@ -72,13 +74,18 @@ Prompts 1-12 implement only:
   graph, immutable promotion requests/plans/decisions/executions, destination validation, capability
   and approval checks, drift detection, atomic active release state, known-good records, rollback
   planning/execution, restart-pending truth, safe events, diagnostics, and release lineage;
+- universal market-data contracts with provider-neutral observation envelopes, canonical
+  quote/trade/tick/bar/status semantics, explicit event/source/receive timestamps, typed volume,
+  timeframe, session/status, sequence, provenance, correction, bounded metadata, deterministic
+  serialization, and structural validation foundations;
 - architecture decision records;
 - development, testing, security, configuration, help, and contribution standards;
 - capability manifest and prompt ledger;
 - minimal npm/TypeScript quality tooling and foundation tests.
 
-No source module currently performs trading, market data ingestion, strategy evaluation, risk
-calculation, portfolio management, account allocation, broker order submission, or MT5 execution.
+No source module currently performs trading, market data ingestion, historical data storage, data
+quality scoring, replay, aggregation, strategy evaluation, risk calculation, portfolio management,
+account allocation, broker order submission, or MT5 execution.
 
 ## Repository structure
 

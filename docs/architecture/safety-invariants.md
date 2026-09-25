@@ -732,6 +732,131 @@ Failed rollback cannot leave mixed active state.
 
 Uncertain activation state must block readiness until recovered.
 
+## Prompt 13 data invariants
+
+These invariants specialize the general safety rules for canonical market-data contracts.
+
+## DATA-001 — Canonical Data Is Provider Neutral
+
+Canonical market-data contracts cannot depend on provider-specific wire formats or SDK types.
+
+## DATA-002 — Every Observation Identifies Its Instrument
+
+No canonical market observation may be anonymous or rely on provider symbol as instrument identity.
+
+## DATA-003 — Every Observation Is Attributable
+
+Source and provenance evidence cannot silently disappear from canonical observations.
+
+## DATA-004 — Financial Prices Use Safe Decimal Representation
+
+Authoritative market prices must use domain decimal/price primitives, not JavaScript floats.
+
+## DATA-005 — Price Semantics Are Explicit
+
+Bid, ask, trade/last, open, high, low and close fields are not interchangeable.
+
+## DATA-006 — Event Time Is Distinct From Receive Time
+
+Market event time and ATE receive time must remain separately represented.
+
+## DATA-007 — Naive Timestamps Are Forbidden
+
+Canonical market-data timestamps must be timezone-explicit UTC-normalized evidence.
+
+## DATA-008 — Provider Symbol Is Not Canonical Instrument Identity
+
+Provider symbols are provenance/source evidence and do not replace canonical instrument IDs.
+
+## DATA-009 — Missing Is Not Zero
+
+Absent price, quantity or volume evidence must not be fabricated as zero.
+
+## DATA-010 — Derived Data Is Identified As Derived
+
+Calculated observations such as derived bars, spreads or mids must carry transformation provenance.
+
+## DATA-011 — Simulated Data Cannot Masquerade As Observed Data
+
+Simulation-origin observations must be distinguishable from provider-observed market facts.
+
+## DATA-012 — Replay Does Not Erase Original Provenance
+
+Replay delivery context must not replace original observation source evidence.
+
+## DATA-013 — Market Observations Are Immutable
+
+Published observations are value records; corrections create new evidence instead of mutation.
+
+## DATA-014 — Corrections Do Not Rewrite Historical Observations
+
+Corrections must reference original and replacement observations explicitly.
+
+## DATA-015 — Tick Does Not Imply Trade
+
+Tick contracts must discriminate quote, trade and combined update semantics.
+
+## DATA-016 — Volume Semantics Are Explicit
+
+Trade volume, tick volume, quote count and unavailable volume are distinct.
+
+## DATA-017 — Timeframe Is Explicit
+
+Bars must carry timeframe identity; it is not inferred from timestamp difference.
+
+## DATA-018 — Bar Interval Semantics Are Explicit
+
+Bar intervals use explicit start/end boundaries with `[start, end)` semantics.
+
+## DATA-019 — Bar Finality Is Explicit
+
+Forming and final bars must be represented explicitly.
+
+## DATA-020 — Sequence Scope Is Explicit
+
+Provider sequence values require scope evidence before comparison.
+
+## DATA-021 — Source Ordering Is Not Global Ordering
+
+Provider-local sequence or receive order cannot be treated as global market order.
+
+## DATA-022 — Out-of-Order Arrival Is Representable
+
+Canonical contracts must permit late and out-of-order observations.
+
+## DATA-023 — Contract Validation Does Not Pretend To Be Quality Assessment
+
+Prompt 13 structural validation does not implement Prompt 15 quality scoring.
+
+## DATA-024 — Raw Provider Payload Is Not Canonical Market Data
+
+Canonical observations may carry bounded references/metadata, not arbitrary raw vendor payloads.
+
+## DATA-025 — Metadata Is Bounded
+
+Market-data metadata must enforce key, value and collection bounds.
+
+## DATA-026 — Unknown Precision Is Not Fabricated Precision
+
+Timestamp precision must be preserved when known and marked unknown when unavailable.
+
+## DATA-027 — Derived Spread Cannot Contradict Canonical Bid/Ask
+
+Canonical spread helpers derive from bid/ask instead of storing independent contradictory values.
+
+## DATA-028 — Structural Errors Are Never Silently Repaired
+
+Malformed bars, timestamps, quantities or identifiers are rejected rather than auto-corrected.
+
+## DATA-029 — Dataset/Transformation Provenance Must Remain Traceable
+
+Dataset and transformation references must remain available for future lineage authority.
+
+## DATA-030 — Market Data Contracts Do Not Authorize Trading
+
+Canonical data representation never grants strategy, risk, execution, paper or live trading
+authority.
+
 ## Prompt 1 test coverage
 
 Prompt 1 includes foundation tests that verify:

@@ -213,3 +213,15 @@ Future contract evolution should follow:
 - Removed/renamed required fields are breaking changes.
 - Fixtures in `tests/fixtures/domain/` provide early compatibility coverage.
 - Deprecated fields should remain documented until removed through an approved migration path.
+
+## Prompt 13 market-data evolution
+
+Prompt 13 matures the original quote/bar foundations into the universal canonical market-data
+contract authority. `@ate/domain` now includes provider-neutral market observations for quotes,
+trades, ticks, OHLCV bars and market status; explicit event/source/receive timestamps; provider
+symbol and source provenance; sequence scopes; typed volume; bounded metadata; correction records;
+and deterministic market-data serialization helpers.
+
+These remain contracts only. Provider ingestion, historical storage, data-quality scoring,
+aggregation, replay, instrument registry, MOSE, strategy, risk and execution behavior remain future
+scope.

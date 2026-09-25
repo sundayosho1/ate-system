@@ -5,7 +5,8 @@ infrastructure adapters, UI/design-system components, and test utilities.
 
 Currently implemented:
 
-- `@ate/domain` — core domain language contracts, primitives, validation, and serialization support.
+- `@ate/domain` — core domain language contracts, primitives, validation, serialization support, and
+  universal provider-neutral market-data observation/quote/trade/tick/bar/status contracts.
 - `@ate/runtime` — application runtime lifecycle, dependency composition, health/readiness,
   degradation, recovery, shutdown, and snapshot foundation.
 - `@ate/events` — internal event registry, event factory, in-process event bus, routing,
@@ -25,5 +26,5 @@ Currently implemented:
   rejection, and safe diagnostics.
 
 No package currently implements trading behavior, risk calculations, portfolio calculations, MT5
-connectivity, broker execution, market calendars, market-data storage, external message brokers,
-APIs, or frontend UI.
+connectivity, broker execution, market calendars, market-data ingestion, market-data storage,
+market-data replay, external message brokers, APIs, or frontend UI.

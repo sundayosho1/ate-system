@@ -21,6 +21,7 @@ export const foundationalCapabilityDefinitions = (): readonly CapabilityDefiniti
   const configurationRelease = capabilityId("configuration.release");
   const configurationHistoryInspection = capabilityId("configuration.historyInspection");
   const configurationCapabilityDiagnostics = capabilityId("configuration.capabilityDiagnostics");
+  const dataMarketDataContracts = capabilityId("data.marketDataContracts");
   const dataMarketData = capabilityId("data.marketData");
   const executionMt5 = capabilityId("execution.mt5");
   const executionLiveTrading = capabilityId("execution.liveTrading");
@@ -164,14 +165,29 @@ export const foundationalCapabilityDefinitions = (): readonly CapabilityDefiniti
       versionIntroduced: "0.10.0-capabilities.1",
     },
     {
+      capabilityId: dataMarketDataContracts,
+      displayName: "Universal Market Data Contracts",
+      description:
+        "Prompt 13 provider-neutral canonical market-data observation, quote, trade, tick, bar, status, provenance, correction and serialization contracts.",
+      owner: "@ate/domain",
+      capabilityClass: "MANDATORY_CORE",
+      implementationStatus: "IMPLEMENTED",
+      reloadBehavior: "STARTUP_ONLY",
+      supportedRuntimeModes: runtimeModes,
+      versionIntroduced: "0.13.0-market-data-contracts.1",
+      safetyNotes:
+        "Contracts only; no provider ingestion, historical storage, replay, strategy, risk, execution or trading authority.",
+    },
+    {
       capabilityId: dataMarketData,
       displayName: "Market Data Ingestion",
-      description: "Future market-data ingestion capability; not implemented in Prompt 10.",
+      description: "Future market-data ingestion capability; not implemented in Prompt 13.",
       owner: "future-market-data",
       capabilityClass: "FUTURE_UNIMPLEMENTED",
       implementationStatus: "NOT_IMPLEMENTED",
       reloadBehavior: "STARTUP_ONLY",
       supportedRuntimeModes: runtimeModes,
+      dependencies: [dataMarketDataContracts],
       versionIntroduced: "future",
     },
     {

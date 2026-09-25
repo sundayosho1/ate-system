@@ -67,7 +67,15 @@ export type TradingStatus = (typeof tradingStatuses)[number];
 export const operationalStatuses = ["HEALTHY", "DEGRADED", "UNAVAILABLE"] as const;
 export type OperationalStatus = (typeof operationalStatuses)[number];
 
-export const marketTradingStatuses = ["OPEN", "CLOSED", "HALTED", "UNKNOWN"] as const;
+export const marketTradingStatuses = [
+  "OPEN",
+  "CLOSED",
+  "PRE_OPEN",
+  "POST_CLOSE",
+  "HALTED",
+  "AUCTION",
+  "UNKNOWN",
+] as const;
 export type MarketTradingStatus = (typeof marketTradingStatuses)[number];
 
 export const strategyStatuses = [
@@ -210,11 +218,92 @@ export const tradeStates = [
 ] as const;
 export type TradeState = (typeof tradeStates)[number];
 
-export const volumeTypes = ["TICK", "REAL", "BROKER_REPORTED", "NOT_AVAILABLE"] as const;
+export const marketObservationKinds = ["QUOTE", "TRADE", "TICK", "BAR", "MARKET_STATUS"] as const;
+export type MarketObservationKind = (typeof marketObservationKinds)[number];
+
+export const tickUpdateKinds = ["QUOTE", "TRADE", "COMBINED"] as const;
+export type TickUpdateKind = (typeof tickUpdateKinds)[number];
+
+export const marketDataSourceTypes = [
+  "BROKER",
+  "EXCHANGE",
+  "DATA_VENDOR",
+  "INTERNAL_DERIVED",
+  "REPLAY",
+  "SIMULATION",
+  "SYSTEM",
+] as const;
+export type MarketDataSourceType = (typeof marketDataSourceTypes)[number];
+
+export const marketDataProviderRoles = [
+  "PRIMARY",
+  "SECONDARY",
+  "REFERENCE",
+  "HISTORICAL",
+  "ECONOMIC",
+  "NEWS",
+  "VISUALIZATION",
+] as const;
+export type MarketDataProviderRole = (typeof marketDataProviderRoles)[number];
+
+export const marketDataOrigins = ["OBSERVED", "DERIVED", "SYNTHETIC", "SIMULATED"] as const;
+export type MarketDataOrigin = (typeof marketDataOrigins)[number];
+
+export const marketDataDeliveryModes = [
+  "LIVE",
+  "HISTORICAL",
+  "REPLAYED",
+  "BACKFILLED",
+  "SIMULATED",
+] as const;
+export type MarketDataDeliveryMode = (typeof marketDataDeliveryModes)[number];
+
+export const timestampPrecisions = [
+  "SECONDS",
+  "MILLISECONDS",
+  "MICROSECONDS",
+  "NANOSECONDS",
+  "UNKNOWN",
+] as const;
+export type TimestampPrecision = (typeof timestampPrecisions)[number];
+
+export const sequenceScopes = [
+  "PROVIDER",
+  "PROVIDER_STREAM",
+  "INSTRUMENT",
+  "SYMBOL",
+  "CHANNEL",
+  "CONNECTION",
+  "DATASET",
+  "UNKNOWN",
+] as const;
+export type SequenceScope = (typeof sequenceScopes)[number];
+
+export const volumeTypes = ["TRADE_VOLUME", "TICK_VOLUME", "QUOTE_COUNT", "NOT_AVAILABLE"] as const;
 export type VolumeType = (typeof volumeTypes)[number];
 
 export const barCompletenessStates = ["FORMING", "FINAL"] as const;
 export type BarCompleteness = (typeof barCompletenessStates)[number];
+
+export const timeframeKinds = ["FIXED", "CALENDAR", "SESSION"] as const;
+export type TimeframeKind = (typeof timeframeKinds)[number];
+
+export const timeframeUnits = ["SECOND", "MINUTE", "HOUR", "DAY", "WEEK", "MONTH"] as const;
+export type TimeframeUnit = (typeof timeframeUnits)[number];
+
+export const quoteQualityFlags = [
+  "MISSING_BID",
+  "MISSING_ASK",
+  "CROSSED_QUOTE",
+  "SOURCE_TIME_ABSENT",
+  "SEQUENCE_ABSENT",
+  "CORRECTION",
+  "INCOMPLETE_BAR",
+] as const;
+export type QuoteQualityFlag = (typeof quoteQualityFlags)[number];
+
+export const marketStatusSources = ["PROVIDER_SUPPLIED", "CALENDAR_DERIVED", "INFERRED"] as const;
+export type MarketStatusSource = (typeof marketStatusSources)[number];
 
 export const exposureDimensions = [
   "INSTRUMENT",
