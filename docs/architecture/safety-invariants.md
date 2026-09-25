@@ -437,6 +437,92 @@ Prompt 8 blocking validation prevents authoritative version creation/publication
 
 Restart/recovery may rebuild derived state but never mutate historical facts.
 
+## Prompt 10 feature-flag and capability-control invariants
+
+These invariants specialize managed configuration for runtime capability enablement.
+
+## CFG-061 — Capability Registry Is Build Truth
+
+Runtime flags cannot make an unimplemented capability implemented.
+
+## CFG-062 — Feature Flags Use Configuration Authority
+
+Feature flags must be declared configuration keys resolved by the managed configuration authority.
+
+## CFG-063 — No Second Configuration Engine
+
+Feature flags cannot become an ad hoc parallel settings store.
+
+## CFG-064 — Mandatory Core Cannot Be Flag-Disabled
+
+Constitutional/control-plane safety capabilities cannot be controlled by ordinary feature flags.
+
+## CFG-065 — Capability States Are Explicit
+
+Enabled, disabled, unavailable, blocked and degraded states must be distinguishable.
+
+## CFG-066 — Capability Reasons Are Stable
+
+Capability decisions must expose stable reason codes suitable for diagnostics and tests.
+
+## CFG-067 — Dependency Gating Fails Closed
+
+Unavailable, disabled or blocked dependencies cannot silently enable dependants.
+
+## CFG-068 — Capability Dependency Graph Is Acyclic
+
+Capability dependencies must not contain cycles.
+
+## CFG-069 — Runtime Mode Gates Are Enforced
+
+A capability unavailable for the current runtime mode must be blocked.
+
+## CFG-070 — Service Readiness Is Not Configuration
+
+Runtime health/readiness can degrade capability state but must not mutate configuration truth.
+
+## CFG-071 — Restart-Required Changes Are Visible
+
+Restart-required feature changes must expose pending-restart state before becoming applied state.
+
+## CFG-072 — Capability Snapshots Are Immutable
+
+Effective capability snapshots must be immutable once published.
+
+## CFG-073 — Capability Snapshot Identity Is Deterministic
+
+Equivalent capability inputs must produce equivalent semantic fingerprints.
+
+## CFG-074 — Capability Provenance References Configuration
+
+Effective capability state must reference the configuration snapshot and available version/schema
+fingerprints that produced it.
+
+## CFG-075 — Capability Events Are Safe
+
+Capability events must not expose raw configuration values, secrets or sensitive material.
+
+## CFG-076 — Capability Control Is Not Approval
+
+Flag enablement cannot imply maker-checker approval or authorization.
+
+## CFG-077 — Capability Control Is Not Promotion or Rollback
+
+Flag evaluation cannot activate configuration promotion or operational rollback workflows.
+
+## CFG-078 — Capability Control Is Not Random Rollout
+
+Prompt 10 does not provide user targeting, percentages or randomized rollout behavior.
+
+## CFG-079 — Future Trading Capabilities Stay Unavailable
+
+Market data, MT5, execution and live trading remain unavailable until their implementation prompts
+complete and verify them.
+
+## CFG-080 — Capability Diagnostics Must Be Truthful
+
+Docs, manifests, diagnostics and tests must not imply capabilities beyond the verified build.
+
 ## Prompt 1 test coverage
 
 Prompt 1 includes foundation tests that verify:

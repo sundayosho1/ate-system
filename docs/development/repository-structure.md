@@ -85,6 +85,12 @@ version streams, current-version pointer, parent lineage, historical derivation,
 semantic diffs, attribution, reconstruction, integrity verification and bounded history queries; it
 does not implement feature flags, maker-checker approval, promotion/rollback or frontend editing.
 
+Prompt 10 extends `packages/configuration` with feature flags and capability control. It implements
+a build-truth capability registry, managed configuration-backed feature flags, deterministic
+effective capability snapshots, dependency/runtime-mode gating, restart-required visibility, safe
+events, state-authority registration and diagnostics; it does not implement maker-checker approval,
+promotion/rollback, market data, MT5, execution, frontend editing or trading.
+
 ### `mt5/`
 
 Future MetaTrader 5 gateway and Connector EA artifacts. Prompt 1 documents the boundary only.
@@ -104,8 +110,8 @@ configuration does not belong here.
 Automated tests. Prompt 1 adds foundation tests validating documentation and capability
 truthfulness. Prompt 4 adds event architecture tests under `tests/events`. Prompt 5 adds
 persistence/state authority tests under `tests/persistence`. Prompt 6 adds temporal integrity tests
-under `tests/time`. Prompts 7-9 add hierarchical configuration, schema validation and versioning
-tests under `tests/configuration`.
+under `tests/time`. Prompts 7-10 add hierarchical configuration, schema validation, versioning and
+capability-control tests under `tests/configuration`.
 
 ### `scripts/`
 

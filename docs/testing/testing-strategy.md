@@ -169,6 +169,20 @@ Prompt 9 adds configuration versioning tests that verify:
 - secret-reference redaction in version payloads and change sets;
 - version-history state authority and safe event registrations.
 
+## Prompt 10 tests
+
+Prompt 10 adds feature-flag and capability-control tests that verify:
+
+- truthful capability and feature-flag registry registration;
+- duplicate, unknown, unsafe mandatory-core and dependency-cycle rejection;
+- managed-configuration-backed flag evaluation;
+- mandatory core capabilities cannot be ordinary-disabled;
+- unimplemented requested capabilities remain unavailable;
+- environment, dependency, conflict, service-readiness and restart-required gating;
+- immutable capability snapshots and deterministic fingerprints;
+- configuration snapshot/schema/version provenance in explanations;
+- capability-control runtime diagnostics, safe event registrations and state authority.
+
 ## Naming
 
 Test names should describe behavior. Avoid opaque names.

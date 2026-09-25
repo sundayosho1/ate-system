@@ -4,8 +4,10 @@ Prompt 9 adds the ATE configuration history authority. It records immutable conf
 with attribution, schema association, configuration fingerprints, snapshot identity, change sets,
 structured diffs, lineage and historical reconstruction.
 
-It does not implement feature flags, maker-checker approval, promotion, environment promotion,
-operational rollback, market data, risk, portfolio, MT5, execution or live trading.
+Prompt 9 itself did not implement feature flags. Prompt 10 now consumes version/schema provenance
+for capability-control snapshots. Maker-checker approval, promotion, environment promotion,
+operational rollback, market data, risk, portfolio, MT5, execution and live trading remain future
+scope.
 
 ## Authority model
 

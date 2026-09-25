@@ -118,6 +118,11 @@ This glossary defines canonical ATE terminology. Future prompts should use these
 | Configuration Diff            | Directional machine-readable comparison from one configuration version to another.                                                                                        |
 | Version Lineage               | Parent/root/ancestor relationships connecting immutable configuration versions.                                                                                           |
 | Historical Reconstruction     | Read-only rebuilding of the canonical configuration represented by a historical version.                                                                                  |
+| Capability Registry           | Prompt 10 build-truth catalog of implemented and explicitly unimplemented capabilities, dependencies, conflicts and runtime-mode scope.                                   |
+| Feature Flag                  | Managed boolean configuration key that requests an optional implemented capability; it cannot implement future functionality by itself.                                   |
+| Effective Capability          | Deterministic Prompt 10 result for one capability, including enabled/disabled/unavailable/blocked/degraded state, reason codes and provenance.                            |
+| Capability Snapshot           | Immutable Prompt 10 view of all effective capabilities and feature flags for one configuration snapshot/runtime mode.                                                     |
+| Pending Restart               | Capability-control state showing that desired configuration differs from applied state for a restart-required flag.                                                       |
 
 ## Identifier conventions
 

@@ -1,8 +1,8 @@
 {
   "name": "ate-system",
-  "version": "0.9.0-config-versioning.1",
+  "version": "0.10.0-capabilities.1",
   "private": true,
-  "description": "ATE Autonomous Trading Engine repository foundation, core domain contracts, runtime lifecycle, internal event architecture, persistence/state authority, temporal integrity, hierarchical configuration, configuration schema validation, and immutable configuration version-history foundation.",
+  "description": "ATE Autonomous Trading Engine repository foundation, core domain contracts, runtime lifecycle, internal event architecture, persistence/state authority, temporal integrity, hierarchical configuration, configuration schema validation, immutable configuration version-history, and feature-flag/capability-control foundation.",
   "license": "UNLICENSED",
   "type": "module",
   "engines": {

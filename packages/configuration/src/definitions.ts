@@ -130,6 +130,49 @@ export const foundationalConfigurationDefinitions = (
       reloadRequirement: "REFRESH",
     },
   },
+  {
+    key: foundationalConfigurationKey(
+      "system.feature.configurationHistoryInspectionEnabled",
+      clock,
+    ),
+    domain: "SYSTEM",
+    displayName: "Configuration History Inspection Feature",
+    description:
+      "Enables read-only inspection of configuration version history through capability control diagnostics.",
+    valueType: "BOOLEAN",
+    required: false,
+    failClosed: false,
+    allowedScopes: ["SYSTEM", "ENVIRONMENT"],
+    mergePolicy: "REPLACE",
+    sensitivity: "INTERNAL",
+    defaultValue: true,
+    metadata: {
+      purpose: "Provide an implemented optional capability controlled by managed configuration.",
+      effect: "Toggles read-only historical configuration inspection surfaces.",
+      riskImplication: "Disabling it removes diagnostics only; it cannot disable version history.",
+      reloadRequirement: "REFRESH",
+    },
+  },
+  {
+    key: foundationalConfigurationKey("system.feature.capabilityDiagnosticsEnabled", clock),
+    domain: "SYSTEM",
+    displayName: "Capability Diagnostics Feature",
+    description:
+      "Enables capability-control diagnostics derived from the registry and effective configuration.",
+    valueType: "BOOLEAN",
+    required: false,
+    failClosed: false,
+    allowedScopes: ["SYSTEM", "ENVIRONMENT"],
+    mergePolicy: "REPLACE",
+    sensitivity: "INTERNAL",
+    defaultValue: true,
+    metadata: {
+      purpose: "Expose safe capability-state diagnostics without creating a second config engine.",
+      effect: "Toggles operator-facing capability diagnostics.",
+      riskImplication: "Restart is required so observers cannot see mixed diagnostic policy.",
+      reloadRequirement: "RESTART",
+    },
+  },
 ];
 
 export const foundationalConfigurationSchemas = (clock: Clock): readonly ConfigurationSchema[] => {
@@ -144,6 +187,14 @@ export const foundationalConfigurationSchemas = (clock: Clock): readonly Configu
   const freshnessPolicy = foundationalConfigurationKey("data.defaultFreshnessPolicy", clock);
   const maxRetryAttempts = foundationalConfigurationKey("execution.maxRetryAttempts", clock);
   const scanInterval = foundationalConfigurationKey("surveillance.scanIntervalMs", clock);
+  const historyInspection = foundationalConfigurationKey(
+    "system.feature.configurationHistoryInspectionEnabled",
+    clock,
+  );
+  const capabilityDiagnostics = foundationalConfigurationKey(
+    "system.feature.capabilityDiagnosticsEnabled",
+    clock,
+  );
 
   return [
     configurationSchemaFromDefinition(requireDefinition(byKey, runtimeMode), {
@@ -219,6 +270,22 @@ export const foundationalConfigurationSchemas = (clock: Clock): readonly Configu
         helpText:
           "Bounds future surveillance scan intervals without implementing MOSE or surveillance.",
         examples: [5_000, 60_000],
+      },
+    }),
+    configurationSchemaFromDefinition(requireDefinition(byKey, historyInspection), {
+      metadata: {
+        ...requireDefinition(byKey, historyInspection).metadata,
+        helpText:
+          "Controls read-only configuration history inspection; it cannot enable approval, promotion, rollback or trading.",
+        examples: [true, false],
+      },
+    }),
+    configurationSchemaFromDefinition(requireDefinition(byKey, capabilityDiagnostics), {
+      metadata: {
+        ...requireDefinition(byKey, capabilityDiagnostics).metadata,
+        helpText:
+          "Controls capability diagnostics visibility. Changes are restart-required by Prompt 10 policy.",
+        examples: [true, false],
       },
     }),
   ];

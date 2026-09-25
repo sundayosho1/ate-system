@@ -8,10 +8,11 @@ ATE is **not** currently a trading bot, MetaTrader Expert Advisor, or live execu
 ## Current development status
 
 - Phase: II — Configuration & Control Plane
-- Prompt: 9 of 84
+- Prompt: 10 of 84
 - Status: foundation, domain contracts, runtime lifecycle, internal event architecture,
   persistence/state authority, temporal integrity, hierarchical configuration, and configuration
-  schema validation and immutable configuration version-history foundation
+  schema validation, immutable configuration version-history, and feature-flag/capability-control
+  foundation
 - Trading capability: **not implemented**
 - MT5 connectivity: **not implemented**
 - Live execution: **not implemented**
@@ -35,7 +36,7 @@ ATE must always be able to return `NO_ACTION` when conditions do not justify cap
 
 ## Currently implemented functionality
 
-Prompts 1-9 implement only:
+Prompts 1-10 implement only:
 
 - repository foundation and documentation hierarchy;
 - engineering constitution and safety invariants;
@@ -59,6 +60,10 @@ Prompts 1-9 implement only:
 - immutable configuration version-history foundation with version IDs, runtime-mode streams, parent
   lineage, current-version pointer, change sets, semantic diffs, actor attribution, reason capture,
   reconstruction, integrity checks, expected-parent concurrency, idempotency and safe diagnostics;
+- feature-flag and capability-control foundation with a build-truth capability registry, managed
+  configuration-backed flags, deterministic effective capability states, dependency/runtime-mode
+  gating, immutable capability snapshots, restart-required visibility, safe events, state authority
+  registration and diagnostics;
 - architecture decision records;
 - development, testing, security, configuration, help, and contribution standards;
 - capability manifest and prompt ledger;
@@ -134,6 +139,7 @@ Start with:
 - [Hierarchical Configuration](docs/architecture/hierarchical-configuration.md)
 - [Configuration Schema and Validation](docs/architecture/configuration-schema-validation.md)
 - [Configuration Versioning](docs/architecture/configuration-versioning.md)
+- [Feature Flags and Capability Control](docs/architecture/feature-flags-and-capabilities.md)
 - [Safety Invariants](docs/architecture/safety-invariants.md)
 - [Authority Hierarchy](docs/architecture/authority-hierarchy.md)
 - [Environment & Runtime Modes](docs/architecture/environment-runtime-modes.md)
@@ -148,6 +154,7 @@ Start with:
 - [Hierarchical Configuration Help](docs/help/hierarchical-configuration.md)
 - [Configuration Schema and Validation Help](docs/help/configuration-schema-and-validation.md)
 - [Configuration Versioning Help](docs/help/configuration-versioning.md)
+- [Feature Flags and Capability Control Help](docs/help/feature-flags-and-capabilities.md)
 
 ## Security warning
 

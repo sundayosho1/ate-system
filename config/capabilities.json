@@ -1,11 +1,11 @@
 {
   "$schema": "./capabilities.schema.json",
-  "project": "ATE — Autonomous Trading Engine",
+  "project": "ATE \u2014 Autonomous Trading Engine",
   "manifest_version": 1,
   "updated_at": "2026-09-25",
-  "development_phase": "Phase II — Configuration & Control Plane",
-  "completed_prompt": 9,
-  "pre_production_version": "0.9.0-config-versioning.1",
+  "development_phase": "Phase II \u2014 Configuration & Control Plane",
+  "completed_prompt": 10,
+  "pre_production_version": "0.10.0-capabilities.1",
   "capabilities": {
     "repository_foundation": true,
     "engineering_constitution": true,
@@ -131,8 +131,8 @@
     "distributed_event_broker": false,
     "comprehensive_configuration_schema_engine": true,
     "configuration_version_lifecycle": true,
-    "feature_flags": false,
-    "capability_management": false,
+    "feature_flags": true,
+    "capability_management": true,
     "maker_checker_approval": false,
     "configuration_promotion": false,
     "configuration_rollback": false,
@@ -168,5 +168,5 @@
     "authentication_rbac": false,
     "production_deployment": false
   },
-  "truth_statement": "Prompts 1-9 establish repository governance, documentation, quality foundations, core domain contracts, application runtime lifecycle infrastructure, internal in-process event architecture, persistence/state authority foundations, temporal integrity foundations, hierarchical configuration control-plane foundations, configuration schema validation/rejection foundations, and immutable configuration version-history foundations only. ATE cannot trade, connect to MT5, manage accounts, size positions, submit orders, execute strategies, ingest market data, calculate risk, allocate accounts, use market calendars/sessions, run a historical replay engine, use a distributed event broker, perform feature-flag rollout, perform maker-checker approval, perform configuration promotion/operational rollback, or perform live trading."
+  "truth_statement": "Prompts 1-10 establish repository governance, documentation, quality foundations, core domain contracts, application runtime lifecycle infrastructure, internal in-process event architecture, persistence/state authority foundations, temporal integrity foundations, hierarchical configuration control-plane foundations, configuration schema validation/rejection foundations, immutable configuration version-history foundations, and feature-flag/capability-control foundations only. ATE cannot trade, connect to MT5, manage accounts, size positions, submit orders, execute strategies, ingest market data, calculate risk, allocate accounts, use market calendars/sessions, run a historical replay engine, use a distributed event broker, perform maker-checker approval, perform configuration promotion/operational rollback, or perform live trading."
 }

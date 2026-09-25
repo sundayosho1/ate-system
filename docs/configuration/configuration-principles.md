@@ -84,9 +84,10 @@ explicit operator configuration and validation.
 Secrets must use environment-appropriate secret management. They must not be stored in committed
 configuration files, logged, exposed through APIs, or rendered in frontend responses.
 
-## Prompt 9 boundaries
+## Prompt 10 boundaries
 
-Prompts 7-9 provide keys, domains, scopes, entries, sources, resolution, provenance, snapshots,
+Prompts 7-10 provide keys, domains, scopes, entries, sources, resolution, provenance, snapshots,
 fingerprints, cache semantics, runtime integration, schemas, validation reports, invalid
-configuration rejection, immutable version records, lineage, change sets, diffs and historical
-reconstruction. Prompts 11-12 own approval, promotion and rollback.
+configuration rejection, immutable version records, lineage, change sets, diffs, historical
+reconstruction, feature flags and capability-control snapshots. Prompts 11-12 own approval,
+promotion and rollback.

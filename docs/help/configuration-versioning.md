@@ -74,5 +74,6 @@ Maker-checker approval belongs to Prompt 11.
 - `CONFIGURATION_VERSION_RECONSTRUCTION_FAILED`: historical content cannot be safely reconstructed.
 - `CONFIGURATION_VERSION_DIFF_LIMIT_EXCEEDED`: requested diff exceeded configured bounds.
 
-Configuration versioning does not provide feature flags, approvals, promotion, rollback, MT5,
-execution or live trading.
+Configuration versioning does not provide approvals, promotion, rollback, MT5, execution or live
+trading. Prompt 10 capability control can reference version provenance, but it does not activate
+historical versions.

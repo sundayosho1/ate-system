@@ -44,6 +44,7 @@ Prompt 5 establishes the state authority model for ATE.
 | Event delivery memory         | `@ate/events`        |      No | Yes                                          | Diagnostics | Persistence outbox/inbox |
 | Configuration current state   | `@ate/configuration` |     Yes | Atomic publication                           | Required    | No                       |
 | Configuration version history | `@ate/configuration` |     Yes | Append-only records; mutable current pointer | Native      | No                       |
+| Capability-control state      | `@ate/configuration` |     Yes | Atomic snapshot publication                  | Required    | No                       |
 
 Reference state is a non-trading test/reference domain used to verify persistence semantics. It is
 not a trading account, instrument registry, risk state, portfolio state or execution state.
@@ -57,6 +58,8 @@ not a trading account, instrument registry, risk state, portfolio state or execu
 - Current managed configuration is owned by the configuration control plane.
 - Configuration schema validation is owned by the configuration schema authority.
 - Immutable configuration history is owned by the configuration version-history authority.
+- Feature flags and effective capability state are owned by the configuration capability-control
+  authority.
 - Future approved/promoted configuration workflows will reference these authorities without
   replacing them.
 

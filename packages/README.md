@@ -20,7 +20,8 @@ Currently implemented:
   scopes, context, source abstraction, deterministic precedence, provenance, immutable snapshots,
   schema validation, constraints, dependency and cross-field rules, fingerprints, bounded cache,
   immutable version history, lineage, change sets, semantic diffs, historical reconstruction,
-  runtime-service integration, invalid-candidate rejection, and safe diagnostics.
+  feature-flag and capability-control registry/evaluation, runtime-service integration,
+  invalid-candidate rejection, and safe diagnostics.
 
 No package currently implements trading behavior, risk calculations, portfolio calculations, MT5
 connectivity, broker execution, market calendars, market-data storage, configuration version

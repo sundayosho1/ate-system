@@ -93,10 +93,52 @@ export const configurationVersionIntegrityFailedEvent = {
   owner: "@ate/configuration",
 } satisfies EventTypeRegistration;
 
+export const configurationCapabilitySnapshotPublishedEvent = {
+  eventType: "configuration.capability.snapshot-published.v1",
+  category: "OPERATIONAL",
+  version: 1,
+  schema: z
+    .object({
+      snapshotId: z.string(),
+      fingerprint: z.string(),
+      configurationSnapshotId: z.string(),
+      configurationVersionId: z.string().optional(),
+      runtimeMode: z.string(),
+      capabilityCount: z.number().int().nonnegative(),
+      enabledCount: z.number().int().nonnegative(),
+      blockedCount: z.number().int().nonnegative(),
+      unavailableCount: z.number().int().nonnegative(),
+    })
+    .strict(),
+  description: "A safe effective capability snapshot was published.",
+  owner: "@ate/configuration",
+} satisfies EventTypeRegistration;
+
+export const configurationCapabilityBlockedEvent = {
+  eventType: "configuration.capability.blocked.v1",
+  category: "OPERATIONAL",
+  version: 1,
+  schema: z
+    .object({
+      capabilityId: z.string(),
+      runtimeMode: z.string(),
+      reasonCodes: z.array(z.string()).min(1),
+      configurationSnapshotId: z.string(),
+      configurationVersionId: z.string().optional(),
+      safeMessage: z.string(),
+    })
+    .strict(),
+  description:
+    "A capability was blocked, unavailable, or degraded without exposing configuration values.",
+  owner: "@ate/configuration",
+} satisfies EventTypeRegistration;
+
 export const configurationEventRegistrations: readonly EventTypeRegistration[] = [
   configurationSnapshotPublishedEvent,
   configurationResolutionFailedEvent,
   configurationSourceDegradedEvent,
   configurationVersionCreatedEvent,
   configurationVersionIntegrityFailedEvent,
+  configurationCapabilitySnapshotPublishedEvent,
+  configurationCapabilityBlockedEvent,
 ];
