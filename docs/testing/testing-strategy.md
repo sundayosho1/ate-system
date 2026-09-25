@@ -65,6 +65,28 @@ Prompt 3 adds runtime lifecycle tests that verify:
 - process signal adapter boundaries;
 - runtime/domain dependency direction.
 
+## Prompt 4 tests
+
+Prompt 4 adds event architecture tests that verify:
+
+- registry construction, event naming/versioning and duplicate registration rejection;
+- canonical envelope and payload validation;
+- unknown event rejection and invalid payload rejection;
+- root and child event factory creation;
+- correlation and causation propagation plus chain reconstruction;
+- self-causation and causation-depth rejection;
+- runtime-mode preservation;
+- exact routing and multiple subscribers;
+- event immutability and subscriber failure isolation;
+- structured handler and delivery results;
+- duplicate publication, subscriber-scoped idempotency and concurrent duplicate protection;
+- bounded retry, non-retryable failure, poison-event handling, dead letters and explicit replay;
+- per-key ordering without global ordering promises;
+- backpressure, handler timeout, cancellation and graceful drain behavior;
+- runtime service integration and lifecycle bridge publication;
+- bounded in-memory diagnostics/dead letters;
+- architecture dependency boundaries and absence of external broker/MT5/frontend dependencies.
+
 ## Naming
 
 Test names should describe behavior. Avoid opaque names.

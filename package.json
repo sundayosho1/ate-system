@@ -1,8 +1,8 @@
 {
   "name": "ate-system",
-  "version": "0.3.0-runtime.1",
+  "version": "0.4.0-events.1",
   "private": true,
-  "description": "ATE Autonomous Trading Engine repository foundation, core domain contracts, and runtime lifecycle foundation.",
+  "description": "ATE Autonomous Trading Engine repository foundation, core domain contracts, runtime lifecycle foundation, and internal event architecture.",
   "license": "UNLICENSED",
   "type": "module",
   "engines": {

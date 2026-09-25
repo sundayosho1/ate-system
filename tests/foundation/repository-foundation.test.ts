@@ -90,14 +90,14 @@ describe("Prompt 1 repository foundation", () => {
     expect(manifest.truth_statement).toContain("cannot trade");
   });
 
-  it("records Prompt 1 without marking future prompts complete", () => {
+  it("records implemented prompts without marking future prompts complete", () => {
     const ledger = readText("docs/development/prompt-ledger.md");
 
     expect(ledger).toContain(
       "Master Architecture, Repository Foundation & Engineering Constitution",
     );
     expect(ledger).toContain("Completed");
-    expect(ledger).not.toMatch(/\|\s*4\s*\|.*Completed/i);
+    expect(ledger).not.toMatch(/\|\s*5\s*\|.*Completed/i);
   });
 
   it("does not claim live trading capability in the README", () => {

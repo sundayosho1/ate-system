@@ -53,6 +53,11 @@ Prompt 3 adds `packages/runtime` as the authoritative application runtime/lifecy
 manages composition, lifecycle, health/readiness, degradation and shutdown only; it does not
 implement trading services.
 
+Prompt 4 adds `packages/events` as the authoritative internal event architecture package. It
+implements typed event registration, factory creation, routing, delivery, idempotency, ordering,
+retry, dead-letter, diagnostics and runtime-service integration only; it does not implement durable
+event persistence, external brokers, market data, MT5 or trading behavior.
+
 ### `mt5/`
 
 Future MetaTrader 5 gateway and Connector EA artifacts. Prompt 1 documents the boundary only.
@@ -70,7 +75,7 @@ configuration does not belong here.
 ### `tests/`
 
 Automated tests. Prompt 1 adds foundation tests validating documentation and capability
-truthfulness.
+truthfulness. Prompt 4 adds event architecture tests under `tests/events`.
 
 ### `scripts/`
 

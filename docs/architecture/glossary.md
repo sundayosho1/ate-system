@@ -45,11 +45,19 @@ This glossary defines canonical ATE terminology. Future prompts should use these
 | Entity                      | Domain object with stable identity and lifecycle, such as Account, Instrument, Candidate, Decision, Order, Position or Trade.                                             |
 | Value Object                | Domain object defined by values rather than identity, such as Money, Price, Quantity, Percentage, Timestamp or CurrencyCode.                                              |
 | Domain Event                | Record that something occurred, carried in a versioned event envelope.                                                                                                    |
+| Event Envelope              | Canonical Prompt 2 structure carrying event ID, type, timestamp, source, actor, correlation, causation, runtime mode and payload.                                         |
+| Event Registry              | Prompt 4 registry of known event types, categories, versions, owners, descriptions and payload validators.                                                                |
+| Event Bus                   | Prompt 4 in-process communication service that validates, routes and delivers registered events to subscribers.                                                           |
+| Event Subscription          | Stable subscriber registration with event routes, subscriber identity, criticality, delivery policy and handler.                                                          |
+| Delivery Result             | Structured publication/handler outcome showing subscribers, attempts, successes, duplicates, failures, retries, dead-letter state and duration.                           |
+| Dead Letter                 | In-memory Prompt 4 record of an event/subscription delivery that failed after bounded handling and requires investigation before explicit replay.                         |
+| Ordering Key                | Optional event metadata defining a scoped sequence boundary such as an instrument, account, order, position or correlation chain.                                         |
 | Execution Intent            | Account-specific requested execution intent derived from a master decision; distinct from broker order submission.                                                        |
 | Fill                        | Execution record for all or part of an order; one order may have multiple fills.                                                                                          |
 | Reason Code                 | Stable machine-readable reason with category, authority, severity, summary and evidence references.                                                                       |
 | Correlation ID              | Identifier connecting related commands, events, logs, audit records and contract objects across a workflow.                                                               |
 | Causation ID                | Identifier pointing to the preceding cause of an event or decision in a workflow chain.                                                                                   |
+| Idempotency Key             | Stable duplicate-protection key. Prompt 4 scopes event handler idempotency by subscription ID plus key.                                                                   |
 | Schema Version              | Explicit version on durable or serialized contracts whose shape or meaning may evolve.                                                                                    |
 | Provenance                  | Source and quality context explaining where data came from, when it was observed/ingested and what quality state applied.                                                 |
 | Data Quality Status         | Canonical quality vocabulary: UNKNOWN, HEALTHY, DEGRADED, STALE, INVALID, MISSING.                                                                                        |
@@ -65,6 +73,8 @@ This glossary defines canonical ATE terminology. Future prompts should use these
 | Readiness                   | Operational condition indicating whether a service/runtime is safe/capable for its intended workload.                                                                     |
 | Runtime Snapshot            | Immutable operational view of runtime state, services, health, readiness, capabilities, failures and degradations.                                                        |
 | Degradation Report          | Structured runtime record describing a degraded/failed service, affected capabilities, affected dependants and recoverability.                                            |
+| Control/Event Plane         | Application/domain event plane for decisions, lifecycle facts, state transitions, alerts, execution outcomes, reconciliation outcomes, analytics and research facts.      |
+| Market Data Plane           | Future high-volume observation transport for ticks, quotes and bars that may use specialized pipelines rather than the general event bus.                                 |
 
 ## Identifier conventions
 

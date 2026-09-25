@@ -3,14 +3,13 @@
 ATE is planned as a configurable autonomous trading, market-intelligence, risk-management,
 portfolio-management, execution, research, and operational control platform.
 
-ATE is **not** currently a trading bot, MetaTrader Expert Advisor, or live execution system. Prompt
-1 establishes the repository and engineering constitution only.
+ATE is **not** currently a trading bot, MetaTrader Expert Advisor, or live execution system.
 
 ## Current development status
 
 - Phase: I — Foundation & Engineering Governance
-- Prompt: 1 of 84
-- Status: foundational documentation, tooling, and governance
+- Prompt: 4 of 84
+- Status: foundation, domain contracts, runtime lifecycle, and internal event architecture
 - Trading capability: **not implemented**
 - MT5 connectivity: **not implemented**
 - Live execution: **not implemented**
@@ -34,13 +33,15 @@ ATE must always be able to return `NO_ACTION` when conditions do not justify cap
 
 ## Currently implemented functionality
 
-Prompt 1 implements only:
+Prompts 1-4 implement only:
 
 - repository foundation and documentation hierarchy;
 - engineering constitution and safety invariants;
 - core domain language contracts and runtime validation;
 - application runtime lifecycle, service composition, health/readiness, graceful degradation, and
   shutdown foundations;
+- internal event registry, event factory, in-process event bus, routing, correlation/causation,
+  idempotency, retry, dead-letter, diagnostics, and runtime event-service integration;
 - architecture decision records;
 - development, testing, security, configuration, help, and contribution standards;
 - capability manifest and prompt ledger;
@@ -109,6 +110,7 @@ Start with:
 - [System Architecture](docs/architecture/system-architecture.md)
 - [Core Domain Contracts](docs/architecture/core-domain-contracts.md)
 - [Application Runtime](docs/architecture/application-runtime.md)
+- [Event Architecture](docs/architecture/event-architecture.md)
 - [Safety Invariants](docs/architecture/safety-invariants.md)
 - [Authority Hierarchy](docs/architecture/authority-hierarchy.md)
 - [Environment & Runtime Modes](docs/architecture/environment-runtime-modes.md)
@@ -117,6 +119,7 @@ Start with:
 - [Testing Strategy](docs/testing/testing-strategy.md)
 - [Security Baseline](docs/security/security-baseline.md)
 - [Help & Configuration Usability Standard](docs/help/help-and-configuration-usability-standard.md)
+- [Event Architecture Help](docs/help/event-architecture.md)
 
 ## Security warning
 
