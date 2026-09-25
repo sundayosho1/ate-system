@@ -12,7 +12,6 @@ import {
   exposureDimensions,
   instrumentStatuses,
   mappingStatuses,
-  marketBiases,
   marketTradingStatuses,
   masterDecisionStates,
   operationalStatuses,
@@ -41,7 +40,6 @@ import {
   priceSchema,
   quantitySchema,
   ratioSchema,
-  rateSchema,
   schemas,
 } from "./primitives.js";
 import { parseWithSchema, type DomainResult } from "./result.js";

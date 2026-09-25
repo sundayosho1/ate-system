@@ -1,4 +1,4 @@
-import DecimalJs from "decimal.js";
+import { Decimal } from "decimal.js";
 import { z } from "zod";
 
 import { domainIssue, fail, ok, parseWithSchema, type DomainResult } from "./result.js";
@@ -54,6 +54,14 @@ const uuidSchema = z.string().uuid();
 const makeIdentifierSchema = <TBrand extends string>(_brand: TBrand) =>
   uuidSchema.transform((value) => value as Brand<string, TBrand>);
 
+const isFiniteDecimal = (value: string): boolean => {
+  try {
+    return new Decimal(value).isFinite();
+  } catch {
+    return false;
+  }
+};
+
 export const schemas = {
   schemaVersion: z
     .number()
@@ -71,7 +79,7 @@ export const schemas = {
   decimal: z
     .string()
     .regex(/^-?(0|[1-9]\d*)(\.\d+)?$/u, "decimal must be a plain base-10 string")
-    .refine((value) => new DecimalJs(value).isFinite(), "decimal must be finite")
+    .refine(isFiniteDecimal, "decimal must be finite")
     .transform((value) => value as DecimalString),
   idempotencyKey: z
     .string()
@@ -164,9 +172,9 @@ export const moneySchema = z
 export const parseMoney = (value: unknown): DomainResult<Money> =>
   parseWithSchema(moneySchema, value);
 
-const toDecimal = (value: DecimalString): DecimalJs => new DecimalJs(value);
+const toDecimal = (value: DecimalString): Decimal => new Decimal(value);
 
-const canonicalDecimal = (value: DecimalJs): DecimalString => value.toFixed() as DecimalString;
+const canonicalDecimal = (value: Decimal): DecimalString => value.toFixed() as DecimalString;
 
 export const addMoney = (left: Money, right: Money): DomainResult<Money> => {
   if (left.currency !== right.currency) {
@@ -187,14 +195,14 @@ export const addMoney = (left: Money, right: Money): DomainResult<Money> => {
 export const roundingModes = ["HALF_UP", "DOWN", "UP"] as const;
 export type RoundingMode = (typeof roundingModes)[number];
 
-const decimalJsRoundingMode = (mode: RoundingMode): DecimalJs.Rounding => {
+const decimalJsRoundingMode = (mode: RoundingMode): Decimal.Rounding => {
   switch (mode) {
     case "HALF_UP":
-      return DecimalJs.ROUND_HALF_UP;
+      return Decimal.ROUND_HALF_UP;
     case "DOWN":
-      return DecimalJs.ROUND_DOWN;
+      return Decimal.ROUND_DOWN;
     case "UP":
-      return DecimalJs.ROUND_UP;
+      return Decimal.ROUND_UP;
   }
 };
 
@@ -248,7 +256,7 @@ export type Quantity = Readonly<{
 export const quantitySchema = z
   .object({
     value: schemas.decimal.refine(
-      (value) => new DecimalJs(value).gte(0),
+      (value) => new Decimal(value).gte(0),
       "quantity cannot be negative",
     ),
     unit: z.enum(quantityUnits),
@@ -262,8 +270,8 @@ export type Percentage = Readonly<{
 export const percentageSchema = z
   .object({
     ratio: schemas.decimal
-      .refine((value) => new DecimalJs(value).gte(0), "percentage ratio cannot be negative")
-      .refine((value) => new DecimalJs(value).lte(1), "percentage ratio cannot exceed 1"),
+      .refine((value) => new Decimal(value).gte(0), "percentage ratio cannot be negative")
+      .refine((value) => new Decimal(value).lte(1), "percentage ratio cannot exceed 1"),
   })
   .strict();
 
@@ -273,10 +281,7 @@ export type Ratio = Readonly<{
 
 export const ratioSchema = z
   .object({
-    value: schemas.decimal.refine(
-      (value) => new DecimalJs(value).gte(0),
-      "ratio cannot be negative",
-    ),
+    value: schemas.decimal.refine((value) => new Decimal(value).gte(0), "ratio cannot be negative"),
   })
   .strict();
 

@@ -38,7 +38,11 @@ export const domainIssue = (
 });
 
 const fromZodIssue = (issue: ZodIssue): DomainIssue =>
-  domainIssue(issue.code, issue.message, issue.path);
+  domainIssue(
+    issue.code,
+    issue.message,
+    issue.path.filter((segment): segment is string | number => typeof segment !== "symbol"),
+  );
 
 export const parseWithSchema = <T>(schema: ZodType<T>, input: unknown): DomainResult<T> => {
   const result = schema.safeParse(input);

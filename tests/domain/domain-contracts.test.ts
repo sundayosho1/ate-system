@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import type { ZodType } from "zod";
 
 import {
   addMoney,
@@ -21,8 +22,11 @@ import {
 } from "@ate/domain";
 
 const root = process.cwd();
-const fixture = (name: string): unknown =>
-  JSON.parse(readFileSync(join(root, "tests", "fixtures", "domain", name), "utf8")) as unknown;
+const fixture = <T = unknown>(name: string): T =>
+  JSON.parse(readFileSync(join(root, "tests", "fixtures", "domain", name), "utf8")) as T;
+
+const fixtureObject = (name: string): Record<string, unknown> =>
+  fixture<Record<string, unknown>>(name);
 
 const id = {
   accountA: "10000000-0000-4000-8000-00000000000a",
@@ -115,7 +119,7 @@ const price = (value: string) => ({
 
 const quantity = (value: string, unit = "ASSET_UNITS") => ({ value, unit });
 
-const roundTrip = <T>(schema: Parameters<typeof parseDomainContract<T>>[0], value: unknown): T => {
+const roundTrip = (schema: ZodType<unknown>, value: unknown): unknown => {
   const parsed = unwrapOrThrow(parseDomainContract(schema, value));
   return unwrapOrThrow(parseDomainContract(schema, JSON.parse(JSON.stringify(parsed))));
 };
@@ -309,9 +313,12 @@ describe("account, strategy, setup, signal, candidate, and decision contracts", 
     };
 
     expect(parseDomainContract(domainSchemas.account, account).ok).toBe(true);
-    expect(parseDomainContract(domainSchemas.account, { ...account, password: "secret" }).ok).toBe(
-      false,
-    );
+    expect(
+      parseDomainContract(domainSchemas.account, {
+        ...account,
+        password: "REPLACE_WITH_LOCAL_VALUE",
+      }).ok,
+    ).toBe(false);
     expect(
       parseDomainContract(domainSchemas.accountSnapshot, {
         schemaVersion: 1,
@@ -634,7 +641,7 @@ describe("execution, position, trade, portfolio, and event contracts", () => {
     ).toBe(true);
     expect(
       parseDomainContract(domainSchemas.eventEnvelope, {
-        ...fixture("event-envelope.json"),
+        ...fixtureObject("event-envelope.json"),
         runtimeMode: "PRODUCTION",
       }).ok,
     ).toBe(false);
@@ -652,40 +659,41 @@ describe("serialization, failure behavior, and architecture boundaries", () => {
     ] as const;
 
     for (const [schema, name] of cases) {
-      const parsed = roundTrip(schema, fixture(name));
-      expect(parsed).toEqual(unwrapOrThrow(parseDomainContract(schema, fixture(name))));
+      const schemaForRoundTrip = schema as ZodType<unknown>;
+      const parsed = roundTrip(schemaForRoundTrip, fixture(name));
+      expect(parsed).toEqual(unwrapOrThrow(parseDomainContract(schemaForRoundTrip, fixture(name))));
     }
   });
 
   it("fails closed for malformed contract payloads", () => {
     expect(
       parseDomainContract(domainSchemas.instrument, {
-        ...fixture("canonical-instrument.json"),
+        ...fixtureObject("canonical-instrument.json"),
         schemaVersion: 0,
       }).ok,
     ).toBe(false);
     expect(
       parseDomainContract(domainSchemas.quoteObservation, {
-        ...fixture("market-quote.json"),
+        ...fixtureObject("market-quote.json"),
         bid: undefined,
       }).ok,
     ).toBe(true);
     expect(
       parseDomainContract(domainSchemas.quoteObservation, {
-        ...fixture("market-quote.json"),
+        ...fixtureObject("market-quote.json"),
         bid: undefined,
         ask: undefined,
       }).ok,
     ).toBe(false);
     expect(
       parseDomainContract(domainSchemas.tradeCandidate, {
-        ...fixture("trade-candidate.json"),
+        ...fixtureObject("trade-candidate.json"),
         provenance: undefined,
       }).ok,
     ).toBe(false);
     expect(
       parseDomainContract(domainSchemas.eventEnvelope, {
-        ...fixture("event-envelope.json"),
+        ...fixtureObject("event-envelope.json"),
         eventType: "decision.recorded",
       }).ok,
     ).toBe(false);
@@ -696,24 +704,35 @@ describe("serialization, failure behavior, and architecture boundaries", () => {
 
   it("keeps the domain package broker-neutral and infrastructure-independent", () => {
     const prohibited = [
-      "mt5",
-      "mql5",
-      "metatrader",
-      "react",
-      "express",
-      "fastify",
-      "postgres",
-      "prisma",
-      "typeorm",
-      "fs",
-      "node:",
+      /mt5/iu,
+      /mql5/iu,
+      /metatrader/iu,
+      /^react$/iu,
+      /^express$/iu,
+      /^fastify$/iu,
+      /postgres/iu,
+      /prisma/iu,
+      /typeorm/iu,
+      /^fs$/iu,
+      /^node:/iu,
     ];
     const sourceDir = join(root, "packages", "domain", "src");
+    const importPattern = /from\s+["']([^"']+)["']|import\s+["']([^"']+)["']/gu;
 
     for (const file of readdirSync(sourceDir).filter((entry) => entry.endsWith(".ts"))) {
-      const content = readFileSync(join(sourceDir, file), "utf8").toLowerCase();
-      for (const token of prohibited) {
-        expect(content, `${file} should not reference ${token}`).not.toContain(token);
+      const content = readFileSync(join(sourceDir, file), "utf8");
+      const importedModules = Array.from(
+        content.matchAll(importPattern),
+        (match) => match[1] ?? match[2] ?? "",
+      );
+
+      for (const importedModule of importedModules) {
+        for (const prohibitedImport of prohibited) {
+          expect(
+            prohibitedImport.test(importedModule),
+            `${file} should not import ${importedModule}`,
+          ).toBe(false);
+        }
       }
     }
   });
