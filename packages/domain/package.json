@@ -1,0 +1,16 @@
+{
+  "name": "@ate/domain",
+  "version": "0.2.0-domain.1",
+  "private": true,
+  "description": "ATE core domain language contracts, primitives, validation, and serialization.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "decimal.js": "^10.6.0",
+    "zod": "^4.1.13"
+  }
+}

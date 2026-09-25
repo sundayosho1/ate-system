@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ATE Capability Manifest",
+  "type": "object",
+  "required": [
+    "project",
+    "manifest_version",
+    "updated_at",
+    "development_phase",
+    "completed_prompt",
+    "pre_production_version",
+    "capabilities",
+    "truth_statement"
+  ],
+  "properties": {
+    "project": {
+      "type": "string"
+    },
+    "manifest_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "updated_at": {
+      "type": "string"
+    },
+    "development_phase": {
+      "type": "string"
+    },
+    "completed_prompt": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 84
+    },
+    "pre_production_version": {
+      "type": "string"
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "boolean"
+      }
+    },
+    "truth_statement": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

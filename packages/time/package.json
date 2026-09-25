@@ -1,0 +1,16 @@
+{
+  "name": "@ate/time",
+  "version": "0.6.0-time.1",
+  "private": true,
+  "description": "ATE authoritative clock, temporal integrity, timezone, freshness, deterministic scheduler, simulation and replay foundation.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@ate/domain": "0.2.0-domain.1",
+    "@ate/runtime": "0.3.0-runtime.1"
+  }
+}

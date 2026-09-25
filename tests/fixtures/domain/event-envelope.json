@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "eventId": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+  "eventType": "decision.recorded.v1",
+  "eventTimestamp": "2026-09-25T00:02:00.000Z",
+  "source": {
+    "sourceId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    "sourceType": "SYSTEM",
+    "name": "Prompt 2 Fixture"
+  },
+  "actor": {
+    "actorType": "SYSTEM",
+    "displayName": "ATE System"
+  },
+  "correlationId": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+  "causationId": "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+  "runtimeMode": "SIMULATION",
+  "payload": {
+    "decisionId": "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+    "outcome": "NO_ACTION"
+  }
+}
