@@ -352,6 +352,91 @@ An effective configuration with blocking validation issues must not be inserted 
 
 Schema validation does not imply configuration approval, promotion, rollback or history.
 
+## Prompt 9 configuration version-history invariants
+
+These invariants specialize immutable managed configuration history.
+
+## CFG-041 — Every Authoritative Change Is Versioned
+
+Authoritative managed configuration changes cannot bypass immutable version history.
+
+## CFG-042 — Configuration Versions Are Immutable
+
+Historical semantic version records are never edited in place.
+
+## CFG-043 — History Is Append-Only
+
+Configuration history grows through new records rather than rewriting old records.
+
+## CFG-044 — Version Attribution Is Required
+
+Every authoritative configuration version has attributable origin.
+
+## CFG-045 — Parentage Is Explicit
+
+Every non-root version identifies its historical predecessor.
+
+## CFG-046 — Version Lineage Is Acyclic
+
+Configuration version history cannot contain cycles.
+
+## CFG-047 — Version Content Is Reconstructable
+
+Historical configuration can be deterministically reconstructed.
+
+## CFG-048 — Historical Fingerprints Are Verifiable
+
+Reconstructed historical configuration must match its recorded semantic fingerprint.
+
+## CFG-049 — Current State and History Must Agree
+
+Current configuration cannot claim a version inconsistent with its semantic content.
+
+## CFG-050 — Stale Writers Cannot Silently Win
+
+Version creation uses explicit concurrency authority.
+
+## CFG-051 — Version Order Is Not Timestamp Authority
+
+Historical succession is determined by version lineage/concurrency semantics, not wall-clock
+ordering.
+
+## CFG-052 — Reversal Never Rewrites History
+
+Returning to earlier semantic configuration creates a new historical fact.
+
+## CFG-053 — Reconstruction Is Not Rollback
+
+Historical reconstruction cannot itself activate configuration.
+
+## CFG-054 — Attribution Is Not Approval
+
+Creator identity never implies maker-checker approval.
+
+## CFG-055 — Historical Schema Identity Is Preserved
+
+Versions retain the schema fingerprint under which they were validated.
+
+## CFG-056 — Sensitive History Is Redacted
+
+Version history never exposes secret material.
+
+## CFG-057 — History Queries Are Bounded
+
+Version history cannot be consumed through unbounded reads.
+
+## CFG-058 — Version Creation Is Atomic
+
+A durable configuration transition cannot leave current state and version history inconsistent.
+
+## CFG-059 — Invalid Configuration Cannot Become a Versioned Authority
+
+Prompt 8 blocking validation prevents authoritative version creation/publication.
+
+## CFG-060 — History Recovery Cannot Rewrite History
+
+Restart/recovery may rebuild derived state but never mutate historical facts.
+
 ## Prompt 1 test coverage
 
 Prompt 1 includes foundation tests that verify:

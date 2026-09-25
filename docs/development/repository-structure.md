@@ -80,6 +80,11 @@ fingerprints, type/range/enum/object/list validation, dependency and conditional
 rules, validation reports and runtime invalid-candidate rejection; it does not implement Prompt 9
 version lifecycle, feature flags, approvals, promotion/rollback or frontend editing.
 
+Prompt 9 extends `packages/configuration` with immutable configuration version history, runtime-mode
+version streams, current-version pointer, parent lineage, historical derivation, change sets,
+semantic diffs, attribution, reconstruction, integrity verification and bounded history queries; it
+does not implement feature flags, maker-checker approval, promotion/rollback or frontend editing.
+
 ### `mt5/`
 
 Future MetaTrader 5 gateway and Connector EA artifacts. Prompt 1 documents the boundary only.
@@ -99,8 +104,8 @@ configuration does not belong here.
 Automated tests. Prompt 1 adds foundation tests validating documentation and capability
 truthfulness. Prompt 4 adds event architecture tests under `tests/events`. Prompt 5 adds
 persistence/state authority tests under `tests/persistence`. Prompt 6 adds temporal integrity tests
-under `tests/time`. Prompts 7-8 add hierarchical configuration and schema validation tests under
-`tests/configuration`.
+under `tests/time`. Prompts 7-9 add hierarchical configuration, schema validation and versioning
+tests under `tests/configuration`.
 
 ### `scripts/`
 

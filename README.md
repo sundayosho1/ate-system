@@ -8,10 +8,10 @@ ATE is **not** currently a trading bot, MetaTrader Expert Advisor, or live execu
 ## Current development status
 
 - Phase: II — Configuration & Control Plane
-- Prompt: 8 of 84
+- Prompt: 9 of 84
 - Status: foundation, domain contracts, runtime lifecycle, internal event architecture,
   persistence/state authority, temporal integrity, hierarchical configuration, and configuration
-  schema validation foundation
+  schema validation and immutable configuration version-history foundation
 - Trading capability: **not implemented**
 - MT5 connectivity: **not implemented**
 - Live execution: **not implemented**
@@ -35,7 +35,7 @@ ATE must always be able to return `NO_ACTION` when conditions do not justify cap
 
 ## Currently implemented functionality
 
-Prompts 1-8 implement only:
+Prompts 1-9 implement only:
 
 - repository foundation and documentation hierarchy;
 - engineering constitution and safety invariants;
@@ -56,6 +56,9 @@ Prompts 1-8 implement only:
 - configuration schema validation with schema registry, deterministic schema fingerprints, type and
   constraint validation, dependency/conditional/cross-field rules, validation reports, runtime
   publication gates, and invalid-candidate rejection;
+- immutable configuration version-history foundation with version IDs, runtime-mode streams, parent
+  lineage, current-version pointer, change sets, semantic diffs, actor attribution, reason capture,
+  reconstruction, integrity checks, expected-parent concurrency, idempotency and safe diagnostics;
 - architecture decision records;
 - development, testing, security, configuration, help, and contribution standards;
 - capability manifest and prompt ledger;
@@ -130,6 +133,7 @@ Start with:
 - [Time & Clock Authority](docs/architecture/time-and-clock.md)
 - [Hierarchical Configuration](docs/architecture/hierarchical-configuration.md)
 - [Configuration Schema and Validation](docs/architecture/configuration-schema-validation.md)
+- [Configuration Versioning](docs/architecture/configuration-versioning.md)
 - [Safety Invariants](docs/architecture/safety-invariants.md)
 - [Authority Hierarchy](docs/architecture/authority-hierarchy.md)
 - [Environment & Runtime Modes](docs/architecture/environment-runtime-modes.md)
@@ -143,6 +147,7 @@ Start with:
 - [Time & Clock Help](docs/help/time-and-clock.md)
 - [Hierarchical Configuration Help](docs/help/hierarchical-configuration.md)
 - [Configuration Schema and Validation Help](docs/help/configuration-schema-and-validation.md)
+- [Configuration Versioning Help](docs/help/configuration-versioning.md)
 
 ## Security warning
 

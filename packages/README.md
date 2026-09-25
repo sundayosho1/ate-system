@@ -19,8 +19,10 @@ Currently implemented:
 - `@ate/configuration` — hierarchical configuration control-plane foundation with canonical domains,
   scopes, context, source abstraction, deterministic precedence, provenance, immutable snapshots,
   schema validation, constraints, dependency and cross-field rules, fingerprints, bounded cache,
+  immutable version history, lineage, change sets, semantic diffs, historical reconstruction,
   runtime-service integration, invalid-candidate rejection, and safe diagnostics.
 
 No package currently implements trading behavior, risk calculations, portfolio calculations, MT5
 connectivity, broker execution, market calendars, market-data storage, configuration version
-lifecycle, approval workflow, promotion/rollback, external message brokers, APIs, or frontend UI.
+lifecycle beyond immutable Prompt 9 history, approval workflow, promotion/rollback, external message
+brokers, APIs, or frontend UI.

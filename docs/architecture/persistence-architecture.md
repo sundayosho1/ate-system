@@ -21,8 +21,10 @@ outbox claims, inbox leases and dead-letter replay metadata should derive timest
 clock, not from ambient wall-clock calls.
 
 Prompt 7 declares `configuration.controlplane` as the configuration control-plane state authority
-for current managed configuration snapshots. Full immutable configuration version history, diffs and
-lifecycle states remain Prompt 9 scope.
+for current managed configuration snapshots. Prompt 9 declares `configuration.versionhistory` as the
+append-only immutable configuration history authority, including current-version pointer, lineage,
+change sets, diffs and reconstruction metadata. Approval, promotion and operational rollback remain
+future prompt scope.
 
 ## State authority rule
 

@@ -110,6 +110,14 @@ This glossary defines canonical ATE terminology. Future prompts should use these
 | Publication Gate              | Runtime validation boundary that blocks a candidate configuration snapshot from becoming active when blocking issues are present.                                         |
 | Configuration Constraint      | Declared type, enum, range, unit, object, list or secret-reference rule that a configuration value must satisfy.                                                          |
 | Configuration Dependency Rule | Declarative relationship requiring or restricting one setting based on another setting.                                                                                   |
+| Configuration Version         | Prompt 9 immutable historical record for one configuration state/change in a version stream.                                                                              |
+| Configuration Version ID      | Stable identity of one immutable configuration version record; not interchangeable with a content fingerprint.                                                            |
+| Version Stream                | Runtime-mode scoped sequence of configuration versions, such as `configuration.simulation.default`.                                                                       |
+| Current Version Pointer       | Mutable pointer identifying the latest version in a stream; separate from immutable version records.                                                                      |
+| Change Set                    | Structured operations that produced a configuration version, such as added, modified or removed entries.                                                                  |
+| Configuration Diff            | Directional machine-readable comparison from one configuration version to another.                                                                                        |
+| Version Lineage               | Parent/root/ancestor relationships connecting immutable configuration versions.                                                                                           |
+| Historical Reconstruction     | Read-only rebuilding of the canonical configuration represented by a historical version.                                                                                  |
 
 ## Identifier conventions
 

@@ -153,6 +153,22 @@ Prompt 8 adds configuration schema and validation tests that verify:
 - schema diagnostics through the runtime service;
 - continued event, persistence and runtime integration without implementing trading features.
 
+## Prompt 9 tests
+
+Prompt 9 adds configuration versioning tests that verify:
+
+- immutable root and child version creation;
+- schema, snapshot and configuration fingerprint association;
+- actor attribution and bounded reason handling;
+- current-version pointer and lineage traversal;
+- deterministic directional semantic diffs;
+- expected-parent concurrency conflicts;
+- no-op rejection and idempotent duplicate handling;
+- Prompt 8 validation blocking invalid authoritative versions;
+- historical reconstruction and candidate-from-history derivation without rollback activation;
+- secret-reference redaction in version payloads and change sets;
+- version-history state authority and safe event registrations.
+
 ## Naming
 
 Test names should describe behavior. Avoid opaque names.

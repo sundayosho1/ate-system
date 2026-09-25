@@ -3,7 +3,9 @@ import type { StateAuthorityRegistry } from "@ate/persistence";
 import { stateDomain, stateOwner } from "@ate/persistence";
 
 export const configurationStateDomain = stateDomain("configuration.controlplane");
+export const configurationVersionHistoryStateDomain = stateDomain("configuration.versionhistory");
 export const configurationStateOwner = stateOwner("configuration");
+export const configurationVersionHistoryStateOwner = stateOwner("configuration.versioning");
 
 export const registerConfigurationStateAuthority = (
   authority: StateAuthorityRegistry,
@@ -20,5 +22,23 @@ export const registerConfigurationStateAuthority = (
     reconciliationRequired: false,
     runtimeModes,
     description:
-      "Configuration control-plane authority for current managed configuration snapshots. Full version lifecycle is Prompt 9 scope.",
+      "Configuration control-plane authority for current managed configuration snapshots. Immutable version history is owned separately by configuration.versionhistory.",
+  });
+
+export const registerConfigurationVersionHistoryStateAuthority = (
+  authority: StateAuthorityRegistry,
+  runtimeModes: readonly RuntimeMode[],
+): ReturnType<StateAuthorityRegistry["register"]> =>
+  authority.register({
+    stateDomain: configurationVersionHistoryStateDomain,
+    owner: configurationVersionHistoryStateOwner,
+    authorityType: "INTERNAL_AUTHORITATIVE",
+    writeAuthority: "@ate/configuration",
+    readers: ["@ate/runtime", "@ate/events", "future-control-center"],
+    durable: true,
+    historyRequired: true,
+    reconciliationRequired: false,
+    runtimeModes,
+    description:
+      "Append-only immutable configuration version-history authority, including current-version pointer, lineage, change sets, diffs and reconstruction metadata.",
   });

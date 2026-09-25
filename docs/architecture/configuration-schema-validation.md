@@ -77,5 +77,5 @@ instead of being cached or silently returned.
 
 Schema fingerprints are deterministic semantic identities derived from schema keys, types,
 constraints, dependencies, conditionals, cross-field rules, scopes, defaults and sensitivity. They
-are separate from snapshot fingerprints and prepare for Prompt 9 lifecycle work without implementing
-version history.
+are separate from snapshot fingerprints and are preserved by Prompt 9 configuration versions as
+historical validation evidence.

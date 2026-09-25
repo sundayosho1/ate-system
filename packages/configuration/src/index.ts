@@ -24,3 +24,7 @@ export * from "./types.js";
 export * from "./validation-report.js";
 export * from "./validation.js";
 export * from "./validators.js";
+export * from "./version-core.js";
+export * from "./version-repository.js";
+export * from "./version-service.js";
+export * from "./version-types.js";

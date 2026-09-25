@@ -32,16 +32,18 @@ Prompt 5 establishes the state authority model for ATE.
 
 ## Implemented state authority matrix
 
-| State                 | Authority          | Durable | Mutable              | History     | Reconciliation           |
-| --------------------- | ------------------ | ------: | -------------------- | ----------- | ------------------------ |
-| Reference state       | `@ate/persistence` |     Yes | Expected-version     | Append-only | No                       |
-| State history         | `@ate/persistence` |     Yes | No ordinary mutation | Native      | No                       |
-| Audit records         | `@ate/persistence` |     Yes | No ordinary mutation | Native      | No                       |
-| Transactional outbox  | `@ate/persistence` |     Yes | Lifecycle only       | State field | Event bus                |
-| Inbox processing      | `@ate/persistence` |     Yes | Lifecycle only       | State field | Subscriber               |
-| Durable dead letters  | `@ate/persistence` |     Yes | Replay metadata only | Native      | Operator                 |
-| Runtime lifecycle     | `@ate/runtime`     | Limited | Yes                  | Operational | No                       |
-| Event delivery memory | `@ate/events`      |      No | Yes                  | Diagnostics | Persistence outbox/inbox |
+| State                         | Authority            | Durable | Mutable                                      | History     | Reconciliation           |
+| ----------------------------- | -------------------- | ------: | -------------------------------------------- | ----------- | ------------------------ |
+| Reference state               | `@ate/persistence`   |     Yes | Expected-version                             | Append-only | No                       |
+| State history                 | `@ate/persistence`   |     Yes | No ordinary mutation                         | Native      | No                       |
+| Audit records                 | `@ate/persistence`   |     Yes | No ordinary mutation                         | Native      | No                       |
+| Transactional outbox          | `@ate/persistence`   |     Yes | Lifecycle only                               | State field | Event bus                |
+| Inbox processing              | `@ate/persistence`   |     Yes | Lifecycle only                               | State field | Subscriber               |
+| Durable dead letters          | `@ate/persistence`   |     Yes | Replay metadata only                         | Native      | Operator                 |
+| Runtime lifecycle             | `@ate/runtime`       | Limited | Yes                                          | Operational | No                       |
+| Event delivery memory         | `@ate/events`        |      No | Yes                                          | Diagnostics | Persistence outbox/inbox |
+| Configuration current state   | `@ate/configuration` |     Yes | Atomic publication                           | Required    | No                       |
+| Configuration version history | `@ate/configuration` |     Yes | Append-only records; mutable current pointer | Native      | No                       |
 
 Reference state is a non-trading test/reference domain used to verify persistence semantics. It is
 not a trading account, instrument registry, risk state, portfolio state or execution state.
@@ -52,7 +54,11 @@ not a trading account, instrument registry, risk state, portfolio state or execu
 - Broker orders and positions ultimately require MT5/broker reconciliation.
 - Internal risk state will be owned by the future Risk Engine.
 - Portfolio state will be owned by the future Portfolio Engine.
-- Approved configuration will be owned by the future Configuration Engine.
+- Current managed configuration is owned by the configuration control plane.
+- Configuration schema validation is owned by the configuration schema authority.
+- Immutable configuration history is owned by the configuration version-history authority.
+- Future approved/promoted configuration workflows will reference these authorities without
+  replacing them.
 
 These domains are not implemented in Prompt 5.
 

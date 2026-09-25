@@ -51,8 +51,52 @@ export const configurationSourceDegradedEvent = {
   owner: "@ate/configuration",
 } satisfies EventTypeRegistration;
 
+export const configurationVersionCreatedEvent = {
+  eventType: "configuration.version.created.v1",
+  category: "AUDIT",
+  version: 1,
+  schema: z
+    .object({
+      versionId: z.string(),
+      parentVersionId: z.string().optional(),
+      derivedFromVersionId: z.string().optional(),
+      streamId: z.string(),
+      sequence: z.number().int().positive(),
+      configurationFingerprint: z.string(),
+      schemaFingerprint: z.string(),
+      changeCount: z.number().int().nonnegative(),
+      runtimeMode: z.string(),
+      actorType: z.string(),
+      correlationId: z.string().optional(),
+      causationId: z.string().optional(),
+    })
+    .strict(),
+  description:
+    "An immutable configuration version was created without exposing configuration values.",
+  owner: "@ate/configuration",
+} satisfies EventTypeRegistration;
+
+export const configurationVersionIntegrityFailedEvent = {
+  eventType: "configuration.version.integrity_failed.v1",
+  category: "OPERATIONAL",
+  version: 1,
+  schema: z
+    .object({
+      versionId: z.string(),
+      streamId: z.string(),
+      runtimeMode: z.string(),
+      issueCount: z.number().int().positive(),
+      safeMessage: z.string(),
+    })
+    .strict(),
+  description: "Configuration version-history integrity verification failed.",
+  owner: "@ate/configuration",
+} satisfies EventTypeRegistration;
+
 export const configurationEventRegistrations: readonly EventTypeRegistration[] = [
   configurationSnapshotPublishedEvent,
   configurationResolutionFailedEvent,
   configurationSourceDegradedEvent,
+  configurationVersionCreatedEvent,
+  configurationVersionIntegrityFailedEvent,
 ];

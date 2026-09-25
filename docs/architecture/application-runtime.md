@@ -209,8 +209,9 @@ Prompt 3 does not install or configure Windows services.
 ## Configuration boundary
 
 Prompt 3 consumes explicit typed construction options only. Prompt 7 establishes hierarchical
-configuration resolution. Prompt 8 adds schema validation and runtime publication gates. Prompts
-9-12 remain responsible for versioning, approval, promotion and rollback.
+configuration resolution. Prompt 8 adds schema validation and runtime publication gates. Prompt 9
+adds immutable configuration version history. Prompts 10-12 remain responsible for feature flags,
+approval, promotion and rollback.
 
 Prompts 7-8 provide the configuration runtime service foundation. Future services should depend on
 that managed service for configuration rather than reading environment variables or local files

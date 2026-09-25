@@ -11,9 +11,10 @@ configuration. It answers:
 - whether resolution is deterministic and safe to consume.
 
 Prompt 8 extends this authority with schema validation, constraints, dependency rules, cross-field
-rules and invalid-candidate rejection. The configuration package still does not implement Prompt 9's
-version lifecycle, feature flags, maker-checker approval, promotion/rollback, frontend configuration
-editing, trading strategies, risk, portfolio, MT5, execution or live trading.
+rules and invalid-candidate rejection. Prompt 9 adds immutable configuration version history,
+lineage, change sets, diffs and reconstruction. The configuration package still does not implement
+feature flags, maker-checker approval, promotion/rollback, frontend configuration editing, trading
+strategies, risk, portfolio, MT5, execution or live trading.
 
 ## Core rule
 
@@ -104,9 +105,10 @@ safe validation reports and prevent activation.
 
 ## Persistence and events
 
-Prompt 7 declares configuration control-plane state authority for current managed snapshots. Full
-configuration version history is Prompt 9 scope. Event integration exposes safe operational event
-registrations without dumping full configuration or secrets into events.
+Prompt 7 declares configuration control-plane state authority for current managed snapshots. Prompt
+9 declares configuration version-history state authority for immutable historical records and the
+current-version pointer. Event integration exposes safe operational/audit event registrations
+without dumping full configuration or secrets into events.
 
 ## Security
 
