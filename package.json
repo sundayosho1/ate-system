@@ -1,8 +1,8 @@
 {
   "name": "ate-system",
-  "version": "0.4.0-events.1",
+  "version": "0.5.0-persistence.1",
   "private": true,
-  "description": "ATE Autonomous Trading Engine repository foundation, core domain contracts, runtime lifecycle foundation, and internal event architecture.",
+  "description": "ATE Autonomous Trading Engine repository foundation, core domain contracts, runtime lifecycle, internal event architecture, and persistence/state authority foundation.",
   "license": "UNLICENSED",
   "type": "module",
   "engines": {

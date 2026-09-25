@@ -58,6 +58,12 @@ implements typed event registration, factory creation, routing, delivery, idempo
 retry, dead-letter, diagnostics and runtime-service integration only; it does not implement durable
 event persistence, external brokers, market data, MT5 or trading behavior.
 
+Prompt 5 adds `packages/persistence` as the authoritative persistence/state authority foundation. It
+implements transactions, state ownership, expected-version writes, append-only history/audit,
+transactional outbox, durable inbox, durable dead letters, migrations, diagnostics and runtime
+integration only; it does not implement market-data storage, instrument registry, trading accounts,
+risk/portfolio/execution engines, MT5 or live trading.
+
 ### `mt5/`
 
 Future MetaTrader 5 gateway and Connector EA artifacts. Prompt 1 documents the boundary only.
@@ -75,7 +81,8 @@ configuration does not belong here.
 ### `tests/`
 
 Automated tests. Prompt 1 adds foundation tests validating documentation and capability
-truthfulness. Prompt 4 adds event architecture tests under `tests/events`.
+truthfulness. Prompt 4 adds event architecture tests under `tests/events`. Prompt 5 adds
+persistence/state authority tests under `tests/persistence`.
 
 ### `scripts/`
 

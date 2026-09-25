@@ -1,0 +1,17 @@
+{
+  "name": "@ate/persistence",
+  "version": "0.5.0-persistence.1",
+  "private": true,
+  "description": "ATE persistence and state authority foundation with transactions, migrations, history, audit, outbox, inbox, dead-letter storage, and runtime integration.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@ate/domain": "0.2.0-domain.1",
+    "@ate/events": "0.4.0-events.1",
+    "@ate/runtime": "0.3.0-runtime.1"
+  }
+}

@@ -10,6 +10,9 @@ Currently implemented:
   degradation, recovery, shutdown, and snapshot foundation.
 - `@ate/events` — internal event registry, event factory, in-process event bus, routing,
   idempotency, ordering, retry, dead-letter, diagnostics, and runtime-service integration.
+- `@ate/persistence` — persistence/state authority foundation with transactions, optimistic
+  concurrency, immutable history, audit records, transactional outbox, durable inbox, durable dead
+  letters, migration discipline, diagnostics, and runtime-service integration.
 
 No package currently implements trading behavior, risk calculations, portfolio calculations, MT5
-connectivity, broker execution, durable persistence, external message brokers, APIs, or frontend UI.
+connectivity, broker execution, market-data storage, external message brokers, APIs, or frontend UI.

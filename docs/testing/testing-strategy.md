@@ -87,6 +87,24 @@ Prompt 4 adds event architecture tests that verify:
 - bounded in-memory diagnostics/dead letters;
 - architecture dependency boundaries and absence of external broker/MT5/frontend dependencies.
 
+## Prompt 5 tests
+
+Prompt 5 adds persistence/state authority tests that verify:
+
+- PostgreSQL-oriented schema boundary and safe connection diagnostics;
+- migration ordering, idempotency and checksum incompatibility detection;
+- transaction commit, rollback, timeout and nested transaction rejection;
+- shared transaction context for state/history/outbox work;
+- expected-version writes and lost-update protection;
+- state ownership and runtime-mode isolation;
+- append-only history and audit API boundaries;
+- transactional outbox creation and dispatch through `@ate/events`;
+- durable inbox duplicate suppression across recreated runtime/persistence instances;
+- stale inbox claim recovery;
+- durable dead-letter persistence and explicit replay metadata;
+- persistence runtime service health/readiness and connection-loss reporting;
+- architecture boundaries for domain/events/persistence dependencies.
+
 ## Naming
 
 Test names should describe behavior. Avoid opaque names.

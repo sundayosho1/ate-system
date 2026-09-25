@@ -68,6 +68,21 @@ Logs may include identifiers, correlation IDs, error categories, and safe metada
 include secrets, credentials, private keys, full tokens, or sensitive account authentication
 material.
 
+## Persistence security baseline
+
+Persistence diagnostics and errors must not expose database passwords, raw credential-bearing
+connection strings, private keys, tokens, certificates or filesystem secrets.
+
+SQL execution must use parameterized statements or safe bindings. Application modules must not
+accept arbitrary untrusted raw SQL as a persistence API.
+
+Future production database roles should follow least privilege. Ordinary runtime operation should
+not require unrestricted database superuser access; migration privileges may be separated from
+runtime privileges.
+
+Audit and history APIs must not expose ordinary update/delete operations. Retention, archival and
+purge policies belong to future governance prompts.
+
 ## Security reporting guidance
 
 Security findings should identify affected files/components without reproducing secret values.

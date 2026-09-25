@@ -63,7 +63,6 @@ describe("Prompt 1 repository foundation", () => {
     const unimplementedCapitalBearingCapabilities = [
       "backend_api",
       "frontend_control_center",
-      "database_persistence",
       "market_data_ingestion",
       "mose_surveillance",
       "strategy_engine",
@@ -97,7 +96,7 @@ describe("Prompt 1 repository foundation", () => {
       "Master Architecture, Repository Foundation & Engineering Constitution",
     );
     expect(ledger).toContain("Completed");
-    expect(ledger).not.toMatch(/\|\s*5\s*\|.*Completed/i);
+    expect(ledger).not.toMatch(/\|\s*6\s*\|.*Completed/i);
   });
 
   it("does not claim live trading capability in the README", () => {

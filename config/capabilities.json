@@ -4,8 +4,8 @@
   "manifest_version": 1,
   "updated_at": "2026-09-25",
   "development_phase": "Phase I — Foundation & Engineering Governance",
-  "completed_prompt": 4,
-  "pre_production_version": "0.4.0-events.1",
+  "completed_prompt": 5,
+  "pre_production_version": "0.5.0-persistence.1",
   "capabilities": {
     "repository_foundation": true,
     "engineering_constitution": true,
@@ -44,9 +44,24 @@
     "backpressure_foundation": true,
     "event_diagnostics": true,
     "runtime_event_service_integration": true,
+    "transactional_persistence": true,
+    "persistence_service": true,
+    "state_authority_foundation": true,
+    "repository_abstraction": true,
+    "transaction_manager": true,
+    "optimistic_concurrency": true,
+    "immutable_state_history": true,
+    "durable_audit_foundation": true,
+    "transactional_outbox": true,
+    "durable_inbox": true,
+    "durable_idempotency": true,
+    "durable_dead_letters": true,
+    "migration_framework": true,
+    "persistence_health_readiness": true,
+    "restart_recovery_foundation": true,
     "backend_api": false,
     "frontend_control_center": false,
-    "database_persistence": false,
+    "database_persistence": true,
     "event_bus": true,
     "durable_event_persistence": false,
     "distributed_event_broker": false,
@@ -79,5 +94,5 @@
     "authentication_rbac": false,
     "production_deployment": false
   },
-  "truth_statement": "Prompts 1-4 establish repository governance, documentation, quality foundations, core domain contracts, application runtime lifecycle infrastructure, and an internal in-process event architecture only. ATE cannot trade, connect to MT5, manage accounts, size positions, submit orders, execute strategies, ingest market data, calculate risk, allocate accounts, persist events durably, use a distributed event broker, or perform live trading."
+  "truth_statement": "Prompts 1-5 establish repository governance, documentation, quality foundations, core domain contracts, application runtime lifecycle infrastructure, internal in-process event architecture, and persistence/state authority foundations only. ATE cannot trade, connect to MT5, manage accounts, size positions, submit orders, execute strategies, ingest market data, calculate risk, allocate accounts, use a distributed event broker, or perform live trading."
 }

@@ -8,8 +8,9 @@ ATE is **not** currently a trading bot, MetaTrader Expert Advisor, or live execu
 ## Current development status
 
 - Phase: I — Foundation & Engineering Governance
-- Prompt: 4 of 84
-- Status: foundation, domain contracts, runtime lifecycle, and internal event architecture
+- Prompt: 5 of 84
+- Status: foundation, domain contracts, runtime lifecycle, internal event architecture, and
+  persistence/state authority foundation
 - Trading capability: **not implemented**
 - MT5 connectivity: **not implemented**
 - Live execution: **not implemented**
@@ -42,6 +43,9 @@ Prompts 1-4 implement only:
   shutdown foundations;
 - internal event registry, event factory, in-process event bus, routing, correlation/causation,
   idempotency, retry, dead-letter, diagnostics, and runtime event-service integration;
+- persistence/state authority foundation with transactions, optimistic concurrency, immutable
+  history, audit records, transactional outbox, durable inbox, durable dead letters, migration
+  discipline, diagnostics, and runtime persistence-service integration;
 - architecture decision records;
 - development, testing, security, configuration, help, and contribution standards;
 - capability manifest and prompt ledger;
@@ -111,6 +115,8 @@ Start with:
 - [Core Domain Contracts](docs/architecture/core-domain-contracts.md)
 - [Application Runtime](docs/architecture/application-runtime.md)
 - [Event Architecture](docs/architecture/event-architecture.md)
+- [Persistence Architecture](docs/architecture/persistence-architecture.md)
+- [State Authority](docs/architecture/state-authority.md)
 - [Safety Invariants](docs/architecture/safety-invariants.md)
 - [Authority Hierarchy](docs/architecture/authority-hierarchy.md)
 - [Environment & Runtime Modes](docs/architecture/environment-runtime-modes.md)
@@ -120,6 +126,7 @@ Start with:
 - [Security Baseline](docs/security/security-baseline.md)
 - [Help & Configuration Usability Standard](docs/help/help-and-configuration-usability-standard.md)
 - [Event Architecture Help](docs/help/event-architecture.md)
+- [Persistence Help](docs/help/persistence.md)
 
 ## Security warning
 

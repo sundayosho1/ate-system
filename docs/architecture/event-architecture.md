@@ -134,14 +134,14 @@ private keys or database credentials. Actors and provenance identify systems; th
 secrets. Prompt 4 includes a sensitivity metadata hook (`PUBLIC`, `INTERNAL`, `SENSITIVE`) but does
 not implement full data-loss prevention.
 
-## Persistence readiness
+## Persistence integration
 
-Prompt 4 intentionally avoids durable storage. Interfaces are shaped so Prompt 5 can add:
+Prompt 5 adds the persistence/state authority foundation:
 
-- transactional outbox for state change plus event publication;
-- durable inbox/idempotency records;
-- audit/event retention;
-- replay controls that distinguish historical replay from new publication.
+- transactional outbox for state changes plus required event publication;
+- durable inbox/idempotency records for subscriber effects;
+- durable dead-letter records;
+- audit/state history foundations.
 
-Until then, current state authority does not come from in-memory events. Events describe
-occurrences; future persistence/state modules decide durable state authority.
+Current state authority does not come from in-memory events. Events describe occurrences;
+persistence/state authority decides durable current truth, history and audit evidence.

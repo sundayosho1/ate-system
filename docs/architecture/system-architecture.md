@@ -63,7 +63,7 @@ Prompt 1 documents boundaries only. Future prompts implement functionality.
 | Core Runtime                    | Process lifecycle, runtime mode, startup/shutdown conventions                    |
 | Configuration                   | Typed, validated, versionable, auditable configuration                           |
 | Events                          | Event contracts, registry, routing, correlation, causation, delivery diagnostics |
-| Persistence                     | State ownership, migrations, transactions, reproducibility                       |
+| Persistence                     | State ownership, migrations, transactions, history, audit, outbox/inbox          |
 | Market Data                     | Broker/provider-neutral market observations and snapshots                        |
 | Instrument Registry             | Canonical instruments, broker-symbol mapping, specifications                     |
 | MOSE                            | Market Opportunity Surveillance Engine lifecycle and prioritization              |
@@ -218,7 +218,7 @@ Future APIs should include:
 
 ## Persistence principles
 
-Prompt 5 will implement persistence detail. The permanent principles are:
+Prompt 5 implements the persistence/state authority foundation. The permanent principles are:
 
 - explicit state ownership;
 - controlled migrations;
@@ -229,6 +229,12 @@ Prompt 5 will implement persistence detail. The permanent principles are:
 - no silent destructive schema changes;
 - backup awareness;
 - retention policies where applicable.
+
+Events describe what happened. Authoritative state describes what is currently true. State history
+explains how authoritative state changed. Audit explains who or what caused meaningful actions. The
+transactional outbox prevents committed state changes from being separated from required events. The
+durable inbox protects subscribers from duplicate effects. Caches and projections never become
+authority.
 
 ## Frontend principles
 
