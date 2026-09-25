@@ -10,6 +10,6 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@ate/domain": "0.2.0-domain.1"
+    "@ate/domain": "0.13.0-market-data-contracts.1"
   }
 }

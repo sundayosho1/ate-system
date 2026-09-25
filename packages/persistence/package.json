@@ -10,7 +10,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@ate/domain": "0.2.0-domain.1",
+    "@ate/domain": "0.13.0-market-data-contracts.1",
     "@ate/events": "0.4.0-events.1",
     "@ate/runtime": "0.3.0-runtime.1"
   }

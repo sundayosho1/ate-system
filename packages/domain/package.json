@@ -1,6 +1,6 @@
 {
   "name": "@ate/domain",
-  "version": "0.2.0-domain.1",
+  "version": "0.13.0-market-data-contracts.1",
   "private": true,
   "description": "ATE core domain language contracts, primitives, validation, and serialization.",
   "license": "UNLICENSED",

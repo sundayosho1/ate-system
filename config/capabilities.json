@@ -3,9 +3,9 @@
   "project": "ATE \u2014 Autonomous Trading Engine",
   "manifest_version": 1,
   "updated_at": "2026-09-25",
-  "development_phase": "Phase II \u2014 Configuration & Control Plane",
-  "completed_prompt": 12,
-  "pre_production_version": "0.12.0-config-promotion.1",
+  "development_phase": "Phase III \u2014 Universal Data Platform",
+  "completed_prompt": 13,
+  "pre_production_version": "0.13.0-market-data-contracts.1",
   "capabilities": {
     "repository_foundation": true,
     "engineering_constitution": true,
@@ -20,6 +20,20 @@
     "domain_primitives": true,
     "contract_validation": true,
     "contract_serialization": true,
+    "universal_market_data_contracts": true,
+    "canonical_market_observation_model": true,
+    "canonical_quote_model": true,
+    "canonical_tick_model": true,
+    "canonical_trade_observation_model": true,
+    "canonical_ohlcv_bar_model": true,
+    "explicit_volume_semantics": true,
+    "explicit_market_data_timestamp_semantics": true,
+    "provider_neutral_market_data_provenance": true,
+    "market_data_structural_validation": true,
+    "market_data_correction_revision_foundation": true,
+    "market_data_deterministic_serialization": true,
+    "market_data_schema_identity": true,
+    "market_data_contract_authority": true,
     "canonical_event_envelope": true,
     "domain_architecture_tests": true,
     "application_runtime": true,
@@ -201,5 +215,5 @@
     "promotion_diagnostics": true,
     "rollback_diagnostics": true
   },
-  "truth_statement": "Prompts 1-12 establish repository governance, documentation, quality foundations, core domain contracts, application runtime lifecycle infrastructure, internal in-process event architecture, persistence/state authority foundations, temporal integrity foundations, hierarchical configuration control-plane foundations, configuration schema validation/rejection foundations, immutable configuration version-history foundations, feature-flag/capability-control foundations, maker-checker configuration approval governance, and controlled configuration promotion/rollback release governance foundations only. ATE cannot trade, connect to MT5, manage accounts, size positions, submit orders, execute strategies, ingest market data, calculate risk, allocate accounts, use market calendars/sessions, run a historical replay engine, use a distributed event broker, use enterprise RBAC/IAM, or perform live trading. Environment promotion does not authorize live trading."
+  "truth_statement": "Prompts 1-13 establish repository governance, documentation, quality foundations, core domain contracts, application runtime lifecycle infrastructure, internal in-process event architecture, persistence/state authority foundations, temporal integrity foundations, hierarchical configuration control-plane foundations, configuration schema validation/rejection foundations, immutable configuration version-history foundations, feature-flag/capability-control foundations, maker-checker configuration approval governance, controlled configuration promotion/rollback release governance foundations, and provider-neutral universal market-data contracts only. ATE cannot trade, connect to MT5, manage accounts, size positions, submit orders, execute strategies, ingest live market data, store historical market data, score data quality, aggregate multi-timeframe bars, replay market data, calculate risk, allocate accounts, use a universal instrument registry, run MOSE, use a distributed event broker, use enterprise RBAC/IAM, or perform paper/live trading. Market-data contracts and environment promotion do not authorize trading."
 }
