@@ -857,6 +857,132 @@ Dataset and transformation references must remain available for future lineage a
 Canonical data representation never grants strategy, risk, execution, paper or live trading
 authority.
 
+## Prompt 14 historical data invariants
+
+These invariants specialize the data rules for offline historical artifact intake and research
+datasets.
+
+## DATA-031 — Historical Inputs Are Untrusted
+
+Every imported artifact must pass controlled intake before parsing or publication.
+
+## DATA-032 — Source Artifact Identity Is Content-Aware
+
+Filename alone cannot establish artifact identity; content checksum is required.
+
+## DATA-033 — Historical Import Is Reproducible
+
+Equivalent artifact bytes, mapping semantics and canonical schema produce equivalent content
+fingerprints.
+
+## DATA-034 — Source Format Is Not Canonical Format
+
+CSV, JSON, NDJSON and Parquet layouts cannot leak into downstream domain logic.
+
+## DATA-035 — Mapping Is Explicit
+
+Ambiguous source semantics cannot be silently guessed.
+
+## DATA-036 — Naive Source Time Requires Explicit Timezone Interpretation
+
+Naive timestamps require declared UTC or IANA timezone semantics before canonical conversion.
+
+## DATA-037 — Bar Timestamp Meaning Is Explicit
+
+Open-time versus close-time semantics cannot be guessed.
+
+## DATA-038 — Volume Meaning Is Explicit
+
+Historical volume columns require declared Prompt 13 volume semantics.
+
+## DATA-039 — Imported Prices Use Canonical Decimal Authority
+
+Imported prices must validate through domain decimal/price contracts.
+
+## DATA-040 — Structural Validation Precedes Publication
+
+Normalized records must pass Prompt 13 structural validation before dataset membership.
+
+## DATA-041 — Rejected Records Are Not Canonical Dataset Members
+
+Rejected source records remain evidence only and are excluded from published observations.
+
+## DATA-042 — Quarantine Is Isolated From Research Queries
+
+Quarantined records must not appear in normal historical query results.
+
+## DATA-043 — Partial Import Status Is Explicit
+
+Datasets completed with rejections must state that status in session statistics and manifest.
+
+## DATA-044 — Historical Dataset Publication Is Atomic
+
+Staged datasets are not authoritative until manifest and observations publish coherently.
+
+## DATA-045 — Published Historical Datasets Are Immutable
+
+Published datasets and partitions are append-only evidence; corrections require new data.
+
+## DATA-046 — Import Failure Cannot Expose Partial Authoritative Data
+
+Failed imports cannot become published datasets.
+
+## DATA-047 — Source Position Is Preserved
+
+Accepted and rejected records retain bounded source-location evidence.
+
+## DATA-048 — Canonical Query Ordering Is Deterministic
+
+Historical query ordering is stable and documented.
+
+## DATA-049 — Dataset Content Fingerprints Exclude Volatile Operational Metadata
+
+Content fingerprints depend on canonical content/order, not random IDs or wall-clock import time.
+
+## DATA-050 — Import Plans Are Immutable
+
+Plan fingerprints bind artifact checksum, mapping, limits and canonical schema identity.
+
+## DATA-051 — Mapping Transformations Are Declarative
+
+Historical mapping cannot execute arbitrary code.
+
+## DATA-052 — Historical Imports Cannot Execute Source Code
+
+Macros, formulas, scripts, eval and shell execution are forbidden in import paths.
+
+## DATA-053 — Historical Import Resource Usage Is Bounded
+
+File size, row count, field size, columns, nesting, rejections and queries must be bounded.
+
+## DATA-054 — Original Filenames Are Never Trusted Paths
+
+Original filenames are display metadata only.
+
+## DATA-055 — Historical Queries Are Bounded
+
+No unbounded historical query API may be exposed.
+
+## DATA-056 — Import Statistics Are Not Quality Scores
+
+Prompt 14 statistics are descriptive and do not assess trustworthiness.
+
+## DATA-057 — Duplicate Evidence Is Not Silently Destroyed
+
+Duplicate candidates are recorded according to explicit policy.
+
+## DATA-058 — Historical Storage Does Not Imply Backtest Eligibility
+
+Published structural datasets are not automatically clean or backtest-ready.
+
+## DATA-059 — Historical Data Does Not Authorize Trading
+
+Historical datasets cannot grant strategy, execution, paper or live trading authority.
+
+## DATA-060 — Prompt 15 Owns Quality Judgment
+
+Quality scoring, outlier detection and gap assessment remain Prompt 15 scope.
+
 ## Prompt 1 test coverage
 
 Prompt 1 includes foundation tests that verify:

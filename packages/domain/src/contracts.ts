@@ -1119,6 +1119,7 @@ export type Actor = z.infer<typeof actorSchema>;
 export type BrokerInstrumentReference = z.infer<typeof brokerInstrumentReferenceSchema>;
 export type ConfigurationVersionRef = z.infer<typeof configurationVersionRefSchema>;
 export type ContentIdentity = z.infer<typeof contentIdentitySchema>;
+export type DataSourceRef = z.infer<typeof dataSourceRefSchema>;
 export type DatasetVersionRef = z.infer<typeof datasetVersionRefSchema>;
 export type Decision = z.infer<typeof decisionSchema>;
 export type EventEnvelope = z.infer<typeof eventEnvelopeSchema>;

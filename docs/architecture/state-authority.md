@@ -32,21 +32,22 @@ Prompt 5 establishes the state authority model for ATE.
 
 ## Implemented state authority matrix
 
-| State                         | Authority            | Durable | Mutable                                                | History     | Reconciliation           |
-| ----------------------------- | -------------------- | ------: | ------------------------------------------------------ | ----------- | ------------------------ |
-| Reference state               | `@ate/persistence`   |     Yes | Expected-version                                       | Append-only | No                       |
-| State history                 | `@ate/persistence`   |     Yes | No ordinary mutation                                   | Native      | No                       |
-| Audit records                 | `@ate/persistence`   |     Yes | No ordinary mutation                                   | Native      | No                       |
-| Transactional outbox          | `@ate/persistence`   |     Yes | Lifecycle only                                         | State field | Event bus                |
-| Inbox processing              | `@ate/persistence`   |     Yes | Lifecycle only                                         | State field | Subscriber               |
-| Durable dead letters          | `@ate/persistence`   |     Yes | Replay metadata only                                   | Native      | Operator                 |
-| Runtime lifecycle             | `@ate/runtime`       | Limited | Yes                                                    | Operational | No                       |
-| Event delivery memory         | `@ate/events`        |      No | Yes                                                    | Diagnostics | Persistence outbox/inbox |
-| Configuration current state   | `@ate/configuration` |     Yes | Atomic publication                                     | Required    | No                       |
-| Configuration version history | `@ate/configuration` |     Yes | Append-only records; mutable current pointer           | Native      | No                       |
-| Capability-control state      | `@ate/configuration` |     Yes | Atomic snapshot publication                            | Required    | No                       |
-| Configuration approval state  | `@ate/configuration` |     Yes | Append-only evidence; derived current status           | Native      | No                       |
-| Configuration release state   | `@ate/configuration` |     Yes | Atomic active pointer and append-only release evidence | Native      | No                       |
+| State                         | Authority              | Durable | Mutable                                                | History     | Reconciliation           |
+| ----------------------------- | ---------------------- | ------: | ------------------------------------------------------ | ----------- | ------------------------ |
+| Reference state               | `@ate/persistence`     |     Yes | Expected-version                                       | Append-only | No                       |
+| State history                 | `@ate/persistence`     |     Yes | No ordinary mutation                                   | Native      | No                       |
+| Audit records                 | `@ate/persistence`     |     Yes | No ordinary mutation                                   | Native      | No                       |
+| Transactional outbox          | `@ate/persistence`     |     Yes | Lifecycle only                                         | State field | Event bus                |
+| Inbox processing              | `@ate/persistence`     |     Yes | Lifecycle only                                         | State field | Subscriber               |
+| Durable dead letters          | `@ate/persistence`     |     Yes | Replay metadata only                                   | Native      | Operator                 |
+| Runtime lifecycle             | `@ate/runtime`         | Limited | Yes                                                    | Operational | No                       |
+| Event delivery memory         | `@ate/events`          |      No | Yes                                                    | Diagnostics | Persistence outbox/inbox |
+| Configuration current state   | `@ate/configuration`   |     Yes | Atomic publication                                     | Required    | No                       |
+| Configuration version history | `@ate/configuration`   |     Yes | Append-only records; mutable current pointer           | Native      | No                       |
+| Capability-control state      | `@ate/configuration`   |     Yes | Atomic snapshot publication                            | Required    | No                       |
+| Configuration approval state  | `@ate/configuration`   |     Yes | Append-only evidence; derived current status           | Native      | No                       |
+| Configuration release state   | `@ate/configuration`   |     Yes | Atomic active pointer and append-only release evidence | Native      | No                       |
+| Historical datasets           | `@ate/historical-data` |   Local | Staged then immutable published datasets               | Manifest    | No                       |
 
 Reference state is a non-trading test/reference domain used to verify persistence semantics. It is
 not a trading account, instrument registry, risk state, portfolio state or execution state.
@@ -66,6 +67,8 @@ not a trading account, instrument registry, risk state, portfolio state or execu
   configuration approval authority.
 - Configuration promotion, activation, known-good and rollback evidence are owned by the
   configuration release authority.
+- Offline historical dataset manifests and published research datasets are owned by the Historical
+  Data Laboratory. Dataset quality scoring and global catalogue lineage remain future authorities.
 
 These domains are not implemented in Prompt 5.
 

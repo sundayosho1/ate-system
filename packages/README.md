@@ -24,7 +24,11 @@ Currently implemented:
   feature-flag and capability-control registry/evaluation, maker-checker approval governance,
   controlled promotion/rollback release governance, runtime-service integration, invalid-candidate
   rejection, and safe diagnostics.
+- `@ate/historical-data` — Historical Data Laboratory foundation with controlled offline artifact
+  intake, safe format adapters, declarative mapping, Prompt 13 canonical normalization, rejection
+  quarantine, immutable dataset manifests, local storage adapters, bounded queries and runtime
+  diagnostics.
 
 No package currently implements trading behavior, risk calculations, portfolio calculations, MT5
-connectivity, broker execution, market calendars, market-data ingestion, market-data storage,
+connectivity, broker execution, market calendars, live market-data ingestion, data-quality scoring,
 market-data replay, external message brokers, APIs, or frontend UI.
