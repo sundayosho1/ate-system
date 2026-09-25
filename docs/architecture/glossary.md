@@ -57,6 +57,14 @@ This glossary defines canonical ATE terminology. Future prompts should use these
 | Decimal                     | Plain base-10 string representation used to avoid silent JavaScript floating-point assumptions.                                                                           |
 | Percentage                  | Ratio-based percentage value where `0.01` means 1% and `1` means 100%.                                                                                                    |
 | Broker Instrument Reference | Contract linking a broker-specific symbol to a canonical ATE instrument without embedding broker details in the Instrument itself.                                        |
+| Runtime Instance ID         | Stable identifier for one ATE runtime instance during its lifetime.                                                                                                       |
+| ATE Runtime                 | Application lifecycle controller responsible for composition, dependency validation, startup, health/readiness, degradation, recovery, shutdown and snapshots.            |
+| Service Descriptor          | Structured runtime metadata for a managed service, including service ID, criticality, dependencies, supported modes and capabilities.                                     |
+| Service Criticality         | Runtime classification: CRITICAL, REQUIRED or OPTIONAL.                                                                                                                   |
+| Health                      | Operational condition indicating whether a service/runtime appears functioning.                                                                                           |
+| Readiness                   | Operational condition indicating whether a service/runtime is safe/capable for its intended workload.                                                                     |
+| Runtime Snapshot            | Immutable operational view of runtime state, services, health, readiness, capabilities, failures and degradations.                                                        |
+| Degradation Report          | Structured runtime record describing a degraded/failed service, affected capabilities, affected dependants and recoverability.                                            |
 
 ## Identifier conventions
 

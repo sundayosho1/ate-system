@@ -1,8 +1,8 @@
 {
   "name": "ate-system",
-  "version": "0.2.0-domain.1",
+  "version": "0.3.0-runtime.1",
   "private": true,
-  "description": "ATE Autonomous Trading Engine repository foundation and core domain contracts.",
+  "description": "ATE Autonomous Trading Engine repository foundation, core domain contracts, and runtime lifecycle foundation.",
   "license": "UNLICENSED",
   "type": "module",
   "engines": {

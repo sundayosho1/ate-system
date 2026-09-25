@@ -48,6 +48,23 @@ Prompt 2 adds domain-contract tests that verify:
 - multi-asset and multi-account representation;
 - domain-package dependency boundaries.
 
+## Prompt 3 tests
+
+Prompt 3 adds runtime lifecycle tests that verify:
+
+- runtime construction and explicit runtime-mode validation;
+- dependency graph validation and deterministic ordering;
+- startup admission and fail-closed critical failures;
+- reverse shutdown, rollback, timeout and stop-failure aggregation;
+- optional service degradation and recovery;
+- transitive readiness/capability degradation;
+- health/readiness distinction;
+- runtime snapshots;
+- lifecycle concurrency protections;
+- background task cancellation;
+- process signal adapter boundaries;
+- runtime/domain dependency direction.
+
 ## Naming
 
 Test names should describe behavior. Avoid opaque names.

@@ -4,8 +4,8 @@
   "manifest_version": 1,
   "updated_at": "2026-09-25",
   "development_phase": "Phase I — Foundation & Engineering Governance",
-  "completed_prompt": 2,
-  "pre_production_version": "0.2.0-domain.1",
+  "completed_prompt": 3,
+  "pre_production_version": "0.3.0-runtime.1",
   "capabilities": {
     "repository_foundation": true,
     "engineering_constitution": true,
@@ -22,6 +22,15 @@
     "contract_serialization": true,
     "canonical_event_envelope": true,
     "domain_architecture_tests": true,
+    "application_runtime": true,
+    "lifecycle_orchestration": true,
+    "service_composition": true,
+    "dependency_ordering": true,
+    "runtime_mode_enforcement": true,
+    "health_readiness_foundation": true,
+    "graceful_degradation_foundation": true,
+    "graceful_shutdown": true,
+    "runtime_snapshots": true,
     "backend_api": false,
     "frontend_control_center": false,
     "database_persistence": false,
@@ -55,5 +64,5 @@
     "authentication_rbac": false,
     "production_deployment": false
   },
-  "truth_statement": "Prompts 1-2 establish repository governance, documentation, quality foundations, and core domain contracts only. ATE cannot trade, connect to MT5, manage accounts, size positions, submit orders, execute strategies, ingest market data, calculate risk, allocate accounts, or perform live trading."
+  "truth_statement": "Prompts 1-3 establish repository governance, documentation, quality foundations, core domain contracts, and application runtime lifecycle infrastructure only. ATE cannot trade, connect to MT5, manage accounts, size positions, submit orders, execute strategies, ingest market data, calculate risk, allocate accounts, or perform live trading."
 }

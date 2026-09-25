@@ -1,0 +1,15 @@
+{
+  "name": "@ate/runtime",
+  "version": "0.3.0-runtime.1",
+  "private": true,
+  "description": "ATE application runtime, lifecycle orchestration, dependency composition, and graceful degradation foundation.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@ate/domain": "0.2.0-domain.1"
+  }
+}

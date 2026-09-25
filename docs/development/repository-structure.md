@@ -49,6 +49,10 @@ and test utilities.
 Prompt 2 adds `packages/domain` as the authoritative core domain-language package. It defines
 contracts and validation only; it does not implement trading behavior.
 
+Prompt 3 adds `packages/runtime` as the authoritative application runtime/lifecycle package. It
+manages composition, lifecycle, health/readiness, degradation and shutdown only; it does not
+implement trading services.
+
 ### `mt5/`
 
 Future MetaTrader 5 gateway and Connector EA artifacts. Prompt 1 documents the boundary only.
