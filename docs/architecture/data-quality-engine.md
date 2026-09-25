@@ -5,7 +5,7 @@ published Prompt 14 historical datasets.
 
 It detects and reports quality issues. It does not repair observations, mutate datasets, certify
 fitness for every use, authorize strategies, authorize execution, connect to providers, aggregate
-bars, replay data, maintain a dataset catalogue, or enable paper/live trading.
+bars, replay data, own dataset catalogue authority, or enable paper/live trading.
 
 ## Authority boundary
 
@@ -90,7 +90,7 @@ Events do not emit row-level findings or raw source values.
 
 Prompt 15 explicitly excludes:
 
-- Dataset Catalogue and lineage graph authority;
+- Dataset Catalogue and lineage graph authority, implemented separately in Prompt 16;
 - real-time ingestion, provider APIs and WebSockets;
 - aggregation, replay and backtesting engines;
 - Universal Instrument Registry and market calendars;

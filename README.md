@@ -8,13 +8,13 @@ ATE is **not** currently a trading bot, MetaTrader Expert Advisor, or live execu
 ## Current development status
 
 - Phase: III — Universal Data Platform
-- Prompt: 15 of 84
+- Prompt: 16 of 84
 - Status: foundation, domain contracts, runtime lifecycle, internal event architecture,
   persistence/state authority, temporal integrity, hierarchical configuration, and configuration
   schema validation, immutable configuration version-history, feature-flag/capability-control, and
   maker-checker approval governance, controlled configuration promotion/rollback foundation,
-  universal market-data contract authority, historical data laboratory foundations, and data quality
-  engine foundations
+  universal market-data contract authority, historical data laboratory foundations, data quality
+  engine foundations, and dataset catalogue/lineage foundations
 - Market-data ingestion: **not implemented**
 - Data quality scoring: **implemented for offline historical datasets only**
 - Trading capability: **not implemented**
@@ -40,7 +40,7 @@ ATE must always be able to return `NO_ACTION` when conditions do not justify cap
 
 ## Currently implemented functionality
 
-Prompts 1-15 implement only:
+Prompts 1-16 implement only:
 
 - repository foundation and documentation hierarchy;
 - engineering constitution and safety invariants;
@@ -88,15 +88,20 @@ Prompts 1-15 implement only:
   suppression counts, duplicate/gap/timestamp/freshness/spread/OHLC/outlier/volume/provenance
   diagnostics, immutable report fingerprints, staging/publication, runtime diagnostics and explicit
   non-trading qualification semantics;
+- dataset catalogue and lineage foundations with governed dataset family/version identity,
+  registration, provenance, transformation metadata, lineage graph traversal, integrity evidence,
+  Prompt 15 quality references, lifecycle state, active-version pointers, intended-use eligibility,
+  reproducibility metadata, bounded discovery, impact analysis, runtime diagnostics and safe local
+  metadata persistence;
 - architecture decision records;
 - development, testing, security, configuration, help, and contribution standards;
 - capability manifest and prompt ledger;
 - minimal npm/TypeScript quality tooling and foundation tests.
 
-No source module currently performs trading, live market data ingestion, dataset catalogue
-governance, replay, aggregation, strategy evaluation, risk calculation, portfolio management,
-account allocation, broker order submission, or MT5 execution. Data-quality reports are diagnostics
-only and do not authorize trading.
+No source module currently performs trading, live market data ingestion, replay, aggregation,
+strategy evaluation, risk calculation, portfolio management, account allocation, broker order
+submission, or MT5 execution. Data-quality reports and catalogue active/eligible status are
+diagnostics/governance metadata only and do not authorize trading.
 
 ## Repository structure
 

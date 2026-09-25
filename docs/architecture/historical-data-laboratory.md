@@ -4,9 +4,10 @@ Prompt 14 establishes `@ate/historical-data`, the offline historical-data intake
 package. It turns untrusted source artifacts into structurally valid Prompt 13 canonical market-data
 observations and immutable local historical datasets.
 
-It does not implement Prompt 16 dataset catalogue, Prompt 17 real-time ingestion, Prompt 18
-aggregation, Prompt 19 replay, Prompt 20 instrument registry, MOSE, strategies, risk, execution or
-trading. Prompt 15 quality scoring is implemented separately in `@ate/data-quality`.
+It does not implement Prompt 17 real-time ingestion, Prompt 18 aggregation, Prompt 19 replay, Prompt
+20 instrument registry, MOSE, strategies, risk, execution or trading. Prompt 15 quality scoring is
+implemented separately in `@ate/data-quality`; Prompt 16 catalogue/lineage is implemented separately
+in `@ate/dataset-catalogue`.
 
 ## Authority boundary
 
@@ -91,6 +92,6 @@ authority is not claimed.
 
 - Prompt 15 consumes published datasets for quality assessment through public repository/query
   contracts.
-- Prompt 16 registers manifests in the global catalogue.
+- Prompt 16 registers manifests in the dataset catalogue.
 - Prompt 19 reads datasets for deterministic replay.
 - Prompt 73+ may consume quality-approved/catalogued datasets for backtesting.

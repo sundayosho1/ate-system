@@ -1095,7 +1095,7 @@ capabilities.
 
 ## DATA-087 — Quality Is Not Catalogue Authority
 
-Quality reports do not implement the future Dataset Catalogue or lineage graph.
+Quality reports do not implement Dataset Catalogue or lineage graph authority.
 
 ## DATA-088 — Quality Is Not Ingestion
 
@@ -1109,6 +1109,170 @@ Quality analysis does not replay market data or aggregate new bars.
 
 Quality analysis does not implement MOSE, indicators, strategies, risk, portfolio, account
 allocation, MT5 or execution.
+
+## Prompt 16 dataset catalogue invariants
+
+These invariants specialize the data rules for dataset identity, lineage and catalogue governance.
+
+## DATA-091 — Every Governed Dataset Has Stable Identity
+
+Catalogue records must identify governed datasets with stable family and version identities.
+
+## DATA-092 — Dataset Family Identity Is Distinct From Dataset Version Identity
+
+A logical family and an immutable version cannot share ambiguous identifier semantics.
+
+## DATA-093 — Dataset Version Identity Is Distinct From Content Fingerprint
+
+Content fingerprints identify canonical content, not governed version identity.
+
+## DATA-094 — Published Dataset Versions Are Immutable
+
+Version records are historical evidence; material changes create new versions.
+
+## DATA-095 — Content Changes Require New Dataset Version
+
+Registered content fingerprints must not be updated in place.
+
+## DATA-096 — Dataset Catalogue Does Not Own Dataset Content
+
+Prompt 14 remains historical dataset content/storage authority.
+
+## DATA-097 — Dataset Catalogue Does Not Recalculate Data Quality
+
+Prompt 15 remains quality-report and score authority.
+
+## DATA-098 — Provenance Is Preserved As Historical Evidence
+
+Provenance must not be rewritten invisibly to alter origin history.
+
+## DATA-099 — Source Filename Is Never Provenance Authority
+
+Source artifact identity must rely on stable IDs and checksums, not filenames.
+
+## DATA-100 — Lineage Derivation Is Distinct From Association
+
+Quality reports and other associations are not derivation lineage.
+
+## DATA-101 — Dataset Derivation Lineage Is Acyclic
+
+Derivation graph cycles must fail closed.
+
+## DATA-102 — Dataset Cannot Derive From Itself
+
+Self-lineage is invalid.
+
+## DATA-103 — Governed Parent References Must Resolve
+
+ATE dataset-version parents must exist before they can be referenced.
+
+## DATA-104 — Lineage Traversal Is Bounded
+
+Ancestry, descendants and impact analysis must enforce depth/node bounds.
+
+## DATA-105 — Integrity Mismatch Never Silently Rewrites Fingerprint
+
+Integrity mismatch creates evidence/status; it does not update registered fingerprints.
+
+## DATA-106 — Quality Reanalysis Does Not Create A New Dataset Version
+
+New quality reports update catalogue quality associations, not dataset content identity.
+
+## DATA-107 — Lifecycle Change Does Not Change Dataset Content Identity
+
+Lifecycle state is governance metadata separate from content.
+
+## DATA-108 — Registration Does Not Imply Qualification
+
+Catalogue registration alone does not prove fitness.
+
+## DATA-109 — Qualification Does Not Imply Active Selection
+
+A qualified dataset is not automatically active.
+
+## DATA-110 — Active Dataset Does Not Authorize Trading
+
+ACTIVE status is data-governance metadata only.
+
+## DATA-111 — Supersession Does Not Delete Historical Version
+
+Superseded versions remain queryable for audit and reproducibility.
+
+## DATA-112 — Supersession Is Distinct From Derivation
+
+Replacement preference does not imply one dataset was derived from another.
+
+## DATA-113 — Invalidated Dataset Evidence Is Preserved
+
+Invalidation records evidence and does not erase historical metadata.
+
+## DATA-114 — Eligibility Is Evidence-Based
+
+Eligibility must derive from lifecycle, integrity, quality and policy evidence.
+
+## DATA-115 — Dataset Eligibility Is Use-Case Specific
+
+Eligibility must identify intended use and reason codes.
+
+## DATA-116 — Catalogue Does Not Create Live Trading Eligibility
+
+Dataset catalogue status cannot create live-trading eligibility.
+
+## DATA-117 — Reproducibility References Exact Dataset Versions
+
+Reproducibility records must bind exact parent/input versions.
+
+## DATA-118 — Research Cannot Silently Substitute Newer Dataset Version
+
+Exact version selection must not float to latest.
+
+## DATA-119 — Catalogue Queries Are Bounded
+
+Discovery and graph APIs must enforce limits.
+
+## DATA-120 — Catalogue State Authority Is Explicit
+
+Catalogue state cannot be inferred by guessing from storage paths.
+
+## DATA-121 — Active Pointer Changes Use Concurrency Protection
+
+Active-version updates must support expected-current conflict detection.
+
+## DATA-122 — Catalogue Registration Is Atomic
+
+Registration must not leave half-created family/version/lineage state.
+
+## DATA-123 — Catalogue Fingerprints Are Deterministic
+
+Equivalent catalogue semantics must produce equivalent fingerprints.
+
+## DATA-124 — Volatile Runtime Metadata Does Not Affect Semantic Fingerprints
+
+Process order and operational timing must not change semantic fingerprints.
+
+## DATA-125 — Broken Lineage Is Visible
+
+Broken parent references or invalid graph structure must be diagnosable.
+
+## DATA-126 — Orphan Detection Distinguishes Legitimate Root Sources
+
+Root imports with valid source provenance are not orphan datasets.
+
+## DATA-127 — Impact Analysis Does Not Automatically Invalidate Descendants
+
+Impact results are evidence only until explicit policy acts.
+
+## DATA-128 — Quality Reports Remain Prompt 15 Authority
+
+Catalogue quality references cannot transfer scoring authority.
+
+## DATA-129 — Historical Metadata Corrections Are Auditable
+
+Administrative corrections require evidence rather than silent overwrites.
+
+## DATA-130 — Catalogue Authority Cannot Be Reconstructed By Guessing From Storage Paths
+
+Filesystem layout may store records, but catalogue records remain semantic authority.
 
 ## Prompt 1 test coverage
 

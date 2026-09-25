@@ -24,6 +24,7 @@ export const foundationalCapabilityDefinitions = (): readonly CapabilityDefiniti
   const dataMarketDataContracts = capabilityId("data.marketDataContracts");
   const dataHistoricalDataLaboratory = capabilityId("data.historicalDataLaboratory");
   const dataQualityEngine = capabilityId("data.dataQualityEngine");
+  const dataDatasetCatalogue = capabilityId("data.datasetCatalogue");
   const dataMarketData = capabilityId("data.marketData");
   const executionMt5 = capabilityId("execution.mt5");
   const executionLiveTrading = capabilityId("execution.liveTrading");
@@ -209,6 +210,21 @@ export const foundationalCapabilityDefinitions = (): readonly CapabilityDefiniti
       versionIntroduced: "0.15.0-data-quality.1",
       safetyNotes:
         "Quality reports detect and explain issues only; scores and qualifications do not authorize strategy, risk, execution, paper or live trading.",
+    },
+    {
+      capabilityId: dataDatasetCatalogue,
+      displayName: "Dataset Catalogue and Lineage",
+      description:
+        "Prompt 16 governed dataset family/version identity, provenance, lineage, integrity, quality references, lifecycle, eligibility, reproducibility, discovery and impact-analysis metadata.",
+      owner: "@ate/dataset-catalogue",
+      capabilityClass: "OPTIONAL",
+      implementationStatus: "IMPLEMENTED",
+      reloadBehavior: "STARTUP_ONLY",
+      supportedRuntimeModes: ["DEVELOPMENT", "RESEARCH", "BACKTEST", "SIMULATION"],
+      dependencies: [dataMarketDataContracts, dataHistoricalDataLaboratory],
+      versionIntroduced: "0.16.0-dataset-catalogue.1",
+      safetyNotes:
+        "Catalogue registration, qualification and active-version selection are data-governance metadata only and do not authorize strategy, risk, execution, paper or live trading. Prompt 15 quality reports are optional for registration and required only for quality-derived qualification policy.",
     },
     {
       capabilityId: dataMarketData,

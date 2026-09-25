@@ -31,8 +31,12 @@ Currently implemented:
 - `@ate/data-quality` — Data Quality Engine foundation with deterministic historical dataset quality
   profiles, rule statuses, bounded findings/evidence, immutable reports, non-trading qualification
   diagnostics, local report storage adapters and runtime diagnostics.
+- `@ate/dataset-catalogue` — Dataset Catalogue and Lineage foundation with governed dataset
+  family/version identity, provenance, transformation metadata, lineage graph traversal, integrity
+  evidence, Prompt 15 quality references, lifecycle, eligibility, reproducibility, discovery, impact
+  analysis, local metadata persistence and runtime diagnostics.
 
 No package currently implements trading behavior, risk calculations, portfolio calculations, MT5
 connectivity, broker execution, market calendars, live market-data ingestion, market-data replay,
-external message brokers, APIs, or frontend UI. Data-quality reports are diagnostics only and do not
-authorize trading.
+external message brokers, APIs, or frontend UI. Data-quality reports and catalogue active/eligible
+status are diagnostics/governance metadata only and do not authorize trading.
