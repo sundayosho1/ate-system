@@ -289,7 +289,7 @@ const validateConstraints = (input: {
       );
     }
   }
-  if (Array.isArray(input.value)) {
+  if (isConfigurationArray(input.value)) {
     if (constraints.minItems !== undefined && input.value.length < constraints.minItems) {
       issues.push(
         issue(input, {
@@ -466,6 +466,10 @@ const isPlainObject = (
   value: ConfigurationValue | undefined,
 ): value is Readonly<Record<string, ConfigurationValue>> =>
   value !== undefined && value !== null && typeof value === "object" && !Array.isArray(value);
+
+const isConfigurationArray = (
+  value: ConfigurationValue | undefined,
+): value is readonly ConfigurationValue[] => Array.isArray(value);
 
 const isSecretReference = (
   value: ConfigurationValue | undefined,
