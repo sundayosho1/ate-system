@@ -7,9 +7,11 @@ export const configurationVersionHistoryStateDomain = stateDomain("configuration
 export const configurationCapabilityControlStateDomain = stateDomain(
   "configuration.capabilitycontrol",
 );
+export const configurationApprovalStateDomain = stateDomain("configuration.approval");
 export const configurationStateOwner = stateOwner("configuration");
 export const configurationVersionHistoryStateOwner = stateOwner("configuration.versioning");
 export const configurationCapabilityControlStateOwner = stateOwner("configuration.capabilities");
+export const configurationApprovalStateOwner = stateOwner("configuration.approval");
 
 export const registerConfigurationStateAuthority = (
   authority: StateAuthorityRegistry,
@@ -63,4 +65,22 @@ export const registerConfigurationCapabilityControlStateAuthority = (
     runtimeModes,
     description:
       "Capability-control authority for effective capability snapshots derived from build truth, managed configuration flags, runtime-mode gates and dependency state.",
+  });
+
+export const registerConfigurationApprovalStateAuthority = (
+  authority: StateAuthorityRegistry,
+  runtimeModes: readonly RuntimeMode[],
+): ReturnType<StateAuthorityRegistry["register"]> =>
+  authority.register({
+    stateDomain: configurationApprovalStateDomain,
+    owner: configurationApprovalStateOwner,
+    authorityType: "INTERNAL_AUTHORITATIVE",
+    writeAuthority: "@ate/configuration",
+    readers: ["@ate/runtime", "@ate/events", "future-control-center"],
+    durable: true,
+    historyRequired: true,
+    reconciliationRequired: false,
+    runtimeModes,
+    description:
+      "Maker-checker configuration approval authority for policies, requests, decisions, revocations, derived eligibility and exact-version governance evidence.",
   });

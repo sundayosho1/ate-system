@@ -47,6 +47,7 @@ Reports avoid raw secret values. Secret-bearing configuration must use secret re
 ## Current boundaries
 
 Prompt 8 validates configuration shape and activation safety only. It does not provide historical
-configuration versions, approvals, promotion, rollback, UI editing, trading, market-data ingestion,
-risk, portfolio, broker execution, MT5 connectivity or live trading. Prompts 9-10 now add immutable
-version history and capability-control foundations on top of these validation gates.
+configuration versions, promotion, rollback, UI editing, trading, market-data ingestion, risk,
+portfolio, broker execution, MT5 connectivity or live trading. Prompts 9-11 now add immutable
+version history, capability-control and approval-governance foundations on top of these validation
+gates.

@@ -278,6 +278,12 @@ export const foundationalConfigurationSchemas = (clock: Clock): readonly Configu
         helpText:
           "Controls read-only configuration history inspection; it cannot enable approval, promotion, rollback or trading.",
         examples: [true, false],
+        approvalClassification: "SENSITIVE",
+        approvalRequired: true,
+        governanceCategory: "CAPABILITY_CONTROL",
+        requiredCheckerAuthority: "SENSITIVE_CONFIGURATION_CHECKER",
+        governanceHelpText:
+          "Changing capability-control flags is sensitive because it can alter desired control-plane behavior.",
       },
     }),
     configurationSchemaFromDefinition(requireDefinition(byKey, capabilityDiagnostics), {
@@ -286,6 +292,12 @@ export const foundationalConfigurationSchemas = (clock: Clock): readonly Configu
         helpText:
           "Controls capability diagnostics visibility. Changes are restart-required by Prompt 10 policy.",
         examples: [true, false],
+        approvalClassification: "SENSITIVE",
+        approvalRequired: true,
+        governanceCategory: "CAPABILITY_CONTROL",
+        requiredCheckerAuthority: "SENSITIVE_CONFIGURATION_CHECKER",
+        governanceHelpText:
+          "Restart-required capability diagnostics changes require independent governance review.",
       },
     }),
   ];

@@ -91,6 +91,13 @@ effective capability snapshots, dependency/runtime-mode gating, restart-required
 events, state-authority registration and diagnostics; it does not implement maker-checker approval,
 promotion/rollback, market data, MT5, execution, frontend editing or trading.
 
+Prompt 11 extends `packages/configuration` with maker-checker configuration approval governance. It
+implements approval policies, sensitivity classification, exact-version approval requests and
+decisions, checker authority resolution, separation of duties, expiry, revocation, reapproval,
+approval eligibility, state-authority registration, safe events and a proposed-vs-applied governance
+gate; it does not implement Prompt 12 promotion/rollback, enterprise RBAC/IAM, frontend editing,
+market data, MT5, execution or trading.
+
 ### `mt5/`
 
 Future MetaTrader 5 gateway and Connector EA artifacts. Prompt 1 documents the boundary only.
@@ -110,8 +117,8 @@ configuration does not belong here.
 Automated tests. Prompt 1 adds foundation tests validating documentation and capability
 truthfulness. Prompt 4 adds event architecture tests under `tests/events`. Prompt 5 adds
 persistence/state authority tests under `tests/persistence`. Prompt 6 adds temporal integrity tests
-under `tests/time`. Prompts 7-10 add hierarchical configuration, schema validation, versioning and
-capability-control tests under `tests/configuration`.
+under `tests/time`. Prompts 7-11 add hierarchical configuration, schema validation, versioning,
+capability-control and approval-governance tests under `tests/configuration`.
 
 ### `scripts/`
 

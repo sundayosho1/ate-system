@@ -133,6 +133,111 @@ export const configurationCapabilityBlockedEvent = {
   owner: "@ate/configuration",
 } satisfies EventTypeRegistration;
 
+export const configurationApprovalRequestedEvent = {
+  eventType: "configuration.approval.requested.v1",
+  category: "AUDIT",
+  version: 1,
+  schema: z
+    .object({
+      requestId: z.string(),
+      versionId: z.string(),
+      streamId: z.string(),
+      runtimeMode: z.string(),
+      classification: z.string(),
+      policyId: z.string(),
+      policyFingerprint: z.string(),
+      makerActorId: z.string().optional(),
+      requiredAuthority: z.string(),
+      requiredApprovalCount: z.number().int().nonnegative(),
+      correlationId: z.string().optional(),
+      causationId: z.string().optional(),
+    })
+    .strict(),
+  description: "A configuration approval request was created for an exact immutable version.",
+  owner: "@ate/configuration",
+} satisfies EventTypeRegistration;
+
+export const configurationApprovedEvent = {
+  eventType: "configuration.approval.approved.v1",
+  category: "AUDIT",
+  version: 1,
+  schema: z
+    .object({
+      requestId: z.string(),
+      decisionId: z.string(),
+      versionId: z.string(),
+      checkerActorId: z.string(),
+      policyId: z.string(),
+      policyFingerprint: z.string(),
+      expiresAt: z.string().optional(),
+      correlationId: z.string().optional(),
+      causationId: z.string().optional(),
+    })
+    .strict(),
+  description: "An authorized independent checker approved a configuration approval request.",
+  owner: "@ate/configuration",
+} satisfies EventTypeRegistration;
+
+export const configurationRejectedEvent = {
+  eventType: "configuration.approval.rejected.v1",
+  category: "AUDIT",
+  version: 1,
+  schema: z
+    .object({
+      requestId: z.string(),
+      decisionId: z.string(),
+      versionId: z.string(),
+      checkerActorId: z.string(),
+      policyId: z.string(),
+      policyFingerprint: z.string(),
+      safeReason: z.string(),
+      correlationId: z.string().optional(),
+      causationId: z.string().optional(),
+    })
+    .strict(),
+  description: "An authorized independent checker rejected a configuration approval request.",
+  owner: "@ate/configuration",
+} satisfies EventTypeRegistration;
+
+export const configurationApprovalRevokedEvent = {
+  eventType: "configuration.approval.revoked.v1",
+  category: "AUDIT",
+  version: 1,
+  schema: z
+    .object({
+      requestId: z.string(),
+      decisionId: z.string(),
+      revocationId: z.string(),
+      versionId: z.string(),
+      revokedByActorId: z.string(),
+      policyId: z.string(),
+      safeReason: z.string(),
+      correlationId: z.string().optional(),
+      causationId: z.string().optional(),
+    })
+    .strict(),
+  description: "A configuration approval was revoked by an authorized governance actor.",
+  owner: "@ate/configuration",
+} satisfies EventTypeRegistration;
+
+export const configurationApprovalInvalidatedEvent = {
+  eventType: "configuration.approval.invalidated.v1",
+  category: "OPERATIONAL",
+  version: 1,
+  schema: z
+    .object({
+      versionId: z.string(),
+      requestId: z.string().optional(),
+      runtimeMode: z.string(),
+      reasonCodes: z.array(z.string()).min(1),
+      policyId: z.string(),
+      safeMessage: z.string(),
+    })
+    .strict(),
+  description: "Previously recorded approval evidence no longer satisfies current eligibility.",
+  owner: "@ate/configuration",
+} satisfies EventTypeRegistration;
+
 export const configurationEventRegistrations: readonly EventTypeRegistration[] = [
   configurationSnapshotPublishedEvent,
   configurationResolutionFailedEvent,
@@ -141,4 +246,9 @@ export const configurationEventRegistrations: readonly EventTypeRegistration[] =
   configurationVersionIntegrityFailedEvent,
   configurationCapabilitySnapshotPublishedEvent,
   configurationCapabilityBlockedEvent,
+  configurationApprovalRequestedEvent,
+  configurationApprovedEvent,
+  configurationRejectedEvent,
+  configurationApprovalRevokedEvent,
+  configurationApprovalInvalidatedEvent,
 ];

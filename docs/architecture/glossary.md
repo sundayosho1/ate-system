@@ -123,6 +123,12 @@ This glossary defines canonical ATE terminology. Future prompts should use these
 | Effective Capability          | Deterministic Prompt 10 result for one capability, including enabled/disabled/unavailable/blocked/degraded state, reason codes and provenance.                            |
 | Capability Snapshot           | Immutable Prompt 10 view of all effective capabilities and feature flags for one configuration snapshot/runtime mode.                                                     |
 | Pending Restart               | Capability-control state showing that desired configuration differs from applied state for a restart-required flag.                                                       |
+| Maker                         | Actor that proposed/created an immutable configuration version.                                                                                                           |
+| Checker                       | Independent actor authorized to review an approval-required configuration version.                                                                                        |
+| Approval Request              | Prompt 11 immutable review request bound to one configuration version and semantic fingerprints.                                                                          |
+| Approval Decision             | Prompt 11 immutable approve/reject evidence from an authorized checker.                                                                                                   |
+| Approval Eligibility          | Current Prompt 11 result showing whether a version satisfies governance requirements.                                                                                     |
+| Proposed Configuration        | Validated/versioned configuration candidate that is not yet applied because governance or later promotion gates are unsatisfied.                                          |
 
 ## Identifier conventions
 

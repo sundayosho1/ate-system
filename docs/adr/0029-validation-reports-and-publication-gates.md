@@ -21,4 +21,4 @@ issues return `CONFIGURATION_VALIDATION_FAILED` and preserve the last-known-good
 - Runtime readiness is blocked by validation errors.
 - Resolution for additional contexts is validated before caching.
 - Reports carry safe metadata such as expected type, constraint and path, not secret material.
-- Promotion, rollback and approval remain future prompt scope.
+- Promotion and rollback remain future prompt scope.

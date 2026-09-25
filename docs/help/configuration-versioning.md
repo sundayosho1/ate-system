@@ -61,8 +61,8 @@ This preserves history and does not implement operational rollback.
 
 ## Attribution vs approval
 
-`actor` identifies who or what created a version. It does not mean the version was approved.
-Maker-checker approval belongs to Prompt 11.
+`actor` identifies who or what created a version. It does not mean the version was approved. Prompt
+11 maker-checker approval binds separate governance evidence to exact version IDs and fingerprints.
 
 ## Troubleshooting
 
@@ -74,6 +74,6 @@ Maker-checker approval belongs to Prompt 11.
 - `CONFIGURATION_VERSION_RECONSTRUCTION_FAILED`: historical content cannot be safely reconstructed.
 - `CONFIGURATION_VERSION_DIFF_LIMIT_EXCEEDED`: requested diff exceeded configured bounds.
 
-Configuration versioning does not provide approvals, promotion, rollback, MT5, execution or live
-trading. Prompt 10 capability control can reference version provenance, but it does not activate
-historical versions.
+Configuration versioning does not provide promotion, rollback, MT5, execution or live trading.
+Prompt 10 capability control and Prompt 11 approval governance can reference version provenance, but
+neither activates historical versions.

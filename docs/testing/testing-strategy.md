@@ -183,6 +183,21 @@ Prompt 10 adds feature-flag and capability-control tests that verify:
 - configuration snapshot/schema/version provenance in explanations;
 - capability-control runtime diagnostics, safe event registrations and state authority.
 
+## Prompt 11 tests
+
+Prompt 11 adds maker-checker approval governance tests that verify:
+
+- deterministic approval policy registration, fingerprints and strictest-policy behavior;
+- standard, sensitive and critical change classification;
+- exact-version approval request binding to version/configuration/change-set/schema/policy
+  fingerprints;
+- maker/checker separation and checker authority fail-closed behavior;
+- approve, reject prevention after final decision, idempotent decision retry and immutable evidence;
+- expiry, revocation and reapproval without rewriting historical decisions;
+- approval of one version does not approve a successor version;
+- proposed-vs-applied governance gate blocks approval-required changes before approval;
+- approval events, state authority and diagnostics.
+
 ## Naming
 
 Test names should describe behavior. Avoid opaque names.

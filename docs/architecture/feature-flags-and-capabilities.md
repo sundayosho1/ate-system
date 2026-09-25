@@ -5,7 +5,8 @@ the build-time capability catalog, managed configuration flags, runtime mode, de
 service readiness, what capabilities are effectively enabled, disabled, unavailable, blocked or
 degraded right now?
 
-It does not implement maker-checker approval, promotion, rollback, rollout percentages, market data,
+Prompt 10 itself did not implement maker-checker approval. Prompt 11 now adds approval governance.
+Capability control still does not implement promotion, rollback, rollout percentages, market data,
 MT5 connectivity, execution engines or live trading.
 
 ## Authorities
@@ -75,6 +76,6 @@ configuration values or secrets.
 
 ## Boundaries
 
-Capability control is not authorization, approval, promotion, rollback or a trading kill switch.
-Those workflows require future prompts with their own authorities. Prompt 10 only establishes the
-truthful registry and deterministic runtime enablement calculation.
+Capability control is not promotion, rollback or a trading kill switch. Prompt 11 approval
+governance remains a separate authority consulted through explicit eligibility/gate contracts.
+Prompt 10 only establishes the truthful registry and deterministic runtime enablement calculation.

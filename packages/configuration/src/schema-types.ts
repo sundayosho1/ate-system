@@ -79,6 +79,14 @@ export type ConfigurationSchemaMetadata = ConfigurationDefinitionMetadata &
     examples?: readonly ConfigurationValue[];
     invalidExamples?: readonly ConfigurationValue[];
     units?: string;
+    approvalClassification?: "STANDARD" | "SENSITIVE" | "CRITICAL";
+    approvalRequired?: boolean;
+    governanceCategory?: string;
+    requiredCheckerAuthority?:
+      | "CONFIGURATION_CHECKER"
+      | "SENSITIVE_CONFIGURATION_CHECKER"
+      | "CRITICAL_CONFIGURATION_CHECKER";
+    governanceHelpText?: string;
   }>;
 
 export type ConfigurationSchema = Readonly<{

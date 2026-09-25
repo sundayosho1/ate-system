@@ -13,9 +13,9 @@ configuration. It answers:
 Prompt 8 extends this authority with schema validation, constraints, dependency rules, cross-field
 rules and invalid-candidate rejection. Prompt 9 adds immutable configuration version history,
 lineage, change sets, diffs and reconstruction. Prompt 10 adds feature-flag and capability-control
-foundations. The configuration package still does not implement maker-checker approval,
-promotion/rollback, frontend configuration editing, trading strategies, risk, portfolio, MT5,
-execution or live trading.
+foundations. Prompt 11 adds maker-checker approval governance. The configuration package still does
+not implement promotion/rollback, frontend configuration editing, trading strategies, risk,
+portfolio, MT5, execution or live trading.
 
 ## Core rule
 

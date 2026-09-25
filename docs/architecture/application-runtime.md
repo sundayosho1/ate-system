@@ -211,7 +211,8 @@ Prompt 3 does not install or configure Windows services.
 Prompt 3 consumes explicit typed construction options only. Prompt 7 establishes hierarchical
 configuration resolution. Prompt 8 adds schema validation and runtime publication gates. Prompt 9
 adds immutable configuration version history. Prompt 10 adds feature-flag and capability-control
-evaluation. Prompts 11-12 remain responsible for approval, promotion and rollback.
+evaluation. Prompt 11 adds maker-checker approval governance. Prompt 12 remains responsible for
+promotion and rollback.
 
 Prompts 7-8 provide the configuration runtime service foundation. Future services should depend on
 that managed service for configuration rather than reading environment variables or local files
@@ -248,3 +249,10 @@ Prompt 10 adds a runtime-managed capability-control service descriptor. The serv
 effective configuration, feature-flag definitions and capability registry records to publish safe
 capability diagnostics. Runtime service readiness may degrade effective capability state, but it
 does not mutate configuration, version history or implementation truth.
+
+## Approval service integration
+
+Prompt 11 adds a runtime-managed approval service descriptor. Pending approval is normal governance
+state and should not automatically make the whole runtime unhealthy. Functionality depending on an
+approval-required configuration version must remain blocked by the governed publication gate until
+approval eligibility is satisfied.

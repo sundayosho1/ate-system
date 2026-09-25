@@ -523,6 +523,91 @@ complete and verify them.
 
 Docs, manifests, diagnostics and tests must not imply capabilities beyond the verified build.
 
+## Prompt 11 maker-checker approval invariants
+
+These invariants specialize managed configuration governance.
+
+## CFG-081 — Sensitive Changes Require Independent Approval
+
+A configuration change classified as approval-required cannot become governance eligible without
+required independent checker approval.
+
+## CFG-082 — Maker Cannot Check Own Sensitive Change
+
+The maker cannot satisfy checker requirements for their own approval-required version.
+
+## CFG-083 — Approval Binds to Exact Version
+
+Approval cannot float between configuration versions.
+
+## CFG-084 — Approval Binds to Exact Content
+
+Configuration, change-set, schema and policy identities must match approval evidence.
+
+## CFG-085 — Validation Precedes Approval
+
+Invalid configuration cannot be approved into validity.
+
+## CFG-086 — Approval Cannot Override Constitutional Safety
+
+Governance authorization remains subordinate to permanent safety authority.
+
+## CFG-087 — Approval Decisions Are Immutable
+
+Historical approval/rejection decisions cannot be edited in place.
+
+## CFG-088 — Approval History Is Append-Only
+
+Revocation and reapproval create new governance evidence rather than rewriting history.
+
+## CFG-089 — Checker Authority Fails Closed
+
+Unverifiable checker authority cannot satisfy approval.
+
+## CFG-090 — Approval Policy Cannot Self-Downgrade
+
+A candidate change cannot weaken the policy used to determine its own approval requirement.
+
+## CFG-091 — Governance Policy Changes Are Governed
+
+Changes weakening or changing approval authority cannot bypass existing governance.
+
+## CFG-092 — Expired Approval Is Not Valid Approval
+
+Expired evidence cannot satisfy a current approval gate.
+
+## CFG-093 — Revoked Approval Is Not Valid Approval
+
+Revoked evidence cannot satisfy a current approval gate.
+
+## CFG-094 — Rejected Version Remains Historical
+
+Rejection cannot delete or rewrite configuration history.
+
+## CFG-095 — Superseding Version Requires Independent Governance Evaluation
+
+Approval of one version never automatically approves its successor.
+
+## CFG-096 — Approval Is Not Promotion
+
+Approval alone cannot perform environment promotion or rollback.
+
+## CFG-097 — Approval Is Not Capability Implementation
+
+Approval cannot make unimplemented functionality available.
+
+## CFG-098 — Approval-Gated Change Cannot Apply Before Approval
+
+Sensitive operational behavior must not change while required approval is pending.
+
+## CFG-099 — Approval Evidence Is Environment-Bound Where Applicable
+
+Approval cannot silently transfer across environment boundaries.
+
+## CFG-100 — Governance Evidence Is Auditable and Safe
+
+Approval provenance must remain inspectable without exposing secrets.
+
 ## Prompt 1 test coverage
 
 Prompt 1 includes foundation tests that verify:
