@@ -1,8 +1,8 @@
 {
   "name": "@ate/configuration",
-  "version": "0.7.0-config.1",
+  "version": "0.8.0-config-schema.1",
   "private": true,
-  "description": "ATE hierarchical configuration authority, scope resolution, effective configuration, provenance, snapshots, and runtime service foundation.",
+  "description": "ATE hierarchical configuration authority, schema validation, constraints, dependency rules, effective configuration, provenance, snapshots, and runtime service foundation.",
   "license": "UNLICENSED",
   "type": "module",
   "sideEffects": false,

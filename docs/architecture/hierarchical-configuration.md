@@ -10,9 +10,10 @@ configuration. It answers:
 - why it won;
 - whether resolution is deterministic and safe to consume.
 
-It does not implement Prompt 8's comprehensive schema engine, Prompt 9's version lifecycle, feature
-flags, maker-checker approval, promotion/rollback, frontend configuration editing, trading
-strategies, risk, portfolio, MT5, execution or live trading.
+Prompt 8 extends this authority with schema validation, constraints, dependency rules, cross-field
+rules and invalid-candidate rejection. The configuration package still does not implement Prompt 9's
+version lifecycle, feature flags, maker-checker approval, promotion/rollback, frontend configuration
+editing, trading strategies, risk, portfolio, MT5, execution or live trading.
 
 ## Core rule
 
@@ -91,7 +92,15 @@ configuration authority.
 ## Runtime service
 
 The configuration runtime service depends on time authority. It loads sources, publishes a coherent
-snapshot, resolves configuration, exposes health/readiness and reports safe diagnostics.
+snapshot, resolves configuration, exposes health/readiness and reports safe diagnostics. When a
+schema registry is supplied, candidate snapshots and runtime effective configuration must pass
+schema validation before publication.
+
+## Schema validation
+
+Prompt 8 schemas define value types, enum values, ranges, object/list shape, units, dependency
+rules, conditional rules, cross-field rules and help metadata. Blocking validation issues produce
+safe validation reports and prevent activation.
 
 ## Persistence and events
 

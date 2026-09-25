@@ -23,6 +23,7 @@ const requiredDocuments = [
   "docs/architecture/environment-runtime-modes.md",
   "docs/architecture/time-and-clock.md",
   "docs/architecture/hierarchical-configuration.md",
+  "docs/architecture/configuration-schema-validation.md",
   "docs/architecture/glossary.md",
   "docs/configuration/configuration-principles.md",
   "docs/help/help-and-configuration-usability-standard.md",
@@ -36,6 +37,7 @@ const requiredDocuments = [
   "docs/testing/testing-strategy.md",
   "docs/help/time-and-clock.md",
   "docs/help/hierarchical-configuration.md",
+  "docs/help/configuration-schema-and-validation.md",
 ];
 
 describe("Prompt 1 repository foundation", () => {
@@ -100,7 +102,7 @@ describe("Prompt 1 repository foundation", () => {
       "Master Architecture, Repository Foundation & Engineering Constitution",
     );
     expect(ledger).toContain("Completed");
-    expect(ledger).not.toMatch(/\|\s*8\s*\|.*Completed/i);
+    expect(ledger).not.toMatch(/\|\s*9\s*\|.*Completed/i);
   });
 
   it("does not claim live trading capability in the README", () => {

@@ -1,6 +1,8 @@
+import { runtimeModes } from "@ate/domain";
 import type { Clock } from "@ate/time";
 
 import { configurationKey } from "./keys.js";
+import { configurationSchemaFromDefinition, type ConfigurationSchema } from "./schema-types.js";
 import type { ConfigurationDefinition, ConfigurationKey } from "./types.js";
 
 export const foundationalConfigurationKey = (value: string, clock: Clock): ConfigurationKey => {
@@ -129,3 +131,106 @@ export const foundationalConfigurationDefinitions = (
     },
   },
 ];
+
+export const foundationalConfigurationSchemas = (clock: Clock): readonly ConfigurationSchema[] => {
+  const definitions = foundationalConfigurationDefinitions(clock);
+  const byKey = new Map(definitions.map((definition) => [definition.key, definition]));
+  const runtimeMode = foundationalConfigurationKey("system.runtimeMode", clock);
+  const logLevel = foundationalConfigurationKey("system.logLevel", clock);
+  const cacheMaxEntries = foundationalConfigurationKey(
+    "system.configurationCacheMaxEntries",
+    clock,
+  );
+  const freshnessPolicy = foundationalConfigurationKey("data.defaultFreshnessPolicy", clock);
+  const maxRetryAttempts = foundationalConfigurationKey("execution.maxRetryAttempts", clock);
+  const scanInterval = foundationalConfigurationKey("surveillance.scanIntervalMs", clock);
+
+  return [
+    configurationSchemaFromDefinition(requireDefinition(byKey, runtimeMode), {
+      constraints: { enumValues: runtimeModes },
+      crossFieldRules: [
+        {
+          ruleId: "RUNTIME_MODE_MATCHES_CONTEXT",
+          keys: [runtimeMode],
+          message: "system.runtimeMode must match the effective resolution runtime context",
+        },
+      ],
+      metadata: {
+        ...requireDefinition(byKey, runtimeMode).metadata,
+        helpText: "Choose one Prompt 3 runtime mode and keep environment overrides isolated.",
+        examples: ["SIMULATION", "PAPER", "LIVE"],
+      },
+    }),
+    configurationSchemaFromDefinition(requireDefinition(byKey, logLevel), {
+      constraints: { enumValues: ["trace", "debug", "info", "warn", "error"] },
+      metadata: {
+        ...requireDefinition(byKey, logLevel).metadata,
+        helpText: "Controls operational logging verbosity after managed configuration loads.",
+        examples: ["info", "warn"],
+      },
+    }),
+    configurationSchemaFromDefinition(requireDefinition(byKey, cacheMaxEntries), {
+      constraints: { minimum: 1, maximum: 10_000, unit: "count" },
+      metadata: {
+        ...requireDefinition(byKey, cacheMaxEntries).metadata,
+        helpText: "Bounds the non-authoritative effective-configuration cache.",
+        examples: [100, 500],
+        invalidExamples: [0, 100_001],
+        units: "entries",
+      },
+    }),
+    configurationSchemaFromDefinition(requireDefinition(byKey, freshnessPolicy), {
+      constraints: {
+        requiredProperties: ["maxAgeMs", "staleAction"],
+        allowUnknownProperties: false,
+        properties: {
+          maxAgeMs: {
+            valueType: "DURATION_MS",
+            required: true,
+            constraints: { minimum: 1, maximum: 86_400_000, unit: "milliseconds" },
+          },
+          staleAction: {
+            valueType: "ENUM",
+            required: true,
+            constraints: { enumValues: ["FAIL_CLOSED", "WARN", "IGNORE"] },
+          },
+        },
+      },
+      metadata: {
+        ...requireDefinition(byKey, freshnessPolicy).metadata,
+        helpText:
+          "Declares foundational data freshness shape without implementing market-data services.",
+        examples: [{ maxAgeMs: 1_000, staleAction: "FAIL_CLOSED" }],
+      },
+    }),
+    configurationSchemaFromDefinition(requireDefinition(byKey, maxRetryAttempts), {
+      constraints: { minimum: 0, maximum: 10, unit: "count" },
+      metadata: {
+        ...requireDefinition(byKey, maxRetryAttempts).metadata,
+        helpText: "Caps future execution retry attempts without implementing an execution engine.",
+        examples: [0, 3],
+        invalidExamples: [-1, 50],
+      },
+    }),
+    configurationSchemaFromDefinition(requireDefinition(byKey, scanInterval), {
+      constraints: { minimum: 1_000, maximum: 3_600_000, unit: "milliseconds" },
+      metadata: {
+        ...requireDefinition(byKey, scanInterval).metadata,
+        helpText:
+          "Bounds future surveillance scan intervals without implementing MOSE or surveillance.",
+        examples: [5_000, 60_000],
+      },
+    }),
+  ];
+};
+
+const requireDefinition = (
+  definitions: ReadonlyMap<ConfigurationKey, ConfigurationDefinition>,
+  key: ConfigurationKey,
+): ConfigurationDefinition => {
+  const definition = definitions.get(key);
+  if (definition === undefined) {
+    throw new Error(`missing foundational configuration definition: ${key}`);
+  }
+  return definition;
+};

@@ -18,7 +18,8 @@ Currently implemented:
   deterministic scheduling, and runtime-service integration.
 - `@ate/configuration` — hierarchical configuration control-plane foundation with canonical domains,
   scopes, context, source abstraction, deterministic precedence, provenance, immutable snapshots,
-  fingerprints, bounded cache, runtime-service integration, and safe diagnostics.
+  schema validation, constraints, dependency and cross-field rules, fingerprints, bounded cache,
+  runtime-service integration, invalid-candidate rejection, and safe diagnostics.
 
 No package currently implements trading behavior, risk calculations, portfolio calculations, MT5
 connectivity, broker execution, market calendars, market-data storage, configuration version

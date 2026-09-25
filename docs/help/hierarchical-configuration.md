@@ -168,4 +168,6 @@ Read diagnostics for missing required values, blocking conflicts, absent snapsho
 | `execution.maxRetryAttempts`          | `EXECUTION`    | `INTEGER`     | None    | System/environment/future execution scopes |
 | `surveillance.scanIntervalMs`         | `SURVEILLANCE` | `DURATION_MS` | None    | System/environment/surveillance scopes     |
 
-These definitions are foundations only; Prompt 8 will add comprehensive validation.
+These definitions are foundations only. Prompt 8 adds schema validation for these keys, including
+runtime-mode/log-level enums, cache bounds, data freshness object shape, retry bounds and
+surveillance interval bounds.

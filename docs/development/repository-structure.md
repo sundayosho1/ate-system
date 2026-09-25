@@ -73,9 +73,12 @@ trading services, MT5 or live trading.
 Prompt 7 adds `packages/configuration` as the authoritative hierarchical configuration foundation.
 It implements domains, keys, scopes, context, source abstraction, deterministic precedence,
 inheritance, conflict detection, provenance, explanations, immutable snapshots, fingerprints,
-bounded cache, runtime integration and safe diagnostics only; it does not implement Prompt 8's full
-schema engine, Prompt 9 version lifecycle, feature flags, approvals, promotion/rollback or frontend
-editing.
+bounded cache, runtime integration and safe diagnostics only.
+
+Prompt 8 extends `packages/configuration` with schema registry authority, deterministic schema
+fingerprints, type/range/enum/object/list validation, dependency and conditional rules, cross-field
+rules, validation reports and runtime invalid-candidate rejection; it does not implement Prompt 9
+version lifecycle, feature flags, approvals, promotion/rollback or frontend editing.
 
 ### `mt5/`
 
@@ -96,7 +99,8 @@ configuration does not belong here.
 Automated tests. Prompt 1 adds foundation tests validating documentation and capability
 truthfulness. Prompt 4 adds event architecture tests under `tests/events`. Prompt 5 adds
 persistence/state authority tests under `tests/persistence`. Prompt 6 adds temporal integrity tests
-under `tests/time`. Prompt 7 adds hierarchical configuration tests under `tests/configuration`.
+under `tests/time`. Prompts 7-8 add hierarchical configuration and schema validation tests under
+`tests/configuration`.
 
 ### `scripts/`
 

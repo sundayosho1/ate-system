@@ -213,6 +213,56 @@ export type ConfigurationConflictType =
   | "MERGE_CONFLICT"
   | "LIMIT_EXCEEDED";
 
+export type ConfigurationValidationPhase =
+  | "SCHEMA"
+  | "SOURCE_ENTRY"
+  | "STRUCTURAL"
+  | "TYPE"
+  | "CONSTRAINT"
+  | "SCOPE_APPLICABILITY"
+  | "DEPENDENCY"
+  | "CONDITIONAL"
+  | "CROSS_FIELD"
+  | "EFFECTIVE_CONFIGURATION"
+  | "PUBLICATION_GATE";
+
+export type ConfigurationValidationSeverity = "INFO" | "WARNING" | "ERROR" | "CRITICAL";
+
+export type ConfigurationValidationIssue = Readonly<{
+  phase: ConfigurationValidationPhase;
+  severity: ConfigurationValidationSeverity;
+  message: string;
+  key?: ConfigurationKey;
+  scope?: ConfigurationScope;
+  path?: string;
+  expected?: string;
+  receivedType?: string;
+  constraint?: string;
+  dependencyKey?: ConfigurationKey;
+  metadata?: Readonly<Record<string, string | number | boolean>>;
+}>;
+
+export type ConfigurationValidationSummary = Readonly<{
+  issueCount: number;
+  blockingIssueCount: number;
+  errorCount: number;
+  warningCount: number;
+  infoCount: number;
+  phaseCounts: Readonly<Record<ConfigurationValidationPhase, number>>;
+}>;
+
+export type ConfigurationValidationReport = Readonly<{
+  reportId: string;
+  fingerprint: ConfigurationFingerprint;
+  generatedAt: UtcTimestamp;
+  schemaFingerprint: ConfigurationFingerprint;
+  snapshotId?: ConfigurationSnapshotId;
+  context?: ConfigurationContext;
+  issues: readonly ConfigurationValidationIssue[];
+  summary: ConfigurationValidationSummary;
+  publicationAllowed: boolean;
+}>;
+
 export type ConfigurationConflict = Readonly<{
   type: ConfigurationConflictType;
   key?: ConfigurationKey;
@@ -309,11 +359,21 @@ export type ConfigurationDiagnostics = Readonly<{
   lastSuccessfulLoad?: UtcTimestamp;
   lastSourceFailure?: UtcTimestamp;
   recentErrors: readonly ConfigurationError[];
+  schema?: ConfigurationSchemaDiagnostics;
+}>;
+
+export type ConfigurationSchemaDiagnostics = Readonly<{
+  registeredSchemaCount: number;
+  schemaFingerprint: ConfigurationFingerprint;
+  lastReportFingerprint?: ConfigurationFingerprint;
+  lastReportSummary?: ConfigurationValidationSummary;
+  blockingIssueCount: number;
 }>;
 
 export const configurationErrorCodes = [
   "CONFIGURATION_KEY_UNKNOWN",
   "CONFIGURATION_KEY_DUPLICATE",
+  "CONFIGURATION_SCHEMA_INVALID",
   "CONFIGURATION_SCOPE_INVALID",
   "CONFIGURATION_CONTEXT_INVALID",
   "CONFIGURATION_CONFLICT",
@@ -326,6 +386,7 @@ export const configurationErrorCodes = [
   "CONFIGURATION_SNAPSHOT_INVALID",
   "CONFIGURATION_CYCLE_DETECTED",
   "CONFIGURATION_SECRET_VALUE_FORBIDDEN",
+  "CONFIGURATION_VALIDATION_FAILED",
   "CONFIGURATION_RUNTIME_MODE_MISMATCH",
   "CONFIGURATION_LIMIT_EXCEEDED",
 ] as const;

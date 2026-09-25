@@ -13,7 +13,10 @@ import { scopeCounts } from "./diagnostics.js";
 import { configurationError, fail, ok } from "./errors.js";
 import type { ConfigurationRegistry } from "./registry.js";
 import { ConfigurationResolver } from "./resolver.js";
+import type { ConfigurationSchemaRegistry } from "./schema-registry.js";
 import { buildConfigurationSnapshot } from "./snapshot.js";
+import { combineValidationReports } from "./validation-report.js";
+import { validateConfigurationSnapshot, validateEffectiveConfiguration } from "./validation.js";
 import type {
   ConfigurationContext,
   ConfigurationDiagnostics,
@@ -21,6 +24,7 @@ import type {
   ConfigurationResult,
   ConfigurationSnapshot,
   ConfigurationSource,
+  ConfigurationValidationReport,
   EffectiveConfiguration,
 } from "./types.js";
 
@@ -30,6 +34,7 @@ export type ConfigurationRuntimeServiceInput = Readonly<{
   runtimeMode: RuntimeMode;
   clock: Clock;
   registry: ConfigurationRegistry;
+  schemaRegistry?: ConfigurationSchemaRegistry;
   sources: readonly ConfigurationSource[];
   cacheMaxEntries?: number;
   snapshotMaxEntries?: number;
@@ -45,6 +50,7 @@ export class ConfigurationRuntimeService {
   private resolutionFailures = 0;
   private lastSuccessfulLoad: ConfigurationDiagnostics["lastSuccessfulLoad"];
   private lastSourceFailure: ConfigurationDiagnostics["lastSourceFailure"];
+  private lastValidationReport: ConfigurationValidationReport | undefined;
   private readonly recentErrors: ConfigurationError[] = [];
 
   public constructor(private readonly input: ConfigurationRuntimeServiceInput) {
@@ -75,7 +81,45 @@ export class ConfigurationRuntimeService {
       this.lastSourceFailure = this.input.clock.now();
       return candidate;
     }
-    if (candidate.value.conflicts.length > 0) {
+    if (this.input.schemaRegistry !== undefined) {
+      const snapshotReport = validateConfigurationSnapshot({
+        schemaRegistry: this.input.schemaRegistry,
+        snapshot: candidate.value,
+        clock: this.input.clock,
+      });
+      const effective = new ConfigurationResolver(
+        this.input.registry,
+        candidate.value,
+        this.input.clock,
+      ).resolve({ runtimeMode: this.input.runtimeMode });
+      if (!effective.ok) {
+        this.recordError(effective.error);
+        this.lastSourceFailure = this.input.clock.now();
+        return effective;
+      }
+      const effectiveReport = validateEffectiveConfiguration({
+        schemaRegistry: this.input.schemaRegistry,
+        effective: effective.value,
+        clock: this.input.clock,
+      });
+      const publicationReport = combineValidationReports({
+        clock: this.input.clock,
+        schemaFingerprint: this.input.schemaRegistry.fingerprint(),
+        reports: [snapshotReport, effectiveReport],
+        snapshotId: candidate.value.snapshotId,
+        context: effective.value.context,
+      });
+      this.lastValidationReport = publicationReport;
+      if (!publicationReport.publicationAllowed) {
+        const error = this.validationError(
+          "candidate configuration failed schema validation",
+          publicationReport,
+        );
+        this.recordError(error);
+        this.lastSourceFailure = this.input.clock.now();
+        return fail(error);
+      }
+    } else if (candidate.value.conflicts.length > 0) {
       const error = configurationError({
         code: "CONFIGURATION_SNAPSHOT_INVALID",
         message: "candidate configuration snapshot contains blocking conflicts",
@@ -120,6 +164,23 @@ export class ConfigurationRuntimeService {
       this.resolutionFailures += 1;
     }
     if (resolved.ok) {
+      if (this.input.schemaRegistry !== undefined) {
+        const report = validateEffectiveConfiguration({
+          schemaRegistry: this.input.schemaRegistry,
+          effective: resolved.value,
+          clock: this.input.clock,
+        });
+        this.lastValidationReport = report;
+        if (!report.publicationAllowed) {
+          this.resolutionFailures += 1;
+          const error = this.validationError(
+            "effective configuration failed schema validation",
+            report,
+          );
+          this.recordError(error);
+          return fail(error);
+        }
+      }
       this.cache.set(resolved.value);
     } else {
       this.recordError(resolved.error);
@@ -158,7 +219,11 @@ export class ConfigurationRuntimeService {
     const environmentResolution =
       this.activeSnapshot === undefined
         ? undefined
-        : this.resolve({ runtimeMode: this.input.runtimeMode });
+        : new ConfigurationResolver(
+            this.input.registry,
+            this.activeSnapshot,
+            this.input.clock,
+          ).resolve({ runtimeMode: this.input.runtimeMode });
     const missingRequiredValues =
       environmentResolution?.ok === true
         ? environmentResolution.value.diagnostics.missingRequiredKeys
@@ -188,6 +253,21 @@ export class ConfigurationRuntimeService {
         ? {}
         : { lastSourceFailure: this.lastSourceFailure }),
       recentErrors: [...this.recentErrors],
+      ...(this.input.schemaRegistry === undefined
+        ? {}
+        : {
+            schema: {
+              registeredSchemaCount: this.input.schemaRegistry.keys().length,
+              schemaFingerprint: this.input.schemaRegistry.fingerprint(),
+              ...(this.lastValidationReport === undefined
+                ? {}
+                : { lastReportFingerprint: this.lastValidationReport.fingerprint }),
+              ...(this.lastValidationReport === undefined
+                ? {}
+                : { lastReportSummary: this.lastValidationReport.summary }),
+              blockingIssueCount: this.lastValidationReport?.summary.blockingIssueCount ?? 0,
+            },
+          }),
     };
   }
 
@@ -212,6 +292,7 @@ export class ConfigurationRuntimeService {
       diagnostics.state === "READY" &&
       diagnostics.activeSnapshotId !== undefined &&
       diagnostics.conflictCount === 0 &&
+      (diagnostics.schema?.blockingIssueCount ?? 0) === 0 &&
       diagnostics.missingRequiredValues.length === 0;
     return {
       status: ready ? "READY" : "NOT_READY",
@@ -227,13 +308,17 @@ export class ConfigurationRuntimeService {
       descriptor: serviceDescriptor({
         serviceId: configurationServiceId,
         name: "ATE Configuration Authority",
-        version: "0.7.0-config.1",
+        version: "0.8.0-config-schema.1",
         description:
-          "Hierarchical configuration control-plane foundation with scoped resolution, provenance, snapshots and diagnostics.",
+          "Hierarchical configuration control-plane foundation with schema validation, scoped resolution, provenance, snapshots and diagnostics.",
         criticality: "CRITICAL",
         dependencies: [clockRuntimeServiceId],
         supportedModes: runtimeModes,
-        capabilities: ["CONFIGURATION_AUTHORITY", "CONFIGURATION_RESOLUTION"],
+        capabilities: [
+          "CONFIGURATION_AUTHORITY",
+          "CONFIGURATION_RESOLUTION",
+          "CONFIGURATION_SCHEMA_VALIDATION",
+        ],
         degradationPolicy: "FAIL_RUNTIME",
         healthCapability: true,
         readinessCapability: true,
@@ -256,6 +341,35 @@ export class ConfigurationRuntimeService {
   private recordError(error: ConfigurationError): void {
     this.recentErrors.unshift(error);
     this.recentErrors.splice(20);
+  }
+
+  private validationError(
+    message: string,
+    report: ConfigurationValidationReport,
+  ): ConfigurationError {
+    return configurationError({
+      code: "CONFIGURATION_VALIDATION_FAILED",
+      message,
+      timestamp: this.input.clock.now(),
+      severity: "CRITICAL",
+      details: {
+        reportId: report.reportId,
+        reportFingerprint: report.fingerprint,
+        summary: report.summary,
+        issues: report.issues.map((issue) => ({
+          phase: issue.phase,
+          severity: issue.severity,
+          message: issue.message,
+          key: issue.key,
+          scope: issue.scope,
+          path: issue.path,
+          expected: issue.expected,
+          receivedType: issue.receivedType,
+          constraint: issue.constraint,
+          dependencyKey: issue.dependencyKey,
+        })),
+      },
+    });
   }
 }
 

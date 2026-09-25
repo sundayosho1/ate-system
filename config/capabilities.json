@@ -4,8 +4,8 @@
   "manifest_version": 1,
   "updated_at": "2026-09-25",
   "development_phase": "Phase II — Configuration & Control Plane",
-  "completed_prompt": 7,
-  "pre_production_version": "0.7.0-config.1",
+  "completed_prompt": 8,
+  "pre_production_version": "0.8.0-config-schema.1",
   "capabilities": {
     "repository_foundation": true,
     "engineering_constitution": true,
@@ -96,14 +96,22 @@
     "configuration_health_readiness": true,
     "configuration_environment_isolation": true,
     "safe_configuration_diagnostics": true,
+    "configuration_schema_registry": true,
+    "configuration_schema_fingerprint": true,
+    "configuration_type_validation": true,
+    "configuration_constraint_validation": true,
+    "configuration_dependency_rules": true,
+    "configuration_conditional_rules": true,
+    "configuration_cross_field_validation": true,
+    "configuration_validation_reports": true,
+    "configuration_invalid_candidate_rejection": true,
     "backend_api": false,
     "frontend_control_center": false,
     "database_persistence": true,
     "event_bus": true,
     "durable_event_persistence": false,
     "distributed_event_broker": false,
-    "comprehensive_configuration_schema_engine": false,
-    "configuration_cross_field_validation": false,
+    "comprehensive_configuration_schema_engine": true,
     "configuration_version_lifecycle": false,
     "feature_flags": false,
     "capability_management": false,
@@ -142,5 +150,5 @@
     "authentication_rbac": false,
     "production_deployment": false
   },
-  "truth_statement": "Prompts 1-7 establish repository governance, documentation, quality foundations, core domain contracts, application runtime lifecycle infrastructure, internal in-process event architecture, persistence/state authority foundations, temporal integrity foundations, and hierarchical configuration control-plane foundations only. ATE cannot trade, connect to MT5, manage accounts, size positions, submit orders, execute strategies, ingest market data, calculate risk, allocate accounts, use market calendars/sessions, run a historical replay engine, use a distributed event broker, perform configuration version promotion/rollback or maker-checker approval, or perform live trading."
+  "truth_statement": "Prompts 1-8 establish repository governance, documentation, quality foundations, core domain contracts, application runtime lifecycle infrastructure, internal in-process event architecture, persistence/state authority foundations, temporal integrity foundations, hierarchical configuration control-plane foundations, and configuration schema validation/rejection foundations only. ATE cannot trade, connect to MT5, manage accounts, size positions, submit orders, execute strategies, ingest market data, calculate risk, allocate accounts, use market calendars/sessions, run a historical replay engine, use a distributed event broker, perform configuration version promotion/rollback or maker-checker approval, or perform live trading."
 }

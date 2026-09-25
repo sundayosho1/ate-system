@@ -3,7 +3,8 @@
 ATE must be highly configurable without becoming unsafe or unexplained.
 
 Prompt 1 documented principles. Prompt 7 implements the first authoritative hierarchical
-configuration engine foundation in `@ate/configuration`.
+configuration engine foundation in `@ate/configuration`. Prompt 8 adds schemas, constraints,
+dependency rules, cross-field validation, validation reports and invalid-candidate rejection.
 
 ## Configuration hierarchy
 
@@ -81,8 +82,9 @@ explicit operator configuration and validation.
 Secrets must use environment-appropriate secret management. They must not be stored in committed
 configuration files, logged, exposed through APIs, or rendered in frontend responses.
 
-## Prompt 7 boundaries
+## Prompt 8 boundaries
 
-Prompt 7 provides keys, domains, scopes, entries, sources, resolution, provenance, snapshots,
-fingerprints, cache semantics and runtime integration. Prompt 8 owns comprehensive schema
-validation. Prompt 9 owns version history. Prompts 11-12 own approval, promotion and rollback.
+Prompts 7-8 provide keys, domains, scopes, entries, sources, resolution, provenance, snapshots,
+fingerprints, cache semantics, runtime integration, schemas, validation reports and invalid
+configuration rejection. Prompt 9 owns version history. Prompts 11-12 own approval, promotion and
+rollback.

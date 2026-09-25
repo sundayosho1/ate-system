@@ -140,6 +140,19 @@ Prompt 7 adds hierarchical configuration tests that verify:
 - architecture constraints against uncontrolled `process.env` reads and domain dependency on
   configuration infrastructure.
 
+## Prompt 8 tests
+
+Prompt 8 adds configuration schema and validation tests that verify:
+
+- deterministic schema registry fingerprints;
+- schema self-validation and invalid default rejection;
+- enum, range, object-shape and safe-report source-entry validation;
+- runtime invalid-candidate rejection before publication;
+- last-known-good preservation after validation failure;
+- dependency, conditional, mutual-exclusion and cross-field validation phases;
+- schema diagnostics through the runtime service;
+- continued event, persistence and runtime integration without implementing trading features.
+
 ## Naming
 
 Test names should describe behavior. Avoid opaque names.

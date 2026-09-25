@@ -268,6 +268,90 @@ Resolution never relies on hidden mutable operational context.
 
 Invalid refreshes leave active configuration coherent where policy permits continued operation.
 
+## Prompt 8 configuration schema invariants
+
+These invariants specialize managed configuration validation.
+
+## CFG-021 — Schema Authority Is Central
+
+Configuration schemas are owned by the configuration authority, not by scattered business modules.
+
+## CFG-022 — Schema Defaults Self-Validate
+
+A default value is not admissible unless it satisfies its own schema.
+
+## CFG-023 — Types Are Enforced Before Activation
+
+Value type metadata must be enforced before a value becomes active.
+
+## CFG-024 — Units Are Explicit
+
+Durations, counts, percentages and other bounded quantities must document their unit.
+
+## CFG-025 — Ranges Are Explicit
+
+Minimums and maximums must be declared for bounded safety-relevant values.
+
+## CFG-026 — Enums Are Closed
+
+Enumerated configuration values must reject unknown strings.
+
+## CFG-027 — Object Shape Is Declared
+
+Structured configuration must declare required properties where behavior depends on them.
+
+## CFG-028 — Dependency Rules Are Declarative
+
+Configuration dependencies must be declared as data, not executable code.
+
+## CFG-029 — Conditional Rules Are Visible
+
+Contextual requirements must be visible in schema metadata and validation reports.
+
+## CFG-030 — Mutual Exclusions Fail Closed
+
+Mutually exclusive settings must not both become active.
+
+## CFG-031 — Cross-Field Rules Are Deterministic
+
+Cross-field validation must use deterministic built-in rule identifiers.
+
+## CFG-032 — Validation Reports Are Safe
+
+Validation reports must not expose secret material or raw sensitive values.
+
+## CFG-033 — Validation Phases Are Stable
+
+Validation reports must identify the phase where an issue occurred.
+
+## CFG-034 — Blocking Issues Prevent Publication
+
+Errors and critical validation issues must block candidate publication.
+
+## CFG-035 — Effective Configuration Is Validated
+
+Resolved effective configuration must be validated before being treated as consumable.
+
+## CFG-036 — Schema Fingerprints Are Deterministic
+
+Equivalent schemas must produce equivalent semantic fingerprints.
+
+## CFG-037 — Runtime Context Must Match Runtime Configuration
+
+The effective runtime-mode configuration must not contradict the resolution context.
+
+## CFG-038 — Secret References Are Typed
+
+Secret references are only valid where the schema permits secret references.
+
+## CFG-039 — Invalid Resolution Is Not Cached
+
+An effective configuration with blocking validation issues must not be inserted into the cache.
+
+## CFG-040 — Schema Validation Is Not Version Lifecycle
+
+Schema validation does not imply configuration approval, promotion, rollback or history.
+
 ## Prompt 1 test coverage
 
 Prompt 1 includes foundation tests that verify:
