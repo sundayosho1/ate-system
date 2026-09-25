@@ -140,9 +140,11 @@ export class InMemoryConfigurationVersionRepository implements ConfigurationVers
       );
     }
     const changeSet = changeSetFromContent({
-      prior: parent?.content,
+      ...(parent === undefined ? {} : { prior: parent.content }),
       next: content,
-      schemaRegistry: this.input.schemaRegistry,
+      ...(this.input.schemaRegistry === undefined
+        ? {}
+        : { schemaRegistry: this.input.schemaRegistry }),
       reason: input.reason,
     });
     const sequence = parent === undefined ? 1 : parent.sequence + 1;

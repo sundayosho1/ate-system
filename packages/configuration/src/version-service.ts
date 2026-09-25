@@ -96,7 +96,9 @@ export class ConfigurationVersionService implements ConfigurationVersionRuntimeS
       ...input,
       snapshot: reconstruction.value.snapshot,
       derivedFromVersionId: versionId,
-      allowNoSemanticChange: input.allowNoSemanticChange,
+      ...(input.allowNoSemanticChange === undefined
+        ? {}
+        : { allowNoSemanticChange: input.allowNoSemanticChange }),
     });
     if (created.ok) {
       this.candidateFromHistoryCount += 1;

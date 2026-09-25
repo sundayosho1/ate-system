@@ -32,7 +32,6 @@ const makeClock = () => new VirtualClock(utc("2026-09-25T09:00:00.000Z"));
 
 const actor: Actor = {
   actorType: "SERVICE",
-  actorId: "configuration-version-test",
   displayName: "configuration-version-test",
 };
 
@@ -135,7 +134,7 @@ describe("Prompt 9 immutable configuration versioning and history", () => {
     expect(root.ok ? root.value.configurationSnapshotId : undefined).toBe(
       firstSnapshot.ok ? firstSnapshot.value.snapshotId : undefined,
     );
-    expect(root.ok ? root.value.actor.actorId : undefined).toBe(actor.actorId);
+    expect(root.ok ? root.value.actor.displayName : undefined).toBe(actor.displayName);
     expect(
       root.ok ? root.value.changeSet.operations.map((operation) => operation.operation) : [],
     ).toContain("ADD");

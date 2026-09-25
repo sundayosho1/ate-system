@@ -10,6 +10,7 @@ import type {
   ConfigurationEntry,
   ConfigurationError,
   ConfigurationFingerprint,
+  ConfigurationScope,
   ConfigurationSnapshot,
   ConfigurationValue,
 } from "./types.js";
@@ -29,7 +30,7 @@ import type {
 
 export const configurationVersionEntryIdentity = (entry: {
   key: string;
-  scope: { scopeType: string; scopeId?: string };
+  scope: ConfigurationScope;
 }): string => `${entry.key}|${scopeIdentity(entry.scope)}`;
 
 export const configurationVersionContentFromSnapshot = (
@@ -65,10 +66,10 @@ export const configurationVersionContentFingerprint = (
   });
 
 export const changeSetFromContent = (input: {
-  prior?: ConfigurationVersionContent;
+  prior?: ConfigurationVersionContent | undefined;
   next: ConfigurationVersionContent;
-  schemaRegistry?: ConfigurationSchemaRegistry;
-  reason?: string;
+  schemaRegistry?: ConfigurationSchemaRegistry | undefined;
+  reason?: string | undefined;
 }): ConfigurationChangeSet => {
   const priorEntries = new Map(
     (input.prior?.entries ?? []).map((entry) => [entry.identity, entry]),
@@ -274,7 +275,7 @@ export const configurationVersionFingerprint = (
     idempotencyKey: version.idempotencyKey,
   });
 
-export const configurationVersionId = (value: string): ConfigurationVersionId =>
+export const configurationVersionId = (value: unknown): ConfigurationVersionId =>
   `cfgver-${fingerprint(value).replace("sha256:", "").slice(0, 24)}` as ConfigurationVersionId;
 
 export const changeSetId = (value: string): ConfigurationChangeSetId =>
@@ -291,8 +292,8 @@ export const versioningError = (input: {
     code: input.code,
     message: input.message,
     timestamp: input.clock.now(),
-    severity: input.severity,
-    details: input.details,
+    ...(input.severity === undefined ? {} : { severity: input.severity }),
+    ...(input.details === undefined ? {} : { details: input.details }),
   });
 
 export const validateVersionActorAndReason = (
@@ -420,28 +421,34 @@ const changeOperation = (
   next: ConfigurationVersionEntry | undefined,
   _schemaRegistry?: ConfigurationSchemaRegistry,
   reason?: string,
-): ConfigurationChangeOperation =>
-  freeze({
+): ConfigurationChangeOperation => {
+  const previousDigest = valueDigest(previous);
+  const nextDigest = valueDigest(next);
+  return freeze({
     operation,
     identity: identitySource.identity,
     key: identitySource.key,
     scope: identitySource.scope,
-    ...(valueDigest(previous) === undefined ? {} : { previous: valueDigest(previous) }),
-    ...(valueDigest(next) === undefined ? {} : { next: valueDigest(next) }),
+    ...(previousDigest === undefined ? {} : { previous: previousDigest }),
+    ...(nextDigest === undefined ? {} : { next: nextDigest }),
     ...(reason === undefined ? {} : { reason }),
   });
+};
 
 const diffEntry = (
   operation: ConfigurationVersionDiffEntry["operation"],
   identitySource: ConfigurationVersionEntry,
   previous: ConfigurationVersionEntry | undefined,
   next: ConfigurationVersionEntry | undefined,
-): ConfigurationVersionDiffEntry =>
-  freeze({
+): ConfigurationVersionDiffEntry => {
+  const previousDigest = valueDigest(previous);
+  const nextDigest = valueDigest(next);
+  return freeze({
     operation,
     identity: identitySource.identity,
     key: identitySource.key,
     scope: identitySource.scope,
-    ...(valueDigest(previous) === undefined ? {} : { previous: valueDigest(previous) }),
-    ...(valueDigest(next) === undefined ? {} : { next: valueDigest(next) }),
+    ...(previousDigest === undefined ? {} : { previous: previousDigest }),
+    ...(nextDigest === undefined ? {} : { next: nextDigest }),
   });
+};
