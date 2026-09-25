@@ -91,5 +91,6 @@ Limits bound file size, rows, columns, field length, nesting, rejections and que
 
 ## Related Features
 
-Prompt 15 quality scoring, Prompt 16 catalogue/lineage, Prompt 17 real-time ingestion, Prompt 18
-aggregation and Prompt 19 replay remain future scope.
+Prompt 15 quality scoring is implemented separately in `@ate/data-quality` and consumes published
+datasets through repository/query contracts. Prompt 16 catalogue/lineage, Prompt 17 real-time
+ingestion, Prompt 18 aggregation and Prompt 19 replay remain future scope.

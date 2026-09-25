@@ -23,6 +23,7 @@ export const foundationalCapabilityDefinitions = (): readonly CapabilityDefiniti
   const configurationCapabilityDiagnostics = capabilityId("configuration.capabilityDiagnostics");
   const dataMarketDataContracts = capabilityId("data.marketDataContracts");
   const dataHistoricalDataLaboratory = capabilityId("data.historicalDataLaboratory");
+  const dataQualityEngine = capabilityId("data.dataQualityEngine");
   const dataMarketData = capabilityId("data.marketData");
   const executionMt5 = capabilityId("execution.mt5");
   const executionLiveTrading = capabilityId("execution.liveTrading");
@@ -193,6 +194,21 @@ export const foundationalCapabilityDefinitions = (): readonly CapabilityDefiniti
       versionIntroduced: "0.14.0-historical-data.1",
       safetyNotes:
         "Offline historical research access only; no data-quality scoring, catalogue authority, provider/live ingestion, replay, strategy, risk, execution or trading authority.",
+    },
+    {
+      capabilityId: dataQualityEngine,
+      displayName: "Data Quality Engine",
+      description:
+        "Prompt 15 deterministic historical dataset quality assessment, bounded findings, immutable quality reports, scoring and non-trading qualification diagnostics.",
+      owner: "@ate/data-quality",
+      capabilityClass: "OPTIONAL",
+      implementationStatus: "IMPLEMENTED",
+      reloadBehavior: "STARTUP_ONLY",
+      supportedRuntimeModes: ["DEVELOPMENT", "RESEARCH", "BACKTEST", "SIMULATION"],
+      dependencies: [dataMarketDataContracts, dataHistoricalDataLaboratory],
+      versionIntroduced: "0.15.0-data-quality.1",
+      safetyNotes:
+        "Quality reports detect and explain issues only; scores and qualifications do not authorize strategy, risk, execution, paper or live trading.",
     },
     {
       capabilityId: dataMarketData,

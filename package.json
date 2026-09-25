@@ -1,8 +1,8 @@
 {
   "name": "ate-system",
-  "version": "0.14.0-historical-data.1",
+  "version": "0.15.0-data-quality.1",
   "private": true,
-  "description": "ATE Autonomous Trading Engine repository foundation through historical data laboratory foundations.",
+  "description": "ATE Autonomous Trading Engine repository foundation through data quality engine foundations.",
   "license": "UNLICENSED",
   "type": "module",
   "engines": {

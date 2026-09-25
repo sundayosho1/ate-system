@@ -264,6 +264,77 @@ export const foundationalConfigurationDefinitions = (
       reloadRequirement: "RESTART",
     },
   },
+  {
+    key: foundationalConfigurationKey("data.quality.maxObservations", clock),
+    domain: "DATA",
+    displayName: "Data Quality Maximum Observations",
+    description: "Maximum historical observations evaluated by one data-quality analysis report.",
+    valueType: "INTEGER",
+    required: false,
+    failClosed: true,
+    allowedScopes: ["SYSTEM", "ENVIRONMENT"],
+    mergePolicy: "REPLACE",
+    sensitivity: "INTERNAL",
+    defaultValue: 100_000,
+    metadata: {
+      purpose: "Bound data-quality analysis work and report evidence volume.",
+      riskImplication: "Partial analysis must be reported as insufficient evidence, never hidden.",
+      reloadRequirement: "REFRESH",
+    },
+  },
+  {
+    key: foundationalConfigurationKey("data.quality.evidenceLimitPerRule", clock),
+    domain: "DATA",
+    displayName: "Data Quality Evidence Limit Per Rule",
+    description: "Maximum findings retained per data-quality rule before suppression is counted.",
+    valueType: "INTEGER",
+    required: false,
+    failClosed: true,
+    allowedScopes: ["SYSTEM", "ENVIRONMENT"],
+    mergePolicy: "REPLACE",
+    sensitivity: "INTERNAL",
+    defaultValue: 25,
+    metadata: {
+      purpose: "Keep data-quality reports bounded while exposing suppressed finding counts.",
+      reloadRequirement: "REFRESH",
+    },
+  },
+  {
+    key: foundationalConfigurationKey("data.quality.defaultFreshnessMaxAgeMs", clock),
+    domain: "DATA",
+    displayName: "Data Quality Default Freshness Maximum Age",
+    description: "Default age threshold used by historical data-quality freshness diagnostics.",
+    valueType: "DURATION_MS",
+    required: false,
+    failClosed: true,
+    allowedScopes: ["SYSTEM", "ENVIRONMENT", "INSTRUMENT", "TIMEFRAME"],
+    mergePolicy: "REPLACE",
+    sensitivity: "INTERNAL",
+    defaultValue: 86_400_000,
+    metadata: {
+      purpose: "Declare freshness diagnostics centrally without authorizing trading decisions.",
+      riskImplication:
+        "Freshness findings are evidence for future consumers, not execution authority.",
+      reloadRequirement: "REFRESH",
+    },
+  },
+  {
+    key: foundationalConfigurationKey("data.quality.reportStorageRoot", clock),
+    domain: "DATA",
+    displayName: "Data Quality Report Storage Root",
+    description: "Managed root for staged and published immutable data-quality reports.",
+    valueType: "STRING",
+    required: false,
+    failClosed: true,
+    allowedScopes: ["SYSTEM", "ENVIRONMENT"],
+    mergePolicy: "REPLACE",
+    sensitivity: "INTERNAL",
+    defaultValue: ".ate/data-quality/reports",
+    metadata: {
+      purpose: "Keep report staging and publication inside a managed storage root.",
+      reloadRequirement: "RESTART",
+    },
+  },
 ];
 
 export const foundationalConfigurationSchemas = (clock: Clock): readonly ConfigurationSchema[] => {
@@ -304,6 +375,22 @@ export const foundationalConfigurationSchemas = (clock: Clock): readonly Configu
   );
   const historicalStorageRoots = foundationalConfigurationKey(
     "data.historical.storageRoots",
+    clock,
+  );
+  const dataQualityMaxObservations = foundationalConfigurationKey(
+    "data.quality.maxObservations",
+    clock,
+  );
+  const dataQualityEvidenceLimitPerRule = foundationalConfigurationKey(
+    "data.quality.evidenceLimitPerRule",
+    clock,
+  );
+  const dataQualityDefaultFreshnessMaxAgeMs = foundationalConfigurationKey(
+    "data.quality.defaultFreshnessMaxAgeMs",
+    clock,
+  );
+  const dataQualityReportStorageRoot = foundationalConfigurationKey(
+    "data.quality.reportStorageRoot",
     clock,
   );
 
@@ -463,6 +550,43 @@ export const foundationalConfigurationSchemas = (clock: Clock): readonly Configu
         examples: [
           { stagingRoot: ".ate/historical/staging", datasetRoot: ".ate/historical/datasets" },
         ],
+      },
+    }),
+    configurationSchemaFromDefinition(requireDefinition(byKey, dataQualityMaxObservations), {
+      constraints: { minimum: 1, maximum: 1_000_000, unit: "count" },
+      metadata: {
+        ...requireDefinition(byKey, dataQualityMaxObservations).metadata,
+        helpText: "Bounds how many historical observations one quality report can evaluate.",
+        examples: [10_000, 100_000],
+      },
+    }),
+    configurationSchemaFromDefinition(requireDefinition(byKey, dataQualityEvidenceLimitPerRule), {
+      constraints: { minimum: 1, maximum: 1000, unit: "count" },
+      metadata: {
+        ...requireDefinition(byKey, dataQualityEvidenceLimitPerRule).metadata,
+        helpText:
+          "Caps retained findings per rule; suppressedFindingCount remains visible when capped.",
+        examples: [25, 100],
+      },
+    }),
+    configurationSchemaFromDefinition(
+      requireDefinition(byKey, dataQualityDefaultFreshnessMaxAgeMs),
+      {
+        constraints: { minimum: 1_000, maximum: 31_536_000_000, unit: "milliseconds" },
+        metadata: {
+          ...requireDefinition(byKey, dataQualityDefaultFreshnessMaxAgeMs).metadata,
+          helpText:
+            "Default stale-data threshold for historical quality diagnostics. It does not authorize trading.",
+          examples: [86_400_000],
+        },
+      },
+    ),
+    configurationSchemaFromDefinition(requireDefinition(byKey, dataQualityReportStorageRoot), {
+      constraints: { minLength: 1, maxLength: 512 },
+      metadata: {
+        ...requireDefinition(byKey, dataQualityReportStorageRoot).metadata,
+        helpText: "Managed local root for immutable data-quality report staging and publication.",
+        examples: [".ate/data-quality/reports"],
       },
     }),
   ];
