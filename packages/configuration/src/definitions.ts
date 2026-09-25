@@ -173,6 +173,97 @@ export const foundationalConfigurationDefinitions = (
       reloadRequirement: "RESTART",
     },
   },
+  {
+    key: foundationalConfigurationKey("data.historical.maxArtifactBytes", clock),
+    domain: "DATA",
+    displayName: "Historical Data Maximum Artifact Bytes",
+    description: "Maximum accepted historical source artifact size for offline laboratory imports.",
+    valueType: "INTEGER",
+    required: false,
+    failClosed: true,
+    allowedScopes: ["SYSTEM", "ENVIRONMENT"],
+    mergePolicy: "REPLACE",
+    sensitivity: "INTERNAL",
+    defaultValue: 25 * 1024 * 1024,
+    metadata: {
+      purpose: "Bound untrusted historical source artifact intake.",
+      riskImplication: "Unbounded historical files can exhaust parser and storage resources.",
+      reloadRequirement: "RESTART",
+    },
+  },
+  {
+    key: foundationalConfigurationKey("data.historical.parserBatchSize", clock),
+    domain: "DATA",
+    displayName: "Historical Data Parser Batch Size",
+    description: "Maximum parser batch size for controlled historical import processing.",
+    valueType: "INTEGER",
+    required: false,
+    failClosed: true,
+    allowedScopes: ["SYSTEM", "ENVIRONMENT"],
+    mergePolicy: "REPLACE",
+    sensitivity: "INTERNAL",
+    defaultValue: 1000,
+    metadata: {
+      purpose: "Keep historical import processing bounded.",
+      reloadRequirement: "RESTART",
+    },
+  },
+  {
+    key: foundationalConfigurationKey("data.historical.maxRejections", clock),
+    domain: "DATA",
+    displayName: "Historical Data Maximum Rejections",
+    description: "Maximum record rejections collected before an import fails closed.",
+    valueType: "INTEGER",
+    required: false,
+    failClosed: true,
+    allowedScopes: ["SYSTEM", "ENVIRONMENT"],
+    mergePolicy: "REPLACE",
+    sensitivity: "INTERNAL",
+    defaultValue: 1000,
+    metadata: {
+      purpose: "Bound rejection/quarantine evidence and prevent unbounded malformed imports.",
+      reloadRequirement: "REFRESH",
+    },
+  },
+  {
+    key: foundationalConfigurationKey("data.historical.maxQueryPageSize", clock),
+    domain: "DATA",
+    displayName: "Historical Data Maximum Query Page Size",
+    description: "Maximum page size for bounded historical research queries.",
+    valueType: "INTEGER",
+    required: false,
+    failClosed: true,
+    allowedScopes: ["SYSTEM", "ENVIRONMENT"],
+    mergePolicy: "REPLACE",
+    sensitivity: "INTERNAL",
+    defaultValue: 5000,
+    metadata: {
+      purpose: "Prevent unbounded historical dataset reads.",
+      reloadRequirement: "REFRESH",
+    },
+  },
+  {
+    key: foundationalConfigurationKey("data.historical.storageRoots", clock),
+    domain: "DATA",
+    displayName: "Historical Data Managed Storage Roots",
+    description:
+      "Managed staging and published dataset roots for local historical research storage.",
+    valueType: "OBJECT",
+    required: false,
+    failClosed: true,
+    allowedScopes: ["SYSTEM", "ENVIRONMENT"],
+    mergePolicy: "REPLACE",
+    sensitivity: "INTERNAL",
+    defaultValue: {
+      stagingRoot: ".ate/historical/staging",
+      datasetRoot: ".ate/historical/datasets",
+    },
+    metadata: {
+      purpose: "Keep filesystem-backed historical data inside configured managed roots.",
+      riskImplication: "Raw filenames are never trusted as storage paths.",
+      reloadRequirement: "RESTART",
+    },
+  },
 ];
 
 export const foundationalConfigurationSchemas = (clock: Clock): readonly ConfigurationSchema[] => {
@@ -193,6 +284,26 @@ export const foundationalConfigurationSchemas = (clock: Clock): readonly Configu
   );
   const capabilityDiagnostics = foundationalConfigurationKey(
     "system.feature.capabilityDiagnosticsEnabled",
+    clock,
+  );
+  const historicalMaxArtifactBytes = foundationalConfigurationKey(
+    "data.historical.maxArtifactBytes",
+    clock,
+  );
+  const historicalParserBatchSize = foundationalConfigurationKey(
+    "data.historical.parserBatchSize",
+    clock,
+  );
+  const historicalMaxRejections = foundationalConfigurationKey(
+    "data.historical.maxRejections",
+    clock,
+  );
+  const historicalMaxQueryPageSize = foundationalConfigurationKey(
+    "data.historical.maxQueryPageSize",
+    clock,
+  );
+  const historicalStorageRoots = foundationalConfigurationKey(
+    "data.historical.storageRoots",
     clock,
   );
 
@@ -301,6 +412,57 @@ export const foundationalConfigurationSchemas = (clock: Clock): readonly Configu
         requiredCheckerAuthority: "SENSITIVE_CONFIGURATION_CHECKER",
         governanceHelpText:
           "Restart-required capability diagnostics changes require independent governance review.",
+      },
+    }),
+    configurationSchemaFromDefinition(requireDefinition(byKey, historicalMaxArtifactBytes), {
+      constraints: { minimum: 1_024, maximum: 1_073_741_824, unit: "count" },
+      metadata: {
+        ...requireDefinition(byKey, historicalMaxArtifactBytes).metadata,
+        helpText: "Bounds each untrusted historical source artifact.",
+        examples: [26_214_400],
+        invalidExamples: [0],
+      },
+    }),
+    configurationSchemaFromDefinition(requireDefinition(byKey, historicalParserBatchSize), {
+      constraints: { minimum: 1, maximum: 100_000, unit: "count" },
+      metadata: {
+        ...requireDefinition(byKey, historicalParserBatchSize).metadata,
+        helpText: "Controls bounded parser batches for historical imports.",
+        examples: [1000, 5000],
+      },
+    }),
+    configurationSchemaFromDefinition(requireDefinition(byKey, historicalMaxRejections), {
+      constraints: { minimum: 0, maximum: 100_000, unit: "count" },
+      metadata: {
+        ...requireDefinition(byKey, historicalMaxRejections).metadata,
+        helpText: "Caps rejection records collected before failing an import.",
+        examples: [100, 1000],
+      },
+    }),
+    configurationSchemaFromDefinition(requireDefinition(byKey, historicalMaxQueryPageSize), {
+      constraints: { minimum: 1, maximum: 100_000, unit: "count" },
+      metadata: {
+        ...requireDefinition(byKey, historicalMaxQueryPageSize).metadata,
+        helpText: "Bounds historical research query pages. No get-all-ticks API is allowed.",
+        examples: [1000, 5000],
+      },
+    }),
+    configurationSchemaFromDefinition(requireDefinition(byKey, historicalStorageRoots), {
+      constraints: {
+        requiredProperties: ["stagingRoot", "datasetRoot"],
+        allowUnknownProperties: false,
+        properties: {
+          stagingRoot: { valueType: "STRING", required: true, constraints: { minLength: 1 } },
+          datasetRoot: { valueType: "STRING", required: true, constraints: { minLength: 1 } },
+        },
+      },
+      metadata: {
+        ...requireDefinition(byKey, historicalStorageRoots).metadata,
+        helpText:
+          "Defines managed local roots for staged and published historical datasets. Filenames never become paths.",
+        examples: [
+          { stagingRoot: ".ate/historical/staging", datasetRoot: ".ate/historical/datasets" },
+        ],
       },
     }),
   ];

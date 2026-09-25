@@ -22,6 +22,7 @@ export const foundationalCapabilityDefinitions = (): readonly CapabilityDefiniti
   const configurationHistoryInspection = capabilityId("configuration.historyInspection");
   const configurationCapabilityDiagnostics = capabilityId("configuration.capabilityDiagnostics");
   const dataMarketDataContracts = capabilityId("data.marketDataContracts");
+  const dataHistoricalDataLaboratory = capabilityId("data.historicalDataLaboratory");
   const dataMarketData = capabilityId("data.marketData");
   const executionMt5 = capabilityId("execution.mt5");
   const executionLiveTrading = capabilityId("execution.liveTrading");
@@ -177,6 +178,21 @@ export const foundationalCapabilityDefinitions = (): readonly CapabilityDefiniti
       versionIntroduced: "0.13.0-market-data-contracts.1",
       safetyNotes:
         "Contracts only; no provider ingestion, historical storage, replay, strategy, risk, execution or trading authority.",
+    },
+    {
+      capabilityId: dataHistoricalDataLaboratory,
+      displayName: "Historical Data Laboratory",
+      description:
+        "Prompt 14 controlled offline artifact intake, format adapters, declarative mapping, canonical normalization, immutable historical datasets, bounded query access and diagnostics.",
+      owner: "@ate/historical-data",
+      capabilityClass: "OPTIONAL",
+      implementationStatus: "IMPLEMENTED",
+      reloadBehavior: "STARTUP_ONLY",
+      supportedRuntimeModes: ["DEVELOPMENT", "RESEARCH", "BACKTEST", "SIMULATION"],
+      dependencies: [dataMarketDataContracts],
+      versionIntroduced: "0.14.0-historical-data.1",
+      safetyNotes:
+        "Offline historical research access only; no data-quality scoring, catalogue authority, provider/live ingestion, replay, strategy, risk, execution or trading authority.",
     },
     {
       capabilityId: dataMarketData,

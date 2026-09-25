@@ -1,8 +1,8 @@
 {
   "name": "ate-system",
-  "version": "0.13.0-market-data-contracts.1",
+  "version": "0.14.0-historical-data.1",
   "private": true,
-  "description": "ATE Autonomous Trading Engine repository foundation through universal market-data contract authority.",
+  "description": "ATE Autonomous Trading Engine repository foundation through historical data laboratory foundations.",
   "license": "UNLICENSED",
   "type": "module",
   "engines": {
