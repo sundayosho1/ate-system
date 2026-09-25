@@ -6,6 +6,7 @@ import type { EventError, EventTypeRegistration, EventCategory } from "./types.j
 import type { RuntimeClock } from "@ate/runtime";
 
 const eventNamePattern = /^[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*){2,}\.v[1-9][0-9]*$/u;
+const validationTimestamp = "1970-01-01T00:00:00.000Z" as UtcTimestamp;
 
 export type EventRegistryResult<T = unknown> =
   Readonly<{ ok: true; value: T }> | Readonly<{ ok: false; error: EventError }>;
@@ -137,7 +138,7 @@ export const validateEventName = (eventType: string): EventRegistryResult<string
         code: "EVENT_SCHEMA_INVALID",
         message: `invalid event type name: ${eventType}`,
         severity: "ERROR",
-        timestamp: new Date(0).toISOString() as UtcTimestamp,
+        timestamp: validationTimestamp,
         eventType,
       }),
     };

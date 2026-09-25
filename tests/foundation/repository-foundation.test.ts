@@ -21,6 +21,7 @@ const requiredDocuments = [
   "docs/architecture/safety-invariants.md",
   "docs/architecture/authority-hierarchy.md",
   "docs/architecture/environment-runtime-modes.md",
+  "docs/architecture/time-and-clock.md",
   "docs/architecture/glossary.md",
   "docs/configuration/configuration-principles.md",
   "docs/help/help-and-configuration-usability-standard.md",
@@ -32,6 +33,7 @@ const requiredDocuments = [
   "docs/development/versioning.md",
   "docs/development/prompt-ledger.md",
   "docs/testing/testing-strategy.md",
+  "docs/help/time-and-clock.md",
 ];
 
 describe("Prompt 1 repository foundation", () => {
@@ -96,7 +98,7 @@ describe("Prompt 1 repository foundation", () => {
       "Master Architecture, Repository Foundation & Engineering Constitution",
     );
     expect(ledger).toContain("Completed");
-    expect(ledger).not.toMatch(/\|\s*6\s*\|.*Completed/i);
+    expect(ledger).not.toMatch(/\|\s*7\s*\|.*Completed/i);
   });
 
   it("does not claim live trading capability in the README", () => {

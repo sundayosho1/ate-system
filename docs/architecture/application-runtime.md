@@ -210,3 +210,21 @@ Prompt 3 does not install or configure Windows services.
 
 Prompt 3 consumes explicit typed construction options only. Prompt 7 remains authoritative for
 layered configuration, promotion, rollback, and governance.
+
+## Time service integration
+
+Prompt 6 adds `@ate/time` as a runtime-managed service boundary. The clock service participates in
+health/readiness and exposes diagnostics for:
+
+- current UTC instant;
+- clock mode and source;
+- runtime mode compatibility;
+- monotonic availability;
+- clock quality and last detected jump;
+- deterministic scheduler queue counts;
+- recent temporal errors.
+
+Runtime lifecycle timestamps continue to come from the runtime's injected clock. Elapsed lifecycle
+durations in the Prompt 3 implementation still use infrastructure-level host duration measurement;
+business services should consume `@ate/time` clocks and scheduler APIs instead of direct ambient
+time.

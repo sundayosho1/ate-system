@@ -105,6 +105,23 @@ Prompt 5 adds persistence/state authority tests that verify:
 - persistence runtime service health/readiness and connection-loss reporting;
 - architecture boundaries for domain/events/persistence dependencies.
 
+## Prompt 6 tests
+
+Prompt 6 adds time/clock authority tests that verify:
+
+- UTC instant normalization, timezone-explicit parsing, naive timestamp rejection and invalid
+  timestamp rejection;
+- system UTC and monotonic clock adapters;
+- virtual, simulation and replay clock advancement without wall-clock waiting;
+- deterministic scheduler due-time, priority, sequence, cancellation and capacity behavior;
+- IANA timezone validation, abbreviation rejection, fixed offsets and DST nonexistent/ambiguous
+  local-time detection;
+- freshness classification including future skew protection;
+- clock-quality monitoring for wall-clock jumps and backward movement;
+- runtime service health/readiness gates for clock mode compatibility;
+- injected-clock integration through events and persistence records;
+- constrained direct use of current-time APIs outside approved infrastructure seams.
+
 ## Naming
 
 Test names should describe behavior. Avoid opaque names.

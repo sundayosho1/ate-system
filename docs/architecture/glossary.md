@@ -86,6 +86,16 @@ This glossary defines canonical ATE terminology. Future prompts should use these
 | Audit Record                 | Append-only evidence of meaningful actions, actors, outcomes, affected resources, correlation and causation.                                                              |
 | Transactional Outbox         | Durable event record committed atomically with state/history so event dispatch occurs after commit.                                                                       |
 | Durable Inbox                | Persistent subscriber/idempotency processing record preventing duplicate side effects across restart.                                                                     |
+| Clock Authority              | The single runtime-selected source of current UTC instants for events, persistence, diagnostics and audit evidence.                                                       |
+| UTC Instant                  | Canonical timezone-explicit timestamp normalized to UTC, such as `2026-09-25T00:00:00.000Z`.                                                                              |
+| Monotonic Time               | Process-local elapsed-time source that does not move backward with wall-clock corrections.                                                                                |
+| Virtual Clock                | Explicitly advanced non-system clock used for deterministic tests and controlled workflows.                                                                               |
+| Simulation Clock             | Non-capital-bearing clock used to advance simulated workflows without waiting for wall time.                                                                              |
+| Replay Clock                 | Clock that steps through a known timestamp sequence for repeatable replay.                                                                                                |
+| Clock Quality                | Assessment of clock trust based on provenance and wall-clock versus monotonic behavior.                                                                                   |
+| IANA Timezone                | Canonical timezone identifier such as `America/New_York`; abbreviations such as `EST` are not accepted as authoritative identifiers.                                      |
+| Deterministic Scheduler      | Clock-driven scheduler that runs due tasks in stable due-time, priority and sequence order.                                                                               |
+| Freshness                    | Classification of observed data age relative to the authoritative clock, such as fresh, stale, expired or future-skewed.                                                  |
 
 ## Identifier conventions
 

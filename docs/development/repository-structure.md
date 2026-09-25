@@ -64,6 +64,12 @@ transactional outbox, durable inbox, durable dead letters, migrations, diagnosti
 integration only; it does not implement market-data storage, instrument registry, trading accounts,
 risk/portfolio/execution engines, MT5 or live trading.
 
+Prompt 6 adds `packages/time` as the authoritative clock/time foundation. It implements UTC instant
+normalization, system/virtual/simulation/replay clocks, monotonic duration support, IANA timezone
+conversion, freshness calculation, clock-quality monitoring, deterministic scheduling and runtime
+integration only; it does not implement market calendars, sessions, market-data replay engines,
+trading services, MT5 or live trading.
+
 ### `mt5/`
 
 Future MetaTrader 5 gateway and Connector EA artifacts. Prompt 1 documents the boundary only.
@@ -82,7 +88,8 @@ configuration does not belong here.
 
 Automated tests. Prompt 1 adds foundation tests validating documentation and capability
 truthfulness. Prompt 4 adds event architecture tests under `tests/events`. Prompt 5 adds
-persistence/state authority tests under `tests/persistence`.
+persistence/state authority tests under `tests/persistence`. Prompt 6 adds temporal integrity tests
+under `tests/time`.
 
 ### `scripts/`
 

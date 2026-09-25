@@ -16,6 +16,10 @@ packages free of database-driver dependencies.
 The deterministic test adapter models transaction and recovery semantics without requiring a
 developer's production database. It is not a production fallback.
 
+Prompt 6 supplies persistence with an injected clock authority. State records, history, audit,
+outbox claims, inbox leases and dead-letter replay metadata should derive timestamps from that
+clock, not from ambient wall-clock calls.
+
 ## State authority rule
 
 ```text
@@ -78,7 +82,8 @@ subscriptionId + idempotencyKey
 ```
 
 This protects side effects across process restart and duplicate delivery. `PROCESSING` records use a
-lease so stale claims can be recovered after abnormal termination.
+lease so stale claims can be recovered after abnormal termination. Lease instants are calculated
+from the injected clock authority.
 
 ## Durable dead letters
 

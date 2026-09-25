@@ -58,41 +58,42 @@ External systems integrate through ports, contracts, adapters, and application s
 
 Prompt 1 documents boundaries only. Future prompts implement functionality.
 
-| Boundary                        | Ownership                                                                        |
-| ------------------------------- | -------------------------------------------------------------------------------- |
-| Core Runtime                    | Process lifecycle, runtime mode, startup/shutdown conventions                    |
-| Configuration                   | Typed, validated, versionable, auditable configuration                           |
-| Events                          | Event contracts, registry, routing, correlation, causation, delivery diagnostics |
-| Persistence                     | State ownership, migrations, transactions, history, audit, outbox/inbox          |
-| Market Data                     | Broker/provider-neutral market observations and snapshots                        |
-| Instrument Registry             | Canonical instruments, broker-symbol mapping, specifications                     |
-| MOSE                            | Market Opportunity Surveillance Engine lifecycle and prioritization              |
-| Market Intelligence             | Market structure, volatility, momentum, session, feature context                 |
-| Regime Detection                | Trend/range/breakout/volatility/uncertain regime classifications                 |
-| Strategies                      | Candidate generation; no direct execution                                        |
-| Candidate/Decision Intelligence | Candidate scoring, ranking, master decision context                              |
-| Risk                            | Deterministic risk checks and veto authority                                     |
-| Portfolio                       | Concentration, correlation, exposure, diversification constraints                |
-| Capital Protection              | Global and scoped protection states and halts                                    |
-| Accounts                        | Account identity, mandates, balances/equity, permissions                         |
-| Allocation                      | Account-specific execution instruction planning                                  |
-| Execution                       | Broker-neutral execution commands and lifecycle                                  |
-| MT5 Integration                 | MT5 gateway and Connector EA adapter boundary                                    |
-| Reconciliation                  | Comparison between ATE state and external broker/MT5 state                       |
-| Trade Management                | Post-entry management, exits, lifecycle tracking                                 |
-| Historical Data                 | Dataset ingestion, normalization, quality, versioning                            |
-| Backtesting                     | Deterministic historical evaluation                                              |
-| Research                        | Hypotheses, experiments, attribution, reproducibility                            |
-| Learning                        | Controlled, non-silent adaptation and research promotion                         |
-| Third-Party Integrations        | Provider adapters for data, news, notifications, storage                         |
-| Reporting                       | Operational and analytical reports                                               |
-| Alerts                          | Operator notifications and escalation                                            |
-| Audit                           | Durable records of sensitive actions and state changes                           |
-| Security                        | Authentication, authorization, secrets, least privilege                          |
-| Observability                   | Logs, metrics, traces, health, readiness                                         |
-| Help                            | Contextual help, module help, searchable help content                            |
-| Frontend                        | Control Center UI and configuration UX                                           |
-| Administration                  | Operator workflows and governed system management                                |
+| Boundary                        | Ownership                                                                               |
+| ------------------------------- | --------------------------------------------------------------------------------------- |
+| Core Runtime                    | Process lifecycle, runtime mode, startup/shutdown conventions                           |
+| Configuration                   | Typed, validated, versionable, auditable configuration                                  |
+| Events                          | Event contracts, registry, routing, correlation, causation, delivery diagnostics        |
+| Persistence                     | State ownership, migrations, transactions, history, audit, outbox/inbox                 |
+| Time                            | Clock authority, UTC instants, timezone conversion, freshness, deterministic scheduling |
+| Market Data                     | Broker/provider-neutral market observations and snapshots                               |
+| Instrument Registry             | Canonical instruments, broker-symbol mapping, specifications                            |
+| MOSE                            | Market Opportunity Surveillance Engine lifecycle and prioritization                     |
+| Market Intelligence             | Market structure, volatility, momentum, session, feature context                        |
+| Regime Detection                | Trend/range/breakout/volatility/uncertain regime classifications                        |
+| Strategies                      | Candidate generation; no direct execution                                               |
+| Candidate/Decision Intelligence | Candidate scoring, ranking, master decision context                                     |
+| Risk                            | Deterministic risk checks and veto authority                                            |
+| Portfolio                       | Concentration, correlation, exposure, diversification constraints                       |
+| Capital Protection              | Global and scoped protection states and halts                                           |
+| Accounts                        | Account identity, mandates, balances/equity, permissions                                |
+| Allocation                      | Account-specific execution instruction planning                                         |
+| Execution                       | Broker-neutral execution commands and lifecycle                                         |
+| MT5 Integration                 | MT5 gateway and Connector EA adapter boundary                                           |
+| Reconciliation                  | Comparison between ATE state and external broker/MT5 state                              |
+| Trade Management                | Post-entry management, exits, lifecycle tracking                                        |
+| Historical Data                 | Dataset ingestion, normalization, quality, versioning                                   |
+| Backtesting                     | Deterministic historical evaluation                                                     |
+| Research                        | Hypotheses, experiments, attribution, reproducibility                                   |
+| Learning                        | Controlled, non-silent adaptation and research promotion                                |
+| Third-Party Integrations        | Provider adapters for data, news, notifications, storage                                |
+| Reporting                       | Operational and analytical reports                                                      |
+| Alerts                          | Operator notifications and escalation                                                   |
+| Audit                           | Durable records of sensitive actions and state changes                                  |
+| Security                        | Authentication, authorization, secrets, least privilege                                 |
+| Observability                   | Logs, metrics, traces, health, readiness                                                |
+| Help                            | Contextual help, module help, searchable help content                                   |
+| Frontend                        | Control Center UI and configuration UX                                                  |
+| Administration                  | Operator workflows and governed system management                                       |
 
 ## Repository architecture
 
@@ -167,8 +168,9 @@ Errors must not expose secrets or sensitive internals.
 
 ## Event principles
 
-Prompt 4 implements the internal event architecture in `@ate/events`. Events communicate facts; they
-do not grant trading authority or replace future persistent state authority. Events carry:
+Prompt 4 implements the internal event architecture in `@ate/events`. Prompt 6 supplies the clock
+authority that event factories consume for timestamps. Events communicate facts; they do not grant
+trading authority or replace future persistent state authority. Events carry:
 
 - event ID;
 - event type;

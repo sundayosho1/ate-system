@@ -13,6 +13,10 @@ Currently implemented:
 - `@ate/persistence` — persistence/state authority foundation with transactions, optimistic
   concurrency, immutable history, audit records, transactional outbox, durable inbox, durable dead
   letters, migration discipline, diagnostics, and runtime-service integration.
+- `@ate/time` — clock/time authority foundation with UTC instants, monotonic duration,
+  virtual/simulation/replay clocks, IANA timezone conversion, freshness, clock-quality monitoring,
+  deterministic scheduling, and runtime-service integration.
 
 No package currently implements trading behavior, risk calculations, portfolio calculations, MT5
-connectivity, broker execution, market-data storage, external message brokers, APIs, or frontend UI.
+connectivity, broker execution, market calendars, market-data storage, external message brokers,
+APIs, or frontend UI.

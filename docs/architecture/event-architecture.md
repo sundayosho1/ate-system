@@ -38,8 +38,9 @@ registry until removed through a governed migration.
 
 ## Canonical envelope
 
-`@ate/events` reuses Prompt 2's `EventEnvelope`. Every `ATEEvent` carries the canonical envelope and
-adds non-authoritative delivery metadata beside it:
+`@ate/events` reuses Prompt 2's `EventEnvelope`. Prompt 6 makes the event factory consume an
+injected clock so `eventTimestamp` comes from the runtime clock authority. Every `ATEEvent` carries
+the canonical envelope and adds non-authoritative delivery metadata beside it:
 
 - `eventId` identifies the occurrence globally;
 - `eventType` and `schemaVersion` identify the contract;
@@ -119,6 +120,9 @@ identity and correlation/causation; it is not automatic.
 The event bus can run as an `@ate/runtime` managed service. It participates in startup, health,
 readiness and graceful shutdown/drain. Lifecycle records from Prompt 3 can be represented as
 `runtime.lifecycle.recorded.v1` after bootstrap. The bus does not rely on itself to report startup.
+
+Handler timeouts and delivery durations remain event-bus infrastructure behavior. Event occurrence
+timestamps and delivery error timestamps come from the injected clock.
 
 ## Control plane vs market data plane
 

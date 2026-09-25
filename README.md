@@ -8,9 +8,9 @@ ATE is **not** currently a trading bot, MetaTrader Expert Advisor, or live execu
 ## Current development status
 
 - Phase: I — Foundation & Engineering Governance
-- Prompt: 5 of 84
-- Status: foundation, domain contracts, runtime lifecycle, internal event architecture, and
-  persistence/state authority foundation
+- Prompt: 6 of 84
+- Status: foundation, domain contracts, runtime lifecycle, internal event architecture,
+  persistence/state authority, and temporal integrity foundation
 - Trading capability: **not implemented**
 - MT5 connectivity: **not implemented**
 - Live execution: **not implemented**
@@ -34,7 +34,7 @@ ATE must always be able to return `NO_ACTION` when conditions do not justify cap
 
 ## Currently implemented functionality
 
-Prompts 1-4 implement only:
+Prompts 1-6 implement only:
 
 - repository foundation and documentation hierarchy;
 - engineering constitution and safety invariants;
@@ -46,6 +46,9 @@ Prompts 1-4 implement only:
 - persistence/state authority foundation with transactions, optimistic concurrency, immutable
   history, audit records, transactional outbox, durable inbox, durable dead letters, migration
   discipline, diagnostics, and runtime persistence-service integration;
+- time/clock authority foundation with UTC instants, monotonic duration, virtual/simulation/replay
+  clocks, IANA timezone conversion, freshness checks, clock-quality diagnostics, deterministic
+  scheduler and runtime time-service integration;
 - architecture decision records;
 - development, testing, security, configuration, help, and contribution standards;
 - capability manifest and prompt ledger;
@@ -117,6 +120,7 @@ Start with:
 - [Event Architecture](docs/architecture/event-architecture.md)
 - [Persistence Architecture](docs/architecture/persistence-architecture.md)
 - [State Authority](docs/architecture/state-authority.md)
+- [Time & Clock Authority](docs/architecture/time-and-clock.md)
 - [Safety Invariants](docs/architecture/safety-invariants.md)
 - [Authority Hierarchy](docs/architecture/authority-hierarchy.md)
 - [Environment & Runtime Modes](docs/architecture/environment-runtime-modes.md)
@@ -127,6 +131,7 @@ Start with:
 - [Help & Configuration Usability Standard](docs/help/help-and-configuration-usability-standard.md)
 - [Event Architecture Help](docs/help/event-architecture.md)
 - [Persistence Help](docs/help/persistence.md)
+- [Time & Clock Help](docs/help/time-and-clock.md)
 
 ## Security warning
 

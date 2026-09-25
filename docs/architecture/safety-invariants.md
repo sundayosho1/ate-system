@@ -104,6 +104,86 @@ and verified.
 ATE must avoid competing sources of truth for accounts, positions, orders, market data
 normalization, clocks, risk state, configuration, audit, and protection state.
 
+## Prompt 6 temporal invariants
+
+These invariants specialize the general safety rules for time authority.
+
+## TIME-001 — Single Runtime Clock Authority
+
+Each runtime must have one selected clock authority for current UTC instants.
+
+## TIME-002 — UTC Durable Evidence
+
+Durable event, state, audit, outbox, inbox and dead-letter evidence must use UTC instants.
+
+## TIME-003 — Naive Timestamps Rejected
+
+Timestamp input that lacks `Z` or an explicit offset must not become canonical evidence.
+
+## TIME-004 — Monotonic Durations
+
+Elapsed-duration logic must use monotonic time where clock jumps could affect correctness.
+
+## TIME-005 — No Test Clocks In Live Mode
+
+`LIVE` runtime mode must reject virtual, simulation and replay clocks.
+
+## TIME-006 — Explicit Clock Mode
+
+Clock mode must be explicit and visible in diagnostics.
+
+## TIME-007 — Clock Provenance Required
+
+Clock outputs must include a known source/provenance model at the clock boundary.
+
+## TIME-008 — Backward Clock Movement Degrades Trust
+
+Backward wall-clock movement must be detected and treated as untrusted temporal state.
+
+## TIME-009 — Large Clock Jumps Are Visible
+
+Large wall-clock jumps must be reported through clock-quality diagnostics.
+
+## TIME-010 — IANA Timezones Only
+
+Local timezone conversion must use IANA timezone IDs, not abbreviations.
+
+## TIME-011 — DST Ambiguity Is Explicit
+
+Nonexistent or ambiguous local times must return explicit errors instead of silent guesses.
+
+## TIME-012 — Broker Time Is Not Canonical By Default
+
+Broker/server time must carry provenance and conversion context before it can influence canonical
+UTC evidence.
+
+## TIME-013 — Market Time Does Not Imply Sessions
+
+Timezone support does not imply market calendar, holiday or trading-session implementation.
+
+## TIME-014 — Freshness Is Clock Relative
+
+Freshness classification must be relative to the selected clock authority and include future-skew
+protection.
+
+## TIME-015 — Deterministic Scheduling
+
+Scheduled work must have stable ordering by due time, priority and sequence when running under the
+deterministic scheduler.
+
+## TIME-016 — Bounded Timers
+
+Schedulers and timer queues must be bounded and fail visibly on capacity exhaustion.
+
+## TIME-017 — Replay Time Cannot Regress During Playback
+
+Replay stepping must not move backward except through an explicit reset before rerun.
+
+## TIME-018 — Time Readiness Is Not Trading Authority
+
+Healthy time service readiness does not authorize market data ingestion, strategy execution, broker
+order submission or live trading.
+
 ## Prompt 1 test coverage
 
 Prompt 1 includes foundation tests that verify:
