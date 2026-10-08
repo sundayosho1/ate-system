@@ -1,4 +1,8 @@
 import {
+  replayConfigurationDefinitions,
+  replayConfigurationSchemas,
+} from "./replay-definitions.js";
+import {
   multitimeframeConfigurationDefinitions,
   multitimeframeConfigurationSchemas,
 } from "./multitimeframe-definitions.js";
@@ -26,6 +30,7 @@ export const foundationalConfigurationDefinitions = (
 ): readonly ConfigurationDefinition[] => [
   ...realtimeConfigurationDefinitions(clock),
   ...multitimeframeConfigurationDefinitions(clock),
+  ...replayConfigurationDefinitions(clock),
   {
     key: foundationalConfigurationKey("system.runtimeMode", clock),
     domain: "SYSTEM",
@@ -559,6 +564,7 @@ export const foundationalConfigurationSchemas = (clock: Clock): readonly Configu
   return [
     ...realtimeConfigurationSchemas(clock),
     ...multitimeframeConfigurationSchemas(clock),
+    ...replayConfigurationSchemas(clock),
     configurationSchemaFromDefinition(requireDefinition(byKey, runtimeMode), {
       constraints: { enumValues: runtimeModes },
       crossFieldRules: [

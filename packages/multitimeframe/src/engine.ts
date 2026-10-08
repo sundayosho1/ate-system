@@ -230,6 +230,36 @@ export class AggregationEngine {
       return failure(this.input.clock, "RECOVERY_REQUIRED");
     }
   }
+  /** Trusted whole-system replay boundary only; ordinary startup still fences continuity. */
+  public startFromReplayCheckpoint(raw: Checkpoint, boundaryTime: UtcTimestamp): Result<void> {
+    if (this.state !== "CREATED" || this.input.clock.mode !== "REPLAY")
+      return failure(this.input.clock, "LIFECYCLE_REJECTED");
+    try {
+      if (instant(boundaryTime) !== this.input.clock.now()) throw Error("REPLAY_BOUNDARY");
+      const checkpoint = safeClone(raw, this.options.maxCheckpointBytes) as Checkpoint;
+      this.validateCheckpoint(checkpoint);
+      if (
+        Object.values(checkpoint.watermarks).some(
+          (m) => m.observedAt !== null && m.observedAt > boundaryTime,
+        ) ||
+        checkpoint.windows.some((w) =>
+          w.contributions.some((x) => x.processedAt > boundaryTime || x.availableAt > boundaryTime),
+        )
+      )
+        throw Error("REPLAY_BOUNDARY");
+      this.checkpoint = freeze(checkpoint);
+      this.state = "READY";
+      return ok(undefined);
+    } catch {
+      this.state = "FAILED";
+      return failure(this.input.clock, "RECOVERY_REQUIRED");
+    }
+  }
+  public exportReplayCheckpoint(): Result<Checkpoint> {
+    if (this.input.clock.mode !== "REPLAY" || this.state !== "READY" || this.busy || this.recovery)
+      return failure(this.input.clock, "LIFECYCLE_REJECTED");
+    return ok(freeze(structuredClone(this.checkpoint)));
+  }
   private validateCheckpoint(c: Checkpoint): void {
     if (
       c.schemaVersion !== 1 ||
@@ -545,7 +575,7 @@ export class AggregationEngine {
     }
     return state;
   }
-  private contribution(stream: Stream, raw: Input): Contribution {
+  private contribution(stream: Stream, raw: Input, reconstruction = false): Contribution {
     const safe = evidenceSchema.parse(safeClone(raw)),
       o = marketObservationSchema.parse(safe.observation),
       now = this.input.clock.now(),
@@ -563,8 +593,8 @@ export class AggregationEngine {
     if (o.provenance.source.sourceType !== o.source.sourceType) throw Error("SOURCE_MISMATCH");
     if (
       Date.parse(o.eventTime) > Date.parse(now) ||
-      Date.parse(o.receivedAt) > Date.parse(now) ||
-      (safe.sourcePublishedAt && safe.sourcePublishedAt > now)
+      (!reconstruction && Date.parse(o.receivedAt) > Date.parse(now)) ||
+      (!reconstruction && safe.sourcePublishedAt && safe.sourcePublishedAt > now)
     )
       throw Error("FUTURE_INPUT");
     let open: string,
@@ -713,11 +743,31 @@ export class AggregationEngine {
     });
   }
   public ingest(streamId: string, input: Input): Result<void> {
+    return this.ingestInternal(streamId, input, false);
+  }
+  /** Explicit reconstruction retains original receipt/publication facts without certifying knowledge. */
+  public ingestReplay(
+    streamId: string,
+    input: Input,
+    mode: "VERIFIED_POINT_IN_TIME" | "EVENT_TIME_RECONSTRUCTION",
+  ): Result<void> {
+    if (
+      this.input.clock.mode !== "REPLAY" ||
+      !["VERIFIED_POINT_IN_TIME", "EVENT_TIME_RECONSTRUCTION"].includes(mode)
+    )
+      return failure(this.input.clock, "LIFECYCLE_REJECTED");
+    return this.ingestInternal(
+      streamId,
+      mode === "EVENT_TIME_RECONSTRUCTION" ? { ...input, availability: "UNKNOWN" } : input,
+      mode === "EVENT_TIME_RECONSTRUCTION",
+    );
+  }
+  private ingestInternal(streamId: string, input: Input, reconstruction: boolean): Result<void> {
     this.bump("received");
     const result = this.transact((c) => {
       const stream = c.streams[streamId];
       if (!stream) throw Error("STREAM_MISSING");
-      const x = this.contribution(stream, input),
+      const x = this.contribution(stream, input, reconstruction),
         wm = c.watermarks[streamId]!;
       if (
         c.windows.some(

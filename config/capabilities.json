@@ -1,9 +1,9 @@
 {
   "$schema": "./capabilities.schema.json",
-  "project": "ATE — Autonomous Trading Engine",
+  "project": "ATE \u2014 Autonomous Trading Engine",
   "manifest_version": 1,
   "updated_at": "2026-10-08",
-  "development_phase": "Phase III — Universal Data Platform",
+  "development_phase": "Phase III \u2014 Universal Data Platform",
   "completed_prompt": 18,
   "pre_production_version": "0.18.0-multitimeframe.1",
   "capabilities": {
@@ -296,5 +296,5 @@
     "aggregation_checkpoint_recovery": true,
     "aggregation_quality_propagation": true
   },
-  "truth_statement": "Prompts 1–18 implement bounded offline research foundations, including deterministic multi-timeframe aggregation with explicit calendar policies, immutable revisions, quality pointers and point-in-time snapshots. Prompt 17 remains conditionally accepted; Prompt 18 implementation awaits independent acceptance. No universal instrument/calendar intelligence, replay engine, automatic dataset registration, research qualification, production qualification, broker connectivity or trading is authorized. Windows, production throughput and power-loss durability remain unqualified; trusted repository, single-writer and trusted-root restrictions remain mandatory. ATE cannot trade, connect to MT5, submit orders or perform paper/live trading."
+  "truth_statement": "Prompts 1\u201318 implement bounded offline research foundations. Prompts 17 and 18 are conditionally accepted. CODEX-004 / Prompt 19 is authorized and IN PROGRESS: replay session, ordering, virtual-time staging and checkpoint primitives exist, but the complete whole-system replay capability is not qualified or independently accepted. Windows, production throughput and power-loss durability remain unqualified. Trusted repository/certificate compliance, single-writer/trusted-root, current registry context, bounded quality, legacy lineage and conservative consumer-loss restrictions remain mandatory. No universal instrument intelligence, automatic dataset registration, research qualification, broker connectivity or trading approval is inferred. ATE cannot trade, connect to MT5, submit orders or perform paper/live trading. Prompt 20 is not started."
 }

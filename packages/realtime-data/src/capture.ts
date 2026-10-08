@@ -14,7 +14,7 @@ import {
   writeSync,
 } from "node:fs";
 import { join, resolve } from "node:path";
-import { stableMarketDataStringify } from "@ate/domain";
+import { marketObservationSchema, schemas, stableMarketDataStringify } from "@ate/domain";
 import type { Clock } from "@ate/time";
 import { z } from "zod";
 import { failure, hash, immutable, safeId } from "./primitives.js";
@@ -282,6 +282,100 @@ export class FilesystemCaptureRepository implements CaptureRepository {
           catalogueRegistrationRequired: true,
           researchQualified: false,
           tradingAuthorized: false,
+        }),
+      };
+    } catch {
+      return failure(this.clock, "CAPTURE_INTEGRITY_FAILED", "capture");
+    }
+  }
+  /** Bounded read-only capture access. This does not materialize or qualify a dataset. */
+  public readRecords(
+    id: string,
+    limit: number,
+    cursor = 0,
+  ): RealtimeResult<Readonly<{ records: readonly AcceptedObservation[]; nextCursor?: number }>> {
+    try {
+      if (
+        !Number.isSafeInteger(limit) ||
+        limit < 1 ||
+        limit > 1000 ||
+        !Number.isSafeInteger(cursor) ||
+        cursor < 0
+      )
+        throw Error("READ_BOUNDS");
+      const verified = this.verify(id);
+      if (!verified.ok) return verified;
+      const manifest = verified.value.manifest;
+      const recordsPath = this.file(id, "records.ndjson");
+      if (statSync(recordsPath).size > this.maxBytes) throw Error("READ_BOUNDS");
+      const text = readFileSync(recordsPath, "utf8");
+      if (hash(text) !== manifest.contentFingerprint || Buffer.byteLength(text) !== manifest.bytes)
+        throw Error("READ_INTEGRITY");
+      const lines = text === "" ? [] : text.trimEnd().split("\n");
+      if (cursor > lines.length || lines.length !== manifest.count) throw Error("READ_CURSOR");
+      const idString = z.string().min(1).max(128);
+      const ingress = z
+        .object({
+          ingressId: idString,
+          sourceId: idString,
+          adapterId: idString,
+          adapterVersion: idString,
+          sessionId: idString,
+          subscriptionId: idString,
+          providerSymbol: idString,
+          observationKind: z.enum(["QUOTE", "TICK", "TRADE", "BAR"]),
+          eventId: idString.optional(),
+          providerSequence: z
+            .string()
+            .regex(/^\d{1,40}$/u)
+            .optional(),
+          sourceTime: z.string().max(128).optional(),
+          receivedAt: schemas.timestamp,
+          localSequence: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER),
+          payloadFingerprint: idString,
+          configurationFingerprint: idString,
+        })
+        .strict();
+      const shape = z
+        .object({
+          ingress,
+          observation: marketObservationSchema,
+          processedAt: schemas.timestamp,
+          warnings: z
+            .array(
+              z.enum([
+                "LATE",
+                "OUT_OF_ORDER",
+                "SEQUENCE_GAP",
+                "SOURCE_TIME_MISSING",
+                "IDENTITY_UNCERTAIN",
+                "CONTINUITY_UNCERTAIN",
+                "SUBSCRIPTION_UNCERTAIN",
+              ]),
+            )
+            .max(64),
+        })
+        .strict();
+      const records = lines
+        .slice(cursor, cursor + limit)
+        .map((line) => shape.parse(JSON.parse(line)) as AcceptedObservation);
+      if (
+        records.some(
+          (r) =>
+            r.ingress.sourceId !== manifest.source.sourceId ||
+            r.observation.source.sourceId !== manifest.source.sourceId ||
+            r.ingress.configurationFingerprint !== manifest.configurationFingerprint ||
+            !manifest.subscriptions.some((x) => x.subscriptionId === r.ingress.subscriptionId),
+        )
+      )
+        throw Error("READ_PROVENANCE");
+      return {
+        ok: true,
+        value: immutable({
+          records,
+          ...(cursor + records.length < lines.length
+            ? { nextCursor: cursor + records.length }
+            : {}),
         }),
       };
     } catch {

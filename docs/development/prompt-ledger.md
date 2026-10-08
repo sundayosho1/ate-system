@@ -206,3 +206,19 @@ not treat the source SHA as the governance successor.
 Prompt 19 may use that verified governance successor only after a separate implementation
 specification and explicit authorization. **Prompt 19: NOT STARTED — IMPLEMENTATION NOT
 AUTHORIZED.** This governance release does not implement Prompt 19 or expand any capability.
+
+## Prompt 19 implementation work — CODEX-004
+
+The separate CODEX-004 specification explicitly authorizes Prompt 19 from governance successor
+`b69530ac75210e62780082034d90e8b1a0a18443`. Earlier NOT STARTED / NOT AUTHORIZED statements above
+record the previous governance release and remain historical evidence.
+
+| Prompt | Title                                         | Current status                     | Target version           | Independent acceptance               | Limitations                                                                                                                                                                         |
+| ------ | --------------------------------------------- | ---------------------------------- | ------------------------ | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 19     | Deterministic whole-system market-data replay | IN PROGRESS — REMEDIATION REQUIRED | `0.19.0-market-replay.1` | PENDING; not implementation-complete | Full multi-source end-to-end qualification, branch orchestration, aggregate input adapter, architecture/runtime authority integration and complete fault matrix remain outstanding. |
+| 20     | Future separate assignment                    | NOT STARTED — NOT AUTHORIZED       | None                     | None                                 | No implementation in CODEX-004.                                                                                                                                                     |
+
+Work is isolated on `codex/prompt-19-market-replay`. Accepted Prompt 17/18 commits are unchanged.
+The application release version and `completed_prompt` remain at Prompt 18; the new workspace
+package identifies its development target only. A passing regression suite does not satisfy the
+complete Prompt 19 definition of done. See [replay help](../help/deterministic-market-replay.md).

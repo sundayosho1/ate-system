@@ -1515,3 +1515,27 @@ Capture completion never automatically grants research eligibility.
   fence.
 - Snapshot successor warnings are diagnostics, not permission to mix incompatible lineage or expose
   future knowledge. Registry membership is current context, not a bitemporal authority.
+
+## Prompt 19 implementation invariants — qualification pending
+
+- **DATA-201**: Replay uses the Prompt 6 REPLAY clock; canonical source timestamps are not
+  rewritten.
+- **DATA-202**: Reconstruction is explicit and cannot grant verified historical knowledge.
+- **DATA-203**: Known publication and direct-quality availability delay event eligibility in either
+  mode.
+- **DATA-204**: Equal-time input cohorts must finish before a public replay snapshot can be
+  acknowledged.
+- **DATA-205**: Aggregate state, input cursor and pending descriptors publish in one replay
+  checkpoint.
+- **DATA-206**: Unknown storage commitment retains an immutable operation obligation across repeated
+  stop.
+- **DATA-207**: A synchronous storage exception cannot certify non-commitment or successful
+  shutdown.
+- **DATA-208**: Only complete verified capture artifacts are read; capture-only handoff is not
+  research qualification.
+- **DATA-209**: Ordinary aggregation recovery keeps its existing continuity fencing behavior.
+- **DATA-210**: Prompt 19 implementation completion and independent acceptance remain distinct;
+  Prompt 20 is unauthorized.
+
+These invariants describe the implemented primitive boundaries. The complete CODEX-004 system and
+all mandated adversarial scenarios remain unqualified; see the implementation gap report.

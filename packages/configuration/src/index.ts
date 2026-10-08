@@ -45,3 +45,5 @@ export * from "./version-types.js";
 export * from "./realtime-definitions.js";
 
 export * from "./multitimeframe-definitions.js";
+
+export * from "./replay-definitions.js";

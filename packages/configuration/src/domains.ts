@@ -24,6 +24,8 @@ export const isConfigurationDomain = (value: string): value is ConfigurationDoma
   configurationDomains.includes(value as ConfigurationDomain);
 
 export const domainFromKey = (key: ConfigurationKey): ConfigurationDomain | undefined => {
+  // Offline replay is governed by DATA; only its authorized research namespace is an alias.
+  if (key.startsWith("research.replay.")) return "DATA";
   const prefix = key.split(".")[0];
   return configurationDomains.find((domain) => domainKeyPrefixes[domain] === prefix);
 };
