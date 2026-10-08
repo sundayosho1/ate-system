@@ -84,3 +84,29 @@ Comparison accepts immutable checkpoints, not live controllers or storage ports.
 checkpoint cannot disclose a subsequent in-memory uncertain commitment; callers must obtain
 participants through qualified owner/repository contracts. This is a T01 limitation, not
 certification of arbitrary storage or a live session's admission availability.
+
+## CODEX-004D provisional admission lifecycle (acceptance pending)
+
+CODEX-004C audited `2468d596ecddeab3274951728be37ef5f0a55245` and confirmed HIGH A19-H01-R1: source
+verification failed before repository access but left an empty FAILED controller registered,
+blocking identity retry and shutdown. That failed audit remains historical.
+
+The existing replay controller now records source verification status and repository provenance:
+NOT_INITIATED, RECOVERY_IN_FLIGHT, RECOVERED_EMPTY, RECOVERED_CONTENT and WRITE_INITIATED. The
+repository phase is set before invoking a repository operation. The disposal predicate requires
+completed, failed source verification with no repository access, checkpoint or obligation.
+STOP_REQUESTED cancellation may also use an honest empty recovery result before any write.
+Repository access uncertainty, recovered content and attempted writes are never classified as
+pre-repository source rejection solely because the checkpoint is null.
+
+Runtime cleanup checks the exact controller identity and absence of pending control publication
+while the admission lock is still held. It releases only the proven provisional registration.
+Restored same-identity inputs undergo normal governed verification/admission; durable identity
+conflicts are unchanged. Repeated shutdown succeeds for disposed failures, while genuine unresolved
+commitments still block. No second state or persistence authority is added.
+
+Disposed failure summaries retain session/specification identity, Prompt 6 timestamp, bounded
+failure code and source/repository phase. This volatile diagnostic history is capped by the admitted
+maxEvidenceRecords resource policy; eviction affects diagnostic samples only and is counted with a
+saturated scalar. It never evicts authoritative checkpoint/read/publication obligations. Arbitrary
+verifier text is not retained. Independent acceptance is still pending.

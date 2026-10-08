@@ -118,3 +118,29 @@ command outcomes, total counts, publication SHA and remote verification.
 
 Current status: TARGETED REMEDIATION — PENDING INDEPENDENT RE-AUDIT AND ACCEPTANCE. F05/F06/T01/M02
 and the no-trading/Prompt-20 restrictions remain mandatory.
+
+## CODEX-004C failure and CODEX-004D lifecycle remediation
+
+CODEX-004C independently audited `2468d596ecddeab3274951728be37ef5f0a55245` and returned RE-AUDIT
+FAILED despite 602 passing permanent tests and all 43 original probes passing. HIGH A19-H01-R1
+retained a failed empty admission after source verification rejected before repository access. The
+audit report and both independent failed reproductions remain preserved.
+
+CODEX-004D uses `codex/prompt-19-lifecycle-remediation` from that exact target. Source changes are
+limited to controller initialization provenance and runtime provisional-disposal/diagnostic
+handling. `tests/market-replay/lifecycle-remediation.test.ts` adds eleven deterministic regressions
+covering A–J: real file/actual historical owner verification, constructor rejection, unknown durable
+commitment, synchronous reentrancy, delayed rejection/shutdown, immutable bounded diagnostics,
+repeated identity rejection/capacity, and post-repository/recovered-content failures. The 602
+existing tests remain unchanged. Root/replay version, dependencies and capability flags are
+unchanged.
+
+The external delivery report records actual complete verification, unchanged original probe results,
+phase-accounting limitations in the two original CODEX-004C assertions, security results and
+publication SHA. A successful retry/stop necessarily makes repository calls; zero-call verification
+must identify the rejected attempt's boundary, not count later successful operations. No original
+external assertion is suppressed or described as passing if its unchanged run fails.
+
+Current status: SECOND TARGETED LIFECYCLE REMEDIATION — PENDING INDEPENDENT RE-AUDIT. Neither
+implementation tests nor probe reproduction constitute acceptance. F05/F06/T01/M02 and
+offline/no-broker/no-trading/Prompt-20 restrictions remain mandatory.

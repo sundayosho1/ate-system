@@ -264,3 +264,22 @@ verification/publication evidence is in the CODEX-004B delivery report. See the
 references. No Prompt 19 acceptance successor is created and no unrelated prompt status changes.
 Prompt 17/18 conditional acceptance, F05/F06/T01/M02, single-writer/trusted-root and offline scope
 remain intact. No broker, trading, production deployment or Prompt 20 authorization is inferred.
+
+## Prompt 19 second lifecycle remediation — CODEX-004C/004D
+
+CODEX-004C audited `2468d596ecddeab3274951728be37ef5f0a55245`, confirmed the original four
+CODEX-004A reproductions corrected, and returned RE-AUDIT FAILED for HIGH A19-H01-R1: an empty
+FAILED provisional session survived a pre-repository source-verification rejection. The original
+failed CODEX-004A/C audit and CODEX-004B remediation records above remain historical evidence.
+
+| Prompt | Current status                                                       | Version                  | Independent acceptance      |
+| ------ | -------------------------------------------------------------------- | ------------------------ | --------------------------- |
+| 19     | SECOND TARGETED LIFECYCLE REMEDIATION — PENDING INDEPENDENT RE-AUDIT | `0.19.0-market-replay.1` | PENDING — not self-accepted |
+| 20     | NOT STARTED — NOT AUTHORIZED                                         | None                     | None                        |
+
+CODEX-004D works only on `codex/prompt-19-lifecycle-remediation`. It distinguishes pre-repository
+rejection from recovery/write uncertainty and preserves bounded disposed-failure diagnostics. Exact
+final commands/probe outcomes and commit/publication evidence are in its external delivery report.
+See [remediation evidence](prompt-19-completion-evidence.md). No acceptance successor, unrelated
+prompt status change or modification of accepted Prompt 17/18 governance is made. All inherited
+F05/F06/T01/M02, single-writer/trusted-root and offline restrictions remain mandatory.

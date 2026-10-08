@@ -1586,3 +1586,17 @@ the bounded replay implementation below; independent acceptance remains pending.
 
 These corrections remain pending independent re-audit/acceptance. DATA-201–223 and all inherited
 F05/F06/T01/M02 restrictions remain mandatory; Prompt 20 is not authorized.
+
+## Prompt 19 provisional lifecycle remediation — CODEX-004D
+
+- **DATA-228**: Controller initialization records source-verification and repository-access phase
+  before crossing each authority boundary. Null checkpoints cannot certify side-effect freedom.
+- **DATA-229**: Proven pre-repository rejected admissions release only their exact provisional
+  registration under the admission lock, preserving normal verification, same-identity retry and
+  repeated clean shutdown. Known empty-recovery cancellation retains its explicit certificate.
+- **DATA-230**: Disposed failure diagnostics are bounded, immutable snapshots with sanitized codes
+  and authoritative clock timestamps. Diagnostic eviction cannot erase durable/source-read/event
+  obligations. Unknown outcomes and recovered content remain discoverable even with null checkpoint.
+
+CODEX-004C failed audit history remains intact; independent acceptance is pending. All earlier DATA
+invariants, F05/F06/T01/M02, owner boundaries and Prompt 20 restrictions remain mandatory.

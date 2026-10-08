@@ -288,3 +288,23 @@ Offline bounded research only. F05 Windows qualification, F06 production through
 durability, T01 trusted repositories/honest certificates and single-writer/trusted-root, and M02
 current governed registry context remain limitations. No broker, execution, production trading or
 full historical registry membership claim is implied.
+
+## Provisional source-verification rejection — CODEX-004D
+
+If source verification rejects before repository access, the empty provisional admission is
+released. Restore the immutable source and retry the same governed identity normally; validation is
+not bypassed. Readiness/health reflect actual admission availability and remaining obligations. A
+disposed rejection cannot block repeated clean shutdown. In-flight admissions still exclude
+concurrent/reentrant identity registration, including during asynchronous verification/shutdown.
+
+Diagnostics expose sourceVerification and repositoryPhase for registered controllers, plus bounded
+disposedAdmissions and evictedAdmissionDiagnostics summaries for safely released admissions. These
+summaries are volatile diagnostic samples, not durable sessions or recovery certificates. Their
+retention is bounded by maxEvidenceRecords; authoritative obligations remain separate and cannot be
+erased through diagnostic eviction. Unclassified verifier messages are reduced to a bounded code. A
+null checkpoint does not prove safety: repository access uncertainty, recovered content, write
+attempts and pending publications remain governed by existing recovery/stop contracts.
+
+The failed CODEX-004C admission audit and prior failures remain historical evidence. CODEX-004D is
+targeted remediation only, pending independent re-audit/acceptance. Version, F05/F06/T01/M02,
+single-writer/trusted-root, offline-only scope and no Prompt 20/trading restrictions are unchanged.

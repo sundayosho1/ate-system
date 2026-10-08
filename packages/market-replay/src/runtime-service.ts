@@ -76,6 +76,15 @@ export class ReplayRuntimeService {
   private readonly sessions = new Map<string, ReplayController>();
   private readonly pendingEvents = new Map<string, ReplayCheckpoint>();
   private readonly pendingEnvelopes = new Map<string, ATEEvent>();
+  private readonly disposedAdmissions: Readonly<{
+    sessionId: string;
+    specificationFingerprint: string;
+    at: ReturnType<Clock["now"]>;
+    failureCode: string;
+    sourceVerification: string;
+    repositoryPhase: string;
+  }>[] = [];
+  private evictedAdmissionDiagnostics = 0;
   public constructor(private readonly ports: ReplayRuntimePorts) {
     const id = serviceId("data.replay");
     this.managedService = {
@@ -136,6 +145,8 @@ export class ReplayRuntimeService {
       researchOnly: true,
       tradingAuthorized: false,
       sessionStates: [...this.sessions.values()].map((c) => c.diagnostics()),
+      disposedAdmissions: [...this.disposedAdmissions],
+      evictedAdmissionDiagnostics: this.evictedAdmissionDiagnostics,
     });
   }
   private ready(): boolean {
@@ -173,15 +184,34 @@ export class ReplayRuntimeService {
       this.sessions.set(specification.sessionId, controller);
       const initialized = await controller.initialize();
       if (!initialized.ok) {
-        // Cancellation without an acknowledged checkpoint or repository obligation
-        // can remove its side-effect-free provisional registration; retain
-        // failures with checkpoint content or uncertain repository commitments.
         if (
-          initialized.code === "STOP_REQUESTED" &&
-          !controller.currentCheckpoint() &&
-          !controller.diagnostics().obligation
-        )
+          controller.canDisposeProvisionalAdmission() &&
+          this.sessions.get(specification.sessionId) === controller &&
+          ![...this.pendingEvents.values()].some((cp) => cp.sessionId === specification.sessionId)
+        ) {
+          // Atomic while the admission lock remains held; never delete a later identity owner.
+          const diagnostic = controller.diagnostics();
           this.sessions.delete(specification.sessionId);
+          this.disposedAdmissions.push(
+            freeze({
+              sessionId: specification.sessionId,
+              specificationFingerprint: specification.fingerprint,
+              at: this.ports.clock.now(),
+              failureCode: diagnostic.lastFailureCode ?? initialized.code,
+              sourceVerification: diagnostic.sourceVerification,
+              repositoryPhase: diagnostic.repositoryPhase,
+            }),
+          );
+          const excess =
+            this.disposedAdmissions.length - specification.resourceLimits.maxEvidenceRecords;
+          if (excess > 0) {
+            this.disposedAdmissions.splice(0, excess);
+            this.evictedAdmissionDiagnostics = Math.min(
+              Number.MAX_SAFE_INTEGER,
+              this.evictedAdmissionDiagnostics + excess,
+            );
+          }
+        }
         throw Error(initialized.code);
       }
       if (this.lifecycle !== "READY") throw Error("SHUTDOWN_DURING_ADMISSION");

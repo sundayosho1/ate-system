@@ -28,6 +28,13 @@ export class ReplayController {
   private stopRequested = false;
   private pauseRequested = false;
   private lastFailureCode: string | null = null;
+  private sourceVerification: "NOT_STARTED" | "IN_FLIGHT" | "VERIFIED" | "FAILED" = "NOT_STARTED";
+  private repositoryPhase:
+    | "NOT_INITIATED"
+    | "RECOVERY_IN_FLIGHT"
+    | "RECOVERED_EMPTY"
+    | "RECOVERED_CONTENT"
+    | "WRITE_INITIATED" = "NOT_INITIATED";
   private readonly observedChannels = new WeakSet<ConsumerChannel>();
   private obligation: Readonly<{ operationId: string; commitment: string }> | undefined;
   public constructor(
@@ -43,6 +50,8 @@ export class ReplayController {
     return freeze({
       state: this.state,
       lastFailureCode: this.lastFailureCode,
+      sourceVerification: this.sourceVerification,
+      repositoryPhase: this.repositoryPhase,
       busy: this.busy,
       checkpointId: this.checkpoint?.checkpointId ?? null,
       cursor: this.checkpoint?.cursor ?? 0,
@@ -61,6 +70,21 @@ export class ReplayController {
         ).length ?? 0,
     });
   }
+  /** Initialization provenance, not absence of a checkpoint, proves safe disposal.
+   * An honest empty recovery may also certify cancellation before any write. */
+  public canDisposeProvisionalAdmission(): boolean {
+    return (
+      !this.busy &&
+      !this.checkpoint &&
+      !this.obligation &&
+      ((this.state === "FAILED" &&
+        this.sourceVerification === "FAILED" &&
+        this.repositoryPhase === "NOT_INITIATED") ||
+        (this.state === "STOPPING" &&
+          this.sourceVerification === "VERIFIED" &&
+          ["NOT_INITIATED", "RECOVERED_EMPTY"].includes(this.repositoryPhase)))
+    );
+  }
   public currentCheckpoint(): ReplayCheckpoint | undefined {
     return this.checkpoint;
   }
@@ -72,6 +96,7 @@ export class ReplayController {
     const operationId = replayOperationId(c);
     this.obligation = freeze({ operationId, commitment: "UNKNOWN_COMMITMENT" });
     try {
+      this.repositoryPhase = "WRITE_INITIATED";
       const committed = this.repository.commit(c);
       if (!committed.ok) return this.storageFailure(committed);
       this.obligation = freeze({ operationId, commitment: "COMMITTED" });
@@ -111,16 +136,20 @@ export class ReplayController {
     if (this.busy || this.state !== "CREATED") return this.fail("INVALID_LIFECYCLE");
     this.busy = true;
     this.state = "VALIDATING";
+    this.sourceVerification = "IN_FLIGHT";
     try {
       await this.inputs.verify();
+      this.sourceVerification = "VERIFIED";
       if (this.stopRequested) return this.fail("STOP_REQUESTED", "STOPPING");
       this.obligation = freeze({
         operationId: hash(this.specification.sessionId),
         commitment: "UNKNOWN_COMMITMENT",
       });
+      this.repositoryPhase = "RECOVERY_IN_FLIGHT";
       const recovered = this.repository.recover(this.specification);
       if (!recovered.ok) return this.storageFailure(recovered);
       this.obligation = undefined;
+      this.repositoryPhase = recovered.value ? "RECOVERED_CONTENT" : "RECOVERED_EMPTY";
       if (recovered.value) {
         const c = validateReplayCheckpoint(recovered.value.checkpoint, this.specification);
         this.validateCursor(c);
@@ -155,7 +184,12 @@ export class ReplayController {
           evidence: [],
         }),
       );
-    } catch {
+    } catch (error) {
+      if (this.sourceVerification === "IN_FLIGHT") this.sourceVerification = "FAILED";
+      this.lastFailureCode =
+        error instanceof Error && /^[A-Z][A-Z0-9_]{0,127}$/u.test(error.message)
+          ? error.message
+          : "UNCLASSIFIED_INITIALIZATION_FAILURE";
       this.state = this.obligation ? "RECOVERY_REQUIRED" : "FAILED";
       return this.fail("INITIALIZATION_FAILED");
     } finally {
