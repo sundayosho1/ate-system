@@ -48,3 +48,6 @@ MQL5/Files/
 
 # Deployment-local state
 deployment/local/
+
+# Local real-time capture artifacts
+.ate/realtime-captures/

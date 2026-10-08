@@ -229,14 +229,18 @@ export const foundationalCapabilityDefinitions = (): readonly CapabilityDefiniti
     {
       capabilityId: dataMarketData,
       displayName: "Market Data Ingestion",
-      description: "Future market-data ingestion capability; not implemented in Prompt 13.",
-      owner: "future-market-data",
-      capabilityClass: "FUTURE_UNIMPLEMENTED",
-      implementationStatus: "NOT_IMPLEMENTED",
+      description:
+        "Prompt 17 provider-neutral bounded ingestion and capture with a deterministic adapter.",
+      owner: "@ate/realtime-data",
+      capabilityClass: "OPTIONAL",
+      implementationStatus: "IMPLEMENTED",
       reloadBehavior: "STARTUP_ONLY",
       supportedRuntimeModes: runtimeModes,
       dependencies: [dataMarketDataContracts],
-      versionIntroduced: "future",
+      featureFlagId: featureFlagId("data.realtime"),
+      versionIntroduced: "0.17.0-realtime-data.1",
+      safetyNotes:
+        "Availability is not provider connection, stream quality, research eligibility or trading permission.",
     },
     {
       capabilityId: executionMt5,
@@ -269,6 +273,17 @@ export const foundationalCapabilityDefinitions = (): readonly CapabilityDefiniti
 export const foundationalFeatureFlagDefinitions = (
   clock: Clock,
 ): readonly FeatureFlagDefinition[] => [
+  {
+    flagId: featureFlagId("data.realtime"),
+    key: foundationalConfigurationKey("data.realtime.enabled", clock),
+    displayName: "Realtime Data",
+    description: "Enable governed data-only ingestion, requiring a new session.",
+    defaultEnabled: false,
+    controls: [capabilityId("data.marketData")],
+    reloadBehavior: "RESTART_REQUIRED",
+    owner: "@ate/realtime-data",
+    safetyNotes: "No trading authority.",
+  },
   {
     flagId: featureFlagId("configuration.historyInspection"),
     key: foundationalConfigurationKey(

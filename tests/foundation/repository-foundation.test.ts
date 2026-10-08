@@ -77,7 +77,6 @@ describe("Prompt 1 repository foundation", () => {
     const unimplementedCapitalBearingCapabilities = [
       "backend_api",
       "frontend_control_center",
-      "market_data_ingestion",
       "mose_surveillance",
       "strategy_engine",
       "risk_engine",
@@ -100,6 +99,9 @@ describe("Prompt 1 repository foundation", () => {
       );
     }
 
+    expect(manifest.capabilities.market_data_ingestion).toBe(true);
+    expect(manifest.capabilities.commercial_market_data_provider_configured).toBe(false);
+    expect(manifest.capabilities.capture_dataset_materialization).toBe(false);
     expect(manifest.truth_statement).toContain("cannot trade");
   });
 
@@ -111,7 +113,8 @@ describe("Prompt 1 repository foundation", () => {
     );
     expect(ledger).toContain("Completed");
     expect(ledger).toMatch(/\|\s*16\s*\|.*Completed/i);
-    expect(ledger).not.toMatch(/\|\s*17\s*\|.*Completed/i);
+    expect(ledger).toMatch(/\|\s*17\s*\|.*Completed/i);
+    expect(ledger).not.toMatch(/\|\s*18\s*\|.*Completed/i);
   });
 
   it("does not claim live trading capability in the README", () => {

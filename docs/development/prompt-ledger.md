@@ -22,4 +22,11 @@ implementation and verification.
 | 15     | Data Quality Engine                                                   | Completed | `0.15.0-data-quality.1`          | 2026-09-25      | `npm run verify` | ADR-0061 through ADR-0066 | None       | Historical dataset quality assessment and immutable reports only; no catalogue, live ingestion, aggregation, replay, instrument registry, MOSE, strategy, risk or execution    |
 | 16     | Dataset Catalogue and Lineage                                         | Completed | `0.16.0-dataset-catalogue.1`     | 2026-09-25      | `npm run verify` | ADR-0067 through ADR-0072 | None       | Dataset identity, lineage and metadata governance only; no real-time ingestion, aggregation, replay, instrument registry, MOSE, strategy, risk, execution or trading           |
 
+| 17 | Real-Time Market Data Ingestion | Completed | `0.17.0-realtime-data.1` | 2026-10-08 |
+`npm run verify` | ADR-0073 through ADR-0078 | None | Deterministic adapter and bounded
+ingestion/capture only; no commercial provider, automatic dataset materialization, aggregation,
+replay, registry or trading. Independent acceptance pending. | | 18 | Multi-Timeframe Aggregation |
+NOT STARTED | None | None | Not run | None | None | Requires independent Prompt 17 acceptance and
+explicit authorization. |
+
 Future prompts remain unimplemented until explicitly received.

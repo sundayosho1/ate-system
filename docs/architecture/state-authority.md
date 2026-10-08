@@ -86,3 +86,10 @@ correlation ID and causation ID, but they are not interchangeable sources of tru
 Cache loss must not imply authoritative-state loss. Projections and read models may be rebuilt from
 authoritative records and events. If cache/projection data disagrees with authoritative state,
 authority wins unless a future reconciliation rule says otherwise.
+
+## Prompt 17 authorities
+
+`data.realtime.sessions` is bounded ephemeral session/subscription/stream evidence owned by
+@ate/realtime-data. Authorized desired subscriptions are supplied by governed composition.
+`data.realtime.captures` is durable capture manifest/content evidence owned by @ate/realtime-data.
+Neither domain duplicates historical dataset storage, quality assessment or catalogue registration.

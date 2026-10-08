@@ -1284,3 +1284,189 @@ Prompt 1 includes foundation tests that verify:
 - security hygiene scanning is available.
 
 Future prompts must add executable invariant tests when corresponding code exists.
+
+## Prompt 17 — Real-Time Ingestion Invariants
+
+### DATA-131
+
+External observations are untrusted evidence.
+
+### DATA-132
+
+Only Prompt 13 validated observations enter the accepted plane.
+
+### DATA-133
+
+Provider payloads remain behind adapter normalization.
+
+### DATA-134
+
+Connection health and stream health are separate.
+
+### DATA-135
+
+Desired subscriptions and applied subscriptions are separate.
+
+### DATA-136
+
+No provider confirmation means uncertain applied state.
+
+### DATA-137
+
+Every connection attempt has a fresh traceable session identity.
+
+### DATA-138
+
+Completed session records are immutable.
+
+### DATA-139
+
+Source/event, receive and processing time are independent.
+
+### DATA-140
+
+Receive and processing time use Prompt 6 clock authority.
+
+### DATA-141
+
+Missing provider timestamps are never fabricated.
+
+### DATA-142
+
+Invalid or future timestamp evidence is rejected explicitly.
+
+### DATA-143
+
+Local ingress and provider sequence scopes are distinct.
+
+### DATA-144
+
+Consecutive provider sequence is used only with an explicit guarantee.
+
+### DATA-145
+
+Reconnect resets provider sequence context, not continuity uncertainty.
+
+### DATA-146
+
+Equal timestamps alone cannot establish a duplicate.
+
+### DATA-147
+
+Equal prices alone cannot establish a duplicate.
+
+### DATA-148
+
+Deduplication identity history has capacity and deterministic expiry.
+
+### DATA-149
+
+Conflicting provider identity reuse is rejected with evidence.
+
+### DATA-150
+
+Insufficient identity preserves potentially legitimate observations.
+
+### DATA-151
+
+Late observations preserve their event time.
+
+### DATA-152
+
+Out-of-order handling follows explicit policy.
+
+### DATA-153
+
+Gap detection never fabricates missing observations.
+
+### DATA-154
+
+Quiet markets do not imply gaps without configured expectations.
+
+### DATA-155
+
+Heartbeat liveness does not refresh canonical market evidence.
+
+### DATA-156
+
+Every raw and consumer queue has explicit capacity.
+
+### DATA-157
+
+Overflow and loss are counted and expose continuity uncertainty.
+
+### DATA-158
+
+Reconnect attempts and elapsed retry windows are bounded.
+
+### DATA-159
+
+Shutdown cancels reconnect and fences callbacks.
+
+### DATA-160
+
+A source change is explicit; no automatic price substitution exists.
+
+### DATA-161
+
+Provider failures cannot corrupt unrelated provider state.
+
+### DATA-162
+
+Slow consumer queues cannot block unrelated consumers indefinitely.
+
+### DATA-163
+
+High-volume data is separate from control-plane summaries.
+
+### DATA-164
+
+Capture artifacts are not governed datasets.
+
+### DATA-165
+
+Prompt 14 retains historical storage/materialization authority.
+
+### DATA-166
+
+Prompt 15 retains quality scoring/certification authority.
+
+### DATA-167
+
+Prompt 16 retains catalogue registration/eligibility authority.
+
+### DATA-168
+
+Credentials and sensitive endpoint parameters are excluded from evidence.
+
+### DATA-169
+
+Payloads, errors, sessions, gaps, metrics and captures are bounded.
+
+### DATA-170
+
+Observation never authorizes trading or execution.
+
+### DATA-171
+
+Stale session callbacks and acknowledgements cannot mutate a newer session.
+
+### DATA-172
+
+Capture completion requires content and manifest integrity verification.
+
+### DATA-173
+
+Accepted publication preserves deterministic per-provider arrival order.
+
+### DATA-174
+
+Cancellation-safe shutdown cannot be revived by retries.
+
+### DATA-175
+
+Successful reconnect never silently restores continuity.
+
+### DATA-176
+
+Capture completion never automatically grants research eligibility.

@@ -36,7 +36,10 @@ Currently implemented:
   evidence, Prompt 15 quality references, lifecycle, eligibility, reproducibility, discovery, impact
   analysis, local metadata persistence and runtime diagnostics.
 
+- `@ate/realtime-data` — provider-neutral bounded real-time ingestion, scripted adapter, connection/
+  subscription authority, integrity evidence, capture verification/recovery and explicit handoffs.
+
 No package currently implements trading behavior, risk calculations, portfolio calculations, MT5
-connectivity, broker execution, market calendars, live market-data ingestion, market-data replay,
-external message brokers, APIs, or frontend UI. Data-quality reports and catalogue active/eligible
-status are diagnostics/governance metadata only and do not authorize trading.
+connectivity, broker execution, market calendars, commercial-provider connectivity, market-data
+replay, external message brokers, APIs, or frontend UI. Data-quality reports and catalogue
+active/eligible status are diagnostics/governance metadata only and do not authorize trading.

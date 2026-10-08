@@ -2,10 +2,10 @@
   "$schema": "./capabilities.schema.json",
   "project": "ATE \u2014 Autonomous Trading Engine",
   "manifest_version": 1,
-  "updated_at": "2026-09-25",
+  "updated_at": "2026-10-08",
   "development_phase": "Phase III \u2014 Universal Data Platform",
-  "completed_prompt": 16,
-  "pre_production_version": "0.16.0-dataset-catalogue.1",
+  "completed_prompt": 17,
+  "pre_production_version": "0.17.0-realtime-data.1",
   "capabilities": {
     "repository_foundation": true,
     "engineering_constitution": true,
@@ -213,7 +213,7 @@
     "maker_checker_approval": true,
     "configuration_promotion": true,
     "configuration_rollback": true,
-    "market_data_ingestion": false,
+    "market_data_ingestion": true,
     "instrument_registry": false,
     "market_calendar": false,
     "market_sessions": false,
@@ -277,7 +277,17 @@
     "rollback_planning": true,
     "restart_aware_configuration_release": true,
     "promotion_diagnostics": true,
-    "rollback_diagnostics": true
+    "rollback_diagnostics": true,
+    "realtime_ingestion_architecture": true,
+    "scripted_realtime_adapter": true,
+    "realtime_connection_subscription_authority": true,
+    "realtime_stream_integrity_evidence": true,
+    "realtime_bounded_data_plane": true,
+    "realtime_capture_foundation": true,
+    "commercial_market_data_provider_configured": false,
+    "market_data_provider_currently_connected": false,
+    "market_data_stream_currently_healthy": false,
+    "capture_dataset_materialization": false
   },
-  "truth_statement": "Prompts 1-16 establish repository governance, documentation, quality foundations, core domain contracts, application runtime lifecycle infrastructure, internal in-process event architecture, persistence/state authority foundations, temporal integrity foundations, hierarchical configuration control-plane foundations, configuration schema validation/rejection foundations, immutable configuration version-history foundations, feature-flag/capability-control foundations, maker-checker configuration approval governance, controlled configuration promotion/rollback release governance foundations, provider-neutral universal market-data contracts, offline historical data laboratory foundations, historical dataset data-quality assessment/reporting foundations, and dataset catalogue/lineage metadata foundations only. ATE cannot trade, connect to MT5, manage accounts, size positions, submit orders, execute strategies, ingest live market data, aggregate multi-timeframe bars, replay market data, calculate risk, allocate accounts, use a universal instrument registry, run MOSE, use a distributed event broker, use enterprise RBAC/IAM, or perform paper/live trading. Quality reports and catalogue active/eligible status are non-trading diagnostics/governance metadata only; they do not repair data, certify universal fitness for purpose, or authorize trading."
+  "truth_statement": "Prompts 1-17 establish the existing domain, runtime, event, persistence, time, configuration governance, market-data contracts, historical data, quality and catalogue foundations plus provider-neutral bounded real-time ingestion and capture. A deterministic scripted adapter is implemented; no commercial provider is configured. Connection, stream health and capture status are runtime observations, not build guarantees. Capture requires separate historical materialization, authoritative quality assessment and catalogue registration. ATE cannot trade, connect to MT5, submit orders, execute strategies, calculate risk, allocate accounts, aggregate bars, run market-data replay, use a universal instrument registry or perform paper/live trading. Data availability and capture completion never authorize research or trading."
 }

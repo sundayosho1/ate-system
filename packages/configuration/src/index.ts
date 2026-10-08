@@ -41,3 +41,5 @@ export * from "./version-core.js";
 export * from "./version-repository.js";
 export * from "./version-service.js";
 export * from "./version-types.js";
+
+export * from "./realtime-definitions.js";

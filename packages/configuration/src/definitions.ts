@@ -1,3 +1,7 @@
+import {
+  realtimeConfigurationDefinitions,
+  realtimeConfigurationSchemas,
+} from "./realtime-definitions.js";
 import { runtimeModes } from "@ate/domain";
 import type { Clock } from "@ate/time";
 
@@ -16,6 +20,7 @@ export const foundationalConfigurationKey = (value: string, clock: Clock): Confi
 export const foundationalConfigurationDefinitions = (
   clock: Clock,
 ): readonly ConfigurationDefinition[] => [
+  ...realtimeConfigurationDefinitions(clock),
   {
     key: foundationalConfigurationKey("system.runtimeMode", clock),
     domain: "SYSTEM",
@@ -547,6 +552,7 @@ export const foundationalConfigurationSchemas = (clock: Clock): readonly Configu
   );
 
   return [
+    ...realtimeConfigurationSchemas(clock),
     configurationSchemaFromDefinition(requireDefinition(byKey, runtimeMode), {
       constraints: { enumValues: runtimeModes },
       crossFieldRules: [
