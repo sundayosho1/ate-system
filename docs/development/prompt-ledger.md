@@ -22,10 +22,10 @@ implementation and verification.
 | 15     | Data Quality Engine                                                   | Completed | `0.15.0-data-quality.1`          | 2026-09-25      | `npm run verify` | ADR-0061 through ADR-0066 | None       | Historical dataset quality assessment and immutable reports only; no catalogue, live ingestion, aggregation, replay, instrument registry, MOSE, strategy, risk or execution    |
 | 16     | Dataset Catalogue and Lineage                                         | Completed | `0.16.0-dataset-catalogue.1`     | 2026-09-25      | `npm run verify` | ADR-0067 through ADR-0072 | None       | Dataset identity, lineage and metadata governance only; no real-time ingestion, aggregation, replay, instrument registry, MOSE, strategy, risk, execution or trading           |
 
-| Prompt | Title                           | Status                                                   | Version/Checkpoint        | Completion Date | Test Baseline                                                  | Important ADRs            | Migrations | Known Limitations                                                                                                                                                                                                                                                               |
-| ------ | ------------------------------- | -------------------------------------------------------- | ------------------------- | --------------- | -------------------------------------------------------------- | ------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 17     | Real-Time Market Data Ingestion | CONDITIONALLY ACCEPTED                                   | `0.17.0-realtime-data.1`  | 2026-10-08      | `npm run verify`; 292 tests across 19 files at accepted commit | ADR-0073 through ADR-0078 | None       | Implementation completed; conditional acceptance covers the bounded offline research foundation only; F05/F06 qualification outstanding; T01 trusted repository/certificate compliance, single writer and trusted root mandatory. No production deployment or trading approval. |
-| 18     | Multi-Timeframe Aggregation     | IMPLEMENTATION COMPLETE — INDEPENDENT ACCEPTANCE PENDING | `0.18.0-multitimeframe.1` | 2026-10-08      | `npm run verify`; 377 tests / 27 files                         | ADR-0079 through ADR-0084 | None       | Offline research only. Prompt 17 acceptance restrictions preserved.                                                                                                                                                                                                             |
+| Prompt | Title                           | Status                 | Version/Checkpoint        | Completion Date | Test Baseline                                                  | Important ADRs            | Migrations | Known Limitations                                                                                                                                                                                                                                                               |
+| ------ | ------------------------------- | ---------------------- | ------------------------- | --------------- | -------------------------------------------------------------- | ------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 17     | Real-Time Market Data Ingestion | CONDITIONALLY ACCEPTED | `0.17.0-realtime-data.1`  | 2026-10-08      | `npm run verify`; 292 tests across 19 files at accepted commit | ADR-0073 through ADR-0078 | None       | Implementation completed; conditional acceptance covers the bounded offline research foundation only; F05/F06 qualification outstanding; T01 trusted repository/certificate compliance, single writer and trusted root mandatory. No production deployment or trading approval. |
+| 18     | Multi-Timeframe Aggregation     | CONDITIONALLY ACCEPTED | `0.18.0-multitimeframe.1` | 2026-10-08      | `npm run verify`; 454 tests / 30 files; 48 adversarial probes  | ADR-0079 through ADR-0084 | None       | Bounded offline market-data research only. CODEX-003D project approval; F05/F06/T01 and registry, quality, legacy, loss and native-correction restrictions remain mandatory.                                                                                                    |
 
 Future prompts remain unimplemented until explicitly received.
 
@@ -145,3 +145,64 @@ findings closures, F05/F06/T01, trusted-root/single-writer and research-only res
 unchanged. Prompt 19 remains **NOT STARTED / BLOCKED** pending acceptance and a separate explicit
 implementation authorization. The immutable commit containing this entry identifies the remediation
 checkpoint; exact verification/publication evidence accompanies CODEX-003B.
+
+## Prompt 18 project conditional acceptance — CODEX-003D
+
+Recorded on **2026-10-08 (Africa/Lagos)** under the project reviewer's explicit CODEX-003D
+conditional-acceptance authorization. This project-level decision is separate from the supporting
+CODEX-003C technical re-audit, which was performed in the implementation assistant session and is
+not represented as an external human audit.
+
+- Status: **CONDITIONALLY ACCEPTED**.
+- Exact accepted implementation and remediation commit:
+  [`30f72360c44396e689efe0bdb82fe356bc92b3eb`](https://github.com/sundayosho1/ate-system/commit/30f72360c44396e689efe0bdb82fe356bc92b3eb).
+- Accepted source branch: `codex/prompt-18-remediation`; direct parent:
+  `58050965dfbe7e90d530e74d822fd6cd0fff854d`.
+- Accepted version: `0.18.0-multitimeframe.1`.
+- Scope: **bounded offline market-data research only**.
+- Permanent verified baseline: **454 tests across 30 files**, retaining all 377 prior tests and
+  adding 77 permanent regressions. CODEX-003C also executed **48 separate adversarial target
+  probes**, with five parent probes reproducing the original defects.
+- Supporting re-audit verdict: **RE-AUDIT PASSED WITH NONBLOCKING CONDITIONS — RECOMMENDED FOR
+  CONDITIONAL ACCEPTANCE**. This recommendation alone did not grant acceptance.
+- Full decision, history, conditions and evidence references:
+  [CODEX-003D conditional-acceptance decision](prompt-18-conditional-acceptance.md).
+
+### Prompt 18 mandatory findings closure
+
+| Finding | Accepted disposition | Corrected contract                                                                   |
+| ------- | -------------------- | ------------------------------------------------------------------------------------ |
+| A18-H01 | CLOSED               | Deterministic observation ordering with explicit market-order uncertainty            |
+| A18-H02 | CLOSED               | Bounded verifiable inherited quality evidence, report membership and suppression     |
+| A18-H03 | CLOSED               | Consistent filesystem operation capacity, truthful commitments and recoverability    |
+| A18-H04 | CLOSED               | Finalized-history correction horizon across invalidation, hierarchy and recovery     |
+| A18-H05 | CLOSED               | Consumer-loss fencing, durable evidence and justified reconciliation before finality |
+
+Closures apply only within the accepted bounded contract. **F05, F06 and T01 remain mandatory**:
+Windows qualification and production performance/durability remain outstanding; trusted repository
+implementation, compliant contracts, a trusted root and a single writer remain required. **M02**
+limits point-in-time claims to revision knowledge within current governed registry context. Bounded
+quality handoffs must fail explicitly without truncation; legacy evidence cannot gain unsupported
+migration, repair or invented report membership. Unknown consumer-loss scope requires conservative
+fencing and justified reconciliation. Native corrected-trade cancellation/replacement remains
+unsupported. No live trading, broker connectivity, financial execution, Windows deployment or
+production operation is approved.
+
+### Prompt 18 history and Prompt 19 baseline
+
+CODEX-003A's **FAILED** initial audit, CODEX-003B's completed remediation and CODEX-003C's qualified
+technical recommendation remain historical evidence; none is rewritten by this acceptance record.
+Earlier pending/NOT STARTED entries above describe their historical checkpoints. This CODEX-003D
+entry records the subsequent project-level acceptance decision; unrelated prompt statuses are
+unchanged.
+
+The **accepted Prompt 18 source baseline** is `30f72360c44396e689efe0bdb82fe356bc92b3eb`. The
+distinct **governance successor** is the new immutable commit introducing this decision and ledger
+entry on `codex/prompt-18-conditional-acceptance`. Its direct parent must be the accepted source and
+its complete diff must contain only these governance documents. The CODEX-003D delivery report
+records the exact successor SHA after publication and verifies the matching remote branch SHA; do
+not treat the source SHA as the governance successor.
+
+Prompt 19 may use that verified governance successor only after a separate implementation
+specification and explicit authorization. **Prompt 19: NOT STARTED — IMPLEMENTATION NOT
+AUTHORIZED.** This governance release does not implement Prompt 19 or expand any capability.
