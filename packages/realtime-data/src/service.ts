@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { z } from "zod";
 import {
   dataSourceRefSchema,
   marketObservationSchema,
@@ -46,9 +47,23 @@ import {
   type SubscriptionRequest,
 } from "./types.js";
 
+const nativeMessageSchema = z
+  .object({
+    subscriptionId: z.string().min(1).max(128),
+    sourceId: schemas.sourceId,
+    observationKind: z.enum(["QUOTE", "TICK", "TRADE", "BAR", "MARKET_STATUS"]),
+    eventId: z.string().min(1).max(128).optional(),
+    sequence: z.string().min(1).max(128).optional(),
+    sourceTime: z.string().min(1).max(64).optional(),
+    payload: z.unknown(),
+  })
+  .strict()
+  .refine((value) => Object.hasOwn(value, "payload") && value.payload !== undefined);
+
 type StreamState = {
   lastEvent?: UtcTimestamp;
   lastAccepted?: UtcTimestamp;
+  lastFresh?: UtcTimestamp;
   sequence?: bigint;
   freshness: "UNKNOWN" | "FRESH" | "AGING" | "STALE";
   seen: Map<string, { at: number; fingerprint: string }>;
@@ -114,6 +129,7 @@ export class RealtimeDataService {
   private running = false;
   private stopping = false;
   private started = false;
+  private initialized = false;
   private drainScheduled = false;
   private failed = false;
   private readonly pending = new Set<Promise<unknown>>();
@@ -178,6 +194,7 @@ export class RealtimeDataService {
     }
     for (const adapter of this.registry.values())
       if (this.options.enabled) await this.connect(adapter.source.sourceId);
+    this.initialized = this.running && !this.stopping && !this.failed;
     return { ok: true, value: undefined };
   }
   private bump(name: keyof Metrics, amount = 1): void {
@@ -429,12 +446,16 @@ export class RealtimeDataService {
       return;
     }
     const generation = p.generation;
-    const scheduled = this.input.scheduler.scheduleAfter(durationMs(delay), async () => {
+    const scheduled = this.input.scheduler.scheduleAfter(durationMs(delay), () => {
       delete p.retryTask;
       if (!this.running || this.stopping || p.generation !== generation) return;
       p.retry++;
       this.bump("reconnectAttempts");
-      await this.connect(p.adapter.source.sourceId);
+      // Return to the sequential runner so it can execute this attempt's deadline.
+      void this.connect(p.adapter.source.sourceId).catch(() => {
+        const error = failure(this.input.clock, "CONNECTION_FAILED", "reconnect");
+        if (!error.ok) this.record(error.error);
+      });
     });
     if (scheduled.ok) p.retryTask = scheduled.value;
     else {
@@ -594,7 +615,6 @@ export class RealtimeDataService {
   }
   private receive(p: ProviderState, message: NativeMessage): RealtimeResult<string> {
     this.bump("received");
-    p.activity = this.input.clock.now();
     const reject = (code: RealtimeErrorCode) => {
       p.evidence.rejected++;
       this.bump("rejected");
@@ -603,14 +623,16 @@ export class RealtimeDataService {
       return r;
     };
     if (p.state !== "CONNECTED") return reject("STALE_SESSION");
-    let safe: NativeMessage;
+    let safe: z.infer<typeof nativeMessageSchema>;
     try {
-      safe = boundedInput(
-        message,
-        this.options.maxMessageBytes,
-        this.options.maxDepth,
-        this.options.maxStringLength,
-      ) as NativeMessage;
+      safe = nativeMessageSchema.parse(
+        boundedInput(
+          message,
+          this.options.maxMessageBytes,
+          this.options.maxDepth,
+          this.options.maxStringLength,
+        ),
+      );
     } catch {
       return reject("MALFORMED_PAYLOAD");
     }
@@ -624,24 +646,30 @@ export class RealtimeDataService {
       safe.observationKind !== subscription.request.observationKind
     )
       return reject("SUBSCRIPTION_CONFLICT");
-    const envelope: IngressEnvelope = immutable({
-      ingressId: this.id(),
-      sourceId: p.adapter.source.sourceId,
-      adapterId: p.adapter.adapterId,
-      adapterVersion: p.adapter.version,
-      sessionId: p.session!.sessionId,
-      subscriptionId: safe.subscriptionId,
-      providerSymbol: subscription.request.providerSymbol,
-      observationKind: safe.observationKind,
-      ...(safe.eventId ? { eventId: safe.eventId } : {}),
-      ...(safe.sequence ? { providerSequence: safe.sequence } : {}),
-      ...(safe.sourceTime ? { sourceTime: safe.sourceTime } : {}),
-      receivedAt: this.input.clock.now(),
-      localSequence: ++p.localSequence,
-      payloadFingerprint: fingerprint(safe.payload),
-      payload: safe.payload,
-      configurationFingerprint: this.input.configurationFingerprint,
-    });
+    let envelope: IngressEnvelope;
+    try {
+      envelope = immutable({
+        ingressId: this.id(),
+        sourceId: p.adapter.source.sourceId,
+        adapterId: p.adapter.adapterId,
+        adapterVersion: p.adapter.version,
+        sessionId: p.session!.sessionId,
+        subscriptionId: safe.subscriptionId,
+        providerSymbol: subscription.request.providerSymbol,
+        observationKind: safe.observationKind,
+        ...(safe.eventId ? { eventId: safe.eventId } : {}),
+        ...(safe.sequence ? { providerSequence: safe.sequence } : {}),
+        ...(safe.sourceTime ? { sourceTime: safe.sourceTime } : {}),
+        receivedAt: this.input.clock.now(),
+        localSequence: ++p.localSequence,
+        payloadFingerprint: fingerprint(safe.payload),
+        payload: safe.payload,
+        configurationFingerprint: this.input.configurationFingerprint,
+      });
+    } catch {
+      return reject("MALFORMED_PAYLOAD");
+    }
+    p.activity = this.input.clock.now();
     if (!p.queue.push(envelope)) {
       p.evidence.overflow++;
       this.bump("overflow");
@@ -914,7 +942,12 @@ export class RealtimeDataService {
       stream.sequence = seq;
     if (!stream.lastEvent || eventMs > Date.parse(stream.lastEvent)) stream.lastEvent = event.value;
     stream.lastAccepted = event.value;
-    stream.freshness = "FRESH";
+    this.updateFreshness(p, raw.subscriptionId, stream);
+    if (
+      Date.parse(this.input.clock.now()) - eventMs <= this.options.staleAfterMs / 2 &&
+      (!stream.lastFresh || eventMs > Date.parse(stream.lastFresh))
+    )
+      stream.lastFresh = event.value;
     const { payload: _payload, ...ingress } = raw;
     const accepted: AcceptedObservation = immutable({
       ingress,
@@ -988,6 +1021,25 @@ export class RealtimeDataService {
       this.interrupt(p);
     }
   }
+  private freshness(stream: StreamState): StreamState["freshness"] {
+    if (!stream.lastEvent) return "UNKNOWN";
+    const age = Date.parse(this.input.clock.now()) - Date.parse(stream.lastEvent);
+    return age > this.options.staleAfterMs
+      ? "STALE"
+      : age > this.options.staleAfterMs / 2
+        ? "AGING"
+        : "FRESH";
+  }
+  private updateFreshness(p: ProviderState, id: string, stream: StreamState): void {
+    const next = this.freshness(stream);
+    if (next === "STALE" && stream.freshness !== "STALE") {
+      this.bump("staleTransitions");
+      this.control(p, "HEALTH", "STALE");
+      if (p.subscriptions.get(id)?.request.expectedActivity)
+        this.gap(p, "TIME_GAP", "configured activity", "no valid observations", id);
+    }
+    stream.freshness = next;
+  }
   private checkFreshness(p: ProviderState): void {
     const now = Date.parse(this.input.clock.now());
     if (
@@ -1003,28 +1055,16 @@ export class RealtimeDataService {
     for (const [id, s] of p.streams) {
       const request = p.subscriptions.get(id);
       if (!request || request.desired !== "ACTIVE") continue;
-      const age = s.lastAccepted ? now - Date.parse(s.lastAccepted) : undefined;
-      const next =
-        age === undefined
-          ? "UNKNOWN"
-          : age > this.options.staleAfterMs
-            ? "STALE"
-            : age > this.options.staleAfterMs / 2
-              ? "AGING"
-              : "FRESH";
-      if (next === "STALE" && s.freshness !== "STALE") {
-        this.bump("staleTransitions");
-        this.control(p, "HEALTH", "STALE");
-        if (request.request.expectedActivity)
-          this.gap(p, "TIME_GAP", "configured activity", "no valid observations", id);
-      }
-      s.freshness = next;
+      this.updateFreshness(p, id, s);
     }
   }
   public startCapture(sourceId: string, captureId: string): RealtimeResult<void> {
     const p = this.providers.get(sourceId);
     if (
       !p ||
+      !this.running ||
+      !this.initialized ||
+      this.failed ||
       !this.options.captureEnabled ||
       !this.input.captureRepository ||
       p.captureId ||
@@ -1051,6 +1091,11 @@ export class RealtimeDataService {
         storageReference: `${captureId}/records.ndjson`,
       }),
     );
+    if (result.ok && (!this.running || this.stopping || this.failed || !this.initialized)) {
+      const aborted = this.input.captureRepository.abort(captureId);
+      if (!aborted.ok) this.record(aborted.error);
+      return failure(this.input.clock, "CAPTURE_FAILED", "capture lifecycle changed");
+    }
     if (result.ok) {
       p.captureId = captureId;
       p.captureStartMetrics = { ...p.evidence };
@@ -1127,7 +1172,10 @@ export class RealtimeDataService {
         subscriptions: [...p.subscriptions.values()],
         streams: [...p.streams.entries()].map(([id, s]) => ({
           subscriptionId: id,
-          freshness: s.freshness,
+          freshness: this.freshness(s),
+          lastAcceptedEventTime: s.lastAccepted,
+          latestAcceptedEventTime: s.lastEvent,
+          lastFreshEventTime: s.lastFresh,
           continuityUncertain: s.uncertain,
           identityCacheSize: s.seen.size,
         })),
@@ -1155,8 +1203,10 @@ export class RealtimeDataService {
           [...p.subscriptions.values()].every(
             (s) => s.desired !== "ACTIVE" || s.state === "ACTIVE",
           ) &&
-          [...p.streams.values()].every(
-            (s) => s.freshness !== "STALE" && s.freshness !== "UNKNOWN" && !s.uncertain,
+          [...p.streams.entries()].every(
+            ([id, s]) =>
+              p.subscriptions.get(id)?.desired !== "ACTIVE" ||
+              (this.freshness(s) !== "STALE" && this.freshness(s) !== "UNKNOWN" && !s.uncertain),
           )
         );
       })

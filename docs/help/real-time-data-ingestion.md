@@ -257,3 +257,29 @@ materialization, quality scoring of streaming evidence, aggregation (Prompt 18),
 instrument registry (20), MOSE, frontend and all trading/execution capabilities remain deferred.
 Windows behavior is designed against Node supported filesystem APIs; execution validation in this
 task is on Linux.
+
+### Prompt 17 audit remediation semantics
+
+Scheduled retries dispatch a tracked connection attempt and return immediately to the existing
+sequential scheduler. The host can therefore execute operation deadlines and unrelated scheduled
+work while a provider operation remains pending. No additional timer or clock authority is used.
+
+Freshness derives from the latest accepted canonical event time and the current injected clock,
+including immediate readiness queries before the next monitor cycle. Old arrivals do not replace
+newer event-time evidence. Diagnostics distinguish last accepted arrival's event time, latest
+accepted event time, and last event accepted within the FRESH age threshold. Invalid or duplicate
+observations cannot independently advance these timestamps. Missing canonical event time is
+rejected; missing optional source time remains an explicit warning rather than fabricated evidence.
+Applied subscription uncertainty and unresolved continuity still prevent required-source readiness.
+
+Native callbacks validate a bounded root envelope and required field types before dereferencing or
+fingerprinting payloads. Malformed envelopes return safe structured rejection evidence. Registry
+wrappers, their source identity and capability metadata are immutable; adapter methods remain bound.
+
+Capture creation requires successfully initialized running lifecycle state. STOPPING, STOPPED,
+FAILED and incomplete startup reject creation. If a custom capture repository callback initiates
+shutdown during synchronous creation, the new capture is aborted before creation can report success.
+Finalization remains synchronous; pending raw ingress rejects completion and shutdown accounts for
+that capture by aborting it. These corrections do not alter the single-writer, synchronous storage
+or filesystem durability limitations above. Windows execution and production throughput/durability
+qualification remain outstanding.

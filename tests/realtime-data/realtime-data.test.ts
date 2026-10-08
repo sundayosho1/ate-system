@@ -132,6 +132,9 @@ async function advance(f: ReturnType<typeof fixture>, ms: number) {
   expect(f.clock.advanceBy(durationMs(ms)).ok).toBe(true);
   const result = await f.scheduler.runDueTasks();
   expect(result.ok).toBe(true);
+  // Retry dispatch is nonblocking: settle the bounded scripted port promise chain,
+  // without advancing virtual time or awaiting an unresolved adapter gate.
+  for (let turn = 0; turn < 20; turn++) await Promise.resolve();
 }
 const deferred = () => {
   let release!: () => void;

@@ -55,17 +55,20 @@ export class AdapterRegistry {
     }
     const source = boundedInput(adapter.source, 2048, 4, 128) as ProviderAdapter["source"];
     const capabilities = boundedInput(adapter.capabilities, 2048, 4, 128) as AdapterCapabilities;
-    this.adapters.set(source.sourceId, {
-      adapterId: adapter.adapterId,
-      version: adapter.version,
-      source,
-      capabilities,
-      connect: adapter.connect.bind(adapter),
-      disconnect: adapter.disconnect.bind(adapter),
-      subscribe: adapter.subscribe.bind(adapter),
-      unsubscribe: adapter.unsubscribe.bind(adapter),
-      normalize: adapter.normalize.bind(adapter),
-    });
+    this.adapters.set(
+      source.sourceId,
+      Object.freeze({
+        adapterId: adapter.adapterId,
+        version: adapter.version,
+        source,
+        capabilities,
+        connect: adapter.connect.bind(adapter),
+        disconnect: adapter.disconnect.bind(adapter),
+        subscribe: adapter.subscribe.bind(adapter),
+        unsubscribe: adapter.unsubscribe.bind(adapter),
+        normalize: adapter.normalize.bind(adapter),
+      }),
+    );
     return { ok: true, value: undefined };
   }
   public values(): readonly ProviderAdapter[] {
