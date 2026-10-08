@@ -57,3 +57,25 @@ Publication/recovery use injected clocks; no filesystem fsync claim implies prod
 
 Retain immutable manifests/checkpoints and branch reservations. A new specification may reconstruct
 under a separately authorized policy; never rewrite accepted histories or erase uncertain artifacts.
+
+## CODEX-004B targeted remediation (acceptance pending)
+
+CODEX-004A confirmed A19-M01 and A19-M02 at `97ace0e431b47cdbb51d838edc84189b0d22ea2d`. Preserve
+that failed audit as historical evidence. The registry now reconstructs using the controller's
+bounded event-processing boundaries, clipped to the exact fork time. It uses the same owner pipeline
+and deterministic task phases; equal-time tasks and snapshots execute only after the entire cohort.
+Public timestamp stepping still rejects an oversized cohort. Each event boundary retains the
+immutable batch/resource limits and durable checkpoint contract. A partial private child is
+recoverable but is not a published branch. Publication requires the exact parent cursor, fork time,
+complete cohort and full input identity. An already PAUSED or COMPLETED complete fork does not
+consume redundant resume/pause operations when recovering its missing branch marker, including at
+exact repository capacity.
+
+The reservation's input identity comes from the parent checkpoint, which commits the full immutable
+manifest identity, source scope/origin and qualification context, not merely record content.
+Creation checks supplied inputs against this identity before reservation, the controller revalidates
+each reconstruction boundary, and publication revalidates the inputs and record. Record
+reading/recovery validates this parent binding again. The parent checkpoint hash already commits
+this identity in branch evidence; no incompatible format or schema migration is required. Identical
+observations with different origins or qualification references are not configuration branches.
+Trusted repository/honest-certificate and single-writer/trusted-root restrictions remain.

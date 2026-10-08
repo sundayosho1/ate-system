@@ -58,3 +58,29 @@ fault evidence is reproducible offline; Windows/production durability remain unq
 
 Preserve source/specification/checkpoint identities; create a separately governed reconstruction for
 new policies. Never implicitly resume changed software/configuration or modify accepted history.
+
+## CODEX-004B targeted remediation (acceptance pending)
+
+CODEX-004A confirmed A19-H01 and A19-H02 at `97ace0e431b47cdbb51d838edc84189b0d22ea2d`. The original
+audit failure remains historical evidence. All admission operations after acquiring the lock,
+including pure controller construction, share a guaranteed cleanup guard. Readiness and health
+include in-flight admission availability. Side-effect-free constructor rejection creates neither a
+session nor a publication obligation. A STOP_REQUESTED cancellation without checkpoint content or
+outstanding commitment removes only its provisional registration. Failures with checkpoint/recovery
+or event publication obligations remain discoverable and continue to prevent false successful
+shutdown. Synchronous repository callbacks and held verification cannot reenter admission or clear
+an operation still in flight.
+
+Comparison qualification applies to parent, child and independent reference: structurally/owner
+valid, complete event cohort, no unresolved required channel-read evidence and no disqualifying
+FAILED/STOPPING/RECOVERY_REQUIRED checkpoint lifecycle. The reference must also match the exact
+child specification, full input identity, logical time and cursor. Pending reference evidence
+returns INCOMPARABLE with REFERENCE_UNRESOLVED_READ_EVIDENCE, even when derived outputs match. After
+the real read completes or recorded reconciliation closes it, ordinary reference agreement can
+support EXPECTED_DIFFERENCE. Corrupt/missing evidence remains INCOMPARABLE. IDENTICAL and
+UNEXPLAINED_DIVERGENCE retain their qualified semantic meaning.
+
+Comparison accepts immutable checkpoints, not live controllers or storage ports. An old acknowledged
+checkpoint cannot disclose a subsequent in-memory uncertain commitment; callers must obtain
+participants through qualified owner/repository contracts. This is a T01 limitation, not
+certification of arbitrary storage or a live session's admission availability.

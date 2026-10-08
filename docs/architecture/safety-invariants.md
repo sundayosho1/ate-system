@@ -1568,3 +1568,21 @@ the bounded replay implementation below; independent acceptance remains pending.
   resource bounds reject rather than evict acknowledged evidence.
 - **DATA-223**: Implementation completion, independent acceptance and production qualification
   remain distinct; F05/F06/T01/M02 and no Prompt 20/trading restrictions remain mandatory.
+
+## Prompt 19 targeted audit remediation — CODEX-004B
+
+- **DATA-224**: Every admission operation after lock acquisition has guaranteed cleanup. Pure
+  rejection and proven side-effect-free cancellation cannot create phantom sessions; genuine
+  repository/control publication obligations cannot be cleared to restore readiness. In-flight
+  admission is NOT_READY/DEGRADED.
+- **DATA-225**: Parent, child and comparison reference all require complete cohorts and resolved
+  required read evidence. Matching outputs cannot qualify pending or corrupt reference evidence.
+- **DATA-226**: Bounded branch reconstruction uses existing atomic EVENT boundaries and task phases,
+  publishes only the exact complete fork, and never silently increases batch limits. Repeated
+  recovery of a completed fork does not consume redundant control checkpoints.
+- **DATA-227**: A configuration-only branch binds the parent's full immutable input identity at
+  reservation, reconstruction, publication, record validation and recovery. Equal record content
+  cannot authorize substituted source origins, manifest or qualification context.
+
+These corrections remain pending independent re-audit/acceptance. DATA-201–223 and all inherited
+F05/F06/T01/M02 restrictions remain mandatory; Prompt 20 is not authorized.

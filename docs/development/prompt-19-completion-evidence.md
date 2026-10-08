@@ -92,3 +92,29 @@ bounded; loss scope is conservatively fenced. Native corrected-trade cancellatio
 automatic dataset qualification and all broker/trading/Prompt 20 work are absent. Actual bus
 summaries remain volatile; checkpoint history owns durable research audit. These are explicit scope
 limitations, not waived acceptance criteria or production claims.
+
+## CODEX-004A failed audit and CODEX-004B targeted remediation
+
+The completion statements above record CODEX-004R's implementation delivery, not acceptance.
+Independent CODEX-004A audited `97ace0e431b47cdbb51d838edc84189b0d22ea2d` and returned AUDIT FAILED
+— MANDATORY REMEDIATION REQUIRED despite 579 passing permanent tests. It confirmed A19-H01
+(admission lock), A19-H02 (unfinished reference), A19-M01 (bounded branch reconstruction), and
+A19-M02 (full source-origin binding). Preserve the original report/probes and failed results.
+
+CODEX-004B works only on `codex/prompt-19-audit-remediation`, preserving release version
+`0.19.0-market-replay.1`, accepted owner packages, dependencies/lockfile and all 579 existing tests.
+Targeted source corrections are in replay runtime-service, comparison, controller and branch.
+Permanent `tests/market-replay/audit-remediation.test.ts` adds 23 cases, including A–E combined
+scenarios, genuine post-commit uncertainty, held real ConsumerChannel reads, exact-capacity and
+mid-cohort interruption recovery, source substitution and rehashed record integrity rejection. The
+runtime still retains genuine uncertain commitments; explicit timestamp capacity rejection is
+preserved; no new scheduler, quality authority, data owner or source-origin substitution contract is
+introduced.
+
+The original external CODEX-004A assertions are rerun unchanged, with evidence paths redirected to
+CODEX-004B so audit history is preserved. Implementation tests and reproduced audit probes are
+distinct; neither constitutes independent acceptance. The final delivery report records actual
+command outcomes, total counts, publication SHA and remote verification.
+
+Current status: TARGETED REMEDIATION — PENDING INDEPENDENT RE-AUDIT AND ACCEPTANCE. F05/F06/T01/M02
+and the no-trading/Prompt-20 restrictions remain mandatory.

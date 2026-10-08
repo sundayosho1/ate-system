@@ -259,3 +259,32 @@ conservative consumer-loss fencing remain mandatory. Legacy lineage/corrected-tr
 automatic dataset research qualification are unsupported. No broker, financial execution, production
 deployment or Prompt 20 implementation is provided. Independent acceptance of Prompt 19 remains
 pending.
+
+## CODEX-004B remediation boundaries
+
+The failed CODEX-004A audit identified admission lock leakage, unfinished reference qualification,
+batch-one branch reconstruction and substituted source origin. Targeted corrections are pending
+independent re-audit; Prompt 19 is not accepted and Prompt 20 is not authorized.
+
+Admission rejection releases its transient lock; it does not create a session when construction
+fails. Admission in flight is NOT_READY/DEGRADED. Real uncertain commitments and control-event
+publication obligations remain visible and block shutdown. Retry/recovery must use existing owner
+contracts; repeated stop is not evidence deletion.
+
+The registry reconstructs a configuration child using bounded event steps through the exact fork
+time. Equal-time snapshots/tasks wait for cohort completion. Oversized explicit timestamp steps
+still reject. Partial reconstruction remains private behind the reservation; fresh recovery resumes
+acknowledged work and publishes a complete fork. Completed PAUSED/COMPLETED forks can publish their
+missing marker at exact capacity without redundant control operations. Limits are never raised.
+
+Supply the exact full parent inputs for creation and recovery. Keeping observation prices, content
+hash or manifest ID while changing source origin or qualification context is rejected, even when
+configuration is the only declared policy change. Reference comparison requires a complete,
+qualified checkpoint at the child boundary. Held reads return INCOMPARABLE with a specific reason;
+only actual completion/reconciliation permits explanatory comparison. Live RAM/storage obligations
+are not inferred from an old checkpoint. Trusted owners/repository certificates remain mandatory.
+
+Offline bounded research only. F05 Windows qualification, F06 production throughput/power-loss
+durability, T01 trusted repositories/honest certificates and single-writer/trusted-root, and M02
+current governed registry context remain limitations. No broker, execution, production trading or
+full historical registry membership claim is implied.

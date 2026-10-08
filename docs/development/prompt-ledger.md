@@ -243,3 +243,24 @@ durability, T01 trusted implementations/certificates and single-writer/trusted-r
 registry context, bounded quality handoff and conservative source-loss restrictions remain
 mandatory. No production deployment, broker connectivity, trading or future-prompt approval is
 inferred.
+
+## Prompt 19 failed independent audit and targeted remediation — CODEX-004A/004B
+
+CODEX-004R's completion row above is historical delivery evidence, not acceptance. CODEX-004A
+independently audited `97ace0e431b47cdbb51d838edc84189b0d22ea2d` (parent
+`bd37a789e6ccac5ba6b7ab2e87a050581df40be1`, accepted Prompt 18 governance ancestor
+`b69530ac75210e62780082034d90e8b1a0a18443`) and returned AUDIT FAILED. Mandatory findings A19-H01,
+A19-H02, A19-M01 and A19-M02 required targeted remediation.
+
+| Prompt | Current status                                      | Version                  | Independent acceptance      |
+| ------ | --------------------------------------------------- | ------------------------ | --------------------------- |
+| 19     | TARGETED REMEDIATION — PENDING INDEPENDENT RE-AUDIT | `0.19.0-market-replay.1` | PENDING — not self-accepted |
+| 20     | NOT STARTED — NOT AUTHORIZED                        | None                     | None                        |
+
+CODEX-004B uses dedicated `codex/prompt-19-audit-remediation` from the audited commit. Source
+changes, permanent regressions and replay documentation address the four findings; exact final
+verification/publication evidence is in the CODEX-004B delivery report. See the
+[completion evidence](prompt-19-completion-evidence.md) for historical failure and remediation
+references. No Prompt 19 acceptance successor is created and no unrelated prompt status changes.
+Prompt 17/18 conditional acceptance, F05/F06/T01/M02, single-writer/trusted-root and offline scope
+remain intact. No broker, trading, production deployment or Prompt 20 authorization is inferred.

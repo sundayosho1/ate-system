@@ -142,6 +142,7 @@ export class ReplayRuntimeService {
     const effective = this.ports.configuration();
     return (
       this.lifecycle === "READY" &&
+      !this.busy &&
       !this.pendingEvents.size &&
       replayFromEffective(effective).enabled &&
       [...this.sessions.values()].every(
@@ -165,11 +166,24 @@ export class ReplayRuntimeService {
     if (this.sessions.size >= specification.resourceLimits.maxSessions)
       throw Error("SESSION_CAPACITY");
     this.busy = true;
-    const controller = new ReplayController(specification, inputs, repository);
-    this.sessions.set(specification.sessionId, controller);
     try {
+      // Construction is pure, but can reject incompatible immutable inputs.
+      // Every operation after acquiring the lock must share its cleanup guard.
+      const controller = new ReplayController(specification, inputs, repository);
+      this.sessions.set(specification.sessionId, controller);
       const initialized = await controller.initialize();
-      if (!initialized.ok) throw Error(initialized.code);
+      if (!initialized.ok) {
+        // Cancellation without an acknowledged checkpoint or repository obligation
+        // can remove its side-effect-free provisional registration; retain
+        // failures with checkpoint content or uncertain repository commitments.
+        if (
+          initialized.code === "STOP_REQUESTED" &&
+          !controller.currentCheckpoint() &&
+          !controller.diagnostics().obligation
+        )
+          this.sessions.delete(specification.sessionId);
+        throw Error(initialized.code);
+      }
       if (this.lifecycle !== "READY") throw Error("SHUTDOWN_DURING_ADMISSION");
       await this.emit(initialized.checkpoint);
       return controller;

@@ -181,7 +181,7 @@ export class ReplayController {
     return this.runBoundary("TIMESTAMP");
   }
   private async runBoundary(
-    mode: "EVENT" | "TIMESTAMP",
+    mode: "EVENT" | "TIMESTAMP" | "BOUNDED",
     target?: UtcTimestamp,
   ): Promise<ReplayCommandResult> {
     if (this.busy) return this.fail("REENTRANT_OPERATION");
@@ -215,7 +215,12 @@ export class ReplayController {
       while (this.sequencer.events[cursor]?.eligibilityAt === at) {
         pipeline.ingest(this.sequencer.events[cursor]!);
         cursor++;
-        if (mode === "EVENT") break;
+        if (
+          mode === "EVENT" ||
+          (mode === "BOUNDED" &&
+            cursor - old.cursor >= this.specification.resourceLimits.maxEventsPerBatch)
+        )
+          break;
       }
       const cohortComplete = this.sequencer.events[cursor]?.eligibilityAt !== at;
       const due = cohortComplete ? old.pendingTasks.filter((t) => t.dueAt === at) : [];
@@ -264,6 +269,17 @@ export class ReplayController {
     }
   }
   public async runToTime(raw: UtcTimestamp): Promise<ReplayCommandResult> {
+    return this.runUntil(raw, "TIMESTAMP");
+  }
+  /** Reconstruct through the same atomic event boundaries without requiring an entire
+   * equal-time cohort to fit a timestamp batch. Tasks/snapshots still wait for its end. */
+  public async reconstructToTime(raw: UtcTimestamp): Promise<ReplayCommandResult> {
+    return this.runUntil(raw, "BOUNDED");
+  }
+  private async runUntil(
+    raw: UtcTimestamp,
+    mode: "BOUNDED" | "TIMESTAMP",
+  ): Promise<ReplayCommandResult> {
     const at = instant(raw);
     if (this.busy) return this.fail("REENTRANT_OPERATION");
     if (!this.checkpoint || at < this.checkpoint.logicalTime || at > this.specification.endTime)
@@ -271,7 +287,8 @@ export class ReplayController {
     if (this.state === "PAUSED") return this.fail("SESSION_PAUSED");
     let result: ReplayCommandResult = { ok: true, checkpoint: this.checkpoint };
     while (this.checkpoint.logicalTime < at || !this.checkpoint.timestampComplete) {
-      result = await this.runBoundary("TIMESTAMP", at);
+      const before = this.checkpoint;
+      result = await this.runBoundary(mode, at);
       if (
         !result.ok ||
         this.state === "COMPLETED" ||
@@ -279,6 +296,13 @@ export class ReplayController {
         this.diagnostics().state === "PAUSED"
       )
         return result;
+      if (
+        this.checkpoint.logicalTime === before.logicalTime &&
+        this.checkpoint.cursor === before.cursor &&
+        this.checkpoint.executedTaskIds.length === before.executedTaskIds.length &&
+        !this.checkpoint.timestampComplete
+      )
+        return this.fail("RECONSTRUCTION_NO_PROGRESS");
     }
     return result;
   }

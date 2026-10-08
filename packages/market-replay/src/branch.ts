@@ -184,6 +184,10 @@ export class FilesystemReplayBranchRegistry {
     verifyReplaySpecification(record.parentSpecification);
     verifyReplaySpecification(record.childSpecification);
     validateReplayCheckpoint(record.parentCheckpoint, record.parentSpecification);
+    // The parent checkpoint hash commits the full manifest/origin/qualification context.
+    // Observation content alone is not sufficient configuration-branch lineage.
+    if (record.inputFingerprint !== record.parentCheckpoint.inputFingerprint)
+      throw Error("BRANCH_PARENT_INPUT_CONTEXT");
     if (
       hash(
         createReplayBranchEvidence(
@@ -301,7 +305,7 @@ export class FilesystemReplayBranchRegistry {
         parentSpecification: parent.specification,
         parentCheckpoint: cp,
         childSpecification: child,
-        inputFingerprint: inputs.fingerprint,
+        inputFingerprint: cp.inputFingerprint,
         evidence,
         fingerprint: "",
       },
@@ -340,7 +344,11 @@ export class FilesystemReplayBranchRegistry {
     try {
       await inputs.verify();
       verifyReplaySpecification(candidate.childSpecification);
-      if (inputs.fingerprint !== candidate.inputFingerprint) throw Error("BRANCH_INPUT_CONTEXT");
+      if (
+        inputs.fingerprint !== candidate.inputFingerprint ||
+        inputs.fingerprint !== candidate.parentCheckpoint.inputFingerprint
+      )
+        throw Error("BRANCH_INPUT_CONTEXT");
       if (
         completeReplayBranchSpecification(
           candidate.parentCheckpoint,
@@ -397,14 +405,30 @@ export class FilesystemReplayBranchRegistry {
       if (!existsSync(markerPath)) {
         const cp = controller.currentCheckpoint()!;
         if (cp.logicalTime > record.evidence.forkTime) throw Error("UNPUBLISHED_BRANCH_ADVANCED");
-        if (cp.state === "PAUSED") {
+        const needsReconstruction =
+          cp.logicalTime < record.evidence.forkTime || !cp.timestampComplete;
+        if (needsReconstruction && cp.state === "PAUSED") {
           const resumed = await controller.resume();
           if (!resumed.ok) throw Error(resumed.code);
         }
-        const run = await controller.runToTime(record.evidence.forkTime);
+        const run = needsReconstruction
+          ? await controller.reconstructToTime(record.evidence.forkTime)
+          : { ok: true as const, checkpoint: cp };
         if (!run.ok) throw Error(run.code);
-        const paused = run.checkpoint.state === "COMPLETED" ? run : await controller.pause();
+        if (
+          run.checkpoint.logicalTime !== record.evidence.forkTime ||
+          run.checkpoint.cursor !== record.parentCheckpoint.cursor ||
+          !run.checkpoint.timestampComplete ||
+          run.checkpoint.inputFingerprint !== record.inputFingerprint
+        )
+          throw Error("BRANCH_FORK_BOUNDARY");
+        const paused = ["COMPLETED", "PAUSED"].includes(run.checkpoint.state)
+          ? run
+          : await controller.pause();
         if (!paused.ok) throw Error(paused.code);
+        await inputs.verify();
+        this.validate(record, id);
+        if (inputs.fingerprint !== record.inputFingerprint) throw Error("BRANCH_INPUT_CONTEXT");
         const markerBody = {
           recordFingerprint: record.fingerprint,
           childCheckpointId: paused.checkpoint.checkpointId,

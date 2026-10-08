@@ -81,7 +81,14 @@ export function compareReplayCheckpoints(
               ["CHANNEL_READ_COMPLETED", "CHANNEL_READ_RECONCILED"].includes(end.kind),
           ),
       );
-    if (pendingRead(a) || pendingRead(b)) throw Error("UNRESOLVED_READ_EVIDENCE");
+    const qualify = (c: ReplayCheckpoint, participant: string) => {
+      if (pendingRead(c)) throw Error(`${participant}_UNRESOLVED_READ_EVIDENCE`);
+      if (!c.timestampComplete) throw Error(`${participant}_INCOMPLETE_EVENT_COHORT`);
+      if (["FAILED", "STOPPING", "RECOVERY_REQUIRED"].includes(c.state))
+        throw Error(`${participant}_UNQUALIFIED_LIFECYCLE`);
+    };
+    qualify(a, "PARENT");
+    qualify(b, "CHILD");
     const sections = (c: ReplayCheckpoint) => ({
       revisions: hash(c.aggregation.revisions),
       quality: hash(
@@ -136,6 +143,7 @@ export function compareReplayCheckpoints(
       hash(createReplayBranchEvidence(a, x, y)) === hash(b.branch)
     ) {
       const reference = validated(childReference);
+      qualify(reference, "REFERENCE");
       if (
         childReference.specification.fingerprint !== y.fingerprint ||
         reference.inputFingerprint !== b.inputFingerprint ||
@@ -160,8 +168,13 @@ export function compareReplayCheckpoints(
     if (differing.length) reasons.push(`Differing semantic sections: ${differing.join(", ")}.`);
     if (classification === "EXPECTED_DIFFERENCE")
       reasons.push(`Validated branch changed: ${b.branch!.changedFields.join(", ")}.`);
-  } catch {
-    reasons.push("Missing, corrupt or owner-incompatible evidence cannot support comparison.");
+  } catch (error) {
+    classification = "INCOMPARABLE";
+    reasons.push(
+      error instanceof Error && /^(PARENT|CHILD|REFERENCE)_/u.test(error.message)
+        ? error.message
+        : "Missing, corrupt or owner-incompatible evidence cannot support comparison.",
+    );
   }
   const body = { classification, reasons, left: leftId, right: rightId };
   return freeze({ ...body, fingerprint: hash(body) });
