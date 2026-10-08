@@ -1600,3 +1600,24 @@ F05/F06/T01/M02 restrictions remain mandatory; Prompt 20 is not authorized.
 
 CODEX-004C failed audit history remains intact; independent acceptance is pending. All earlier DATA
 invariants, F05/F06/T01/M02, owner boundaries and Prompt 20 restrictions remain mandatory.
+
+## Prompt 19 exception-safety remediation — CODEX-004F
+
+- **DATA-231**: Authoritative initialization failure classification precedes optional diagnostics. A
+  diagnostic accessor, proxy trap or coercion failure cannot strand VALIDATING or clear a genuine
+  repository obligation. Normalization uses one guarded read, bounded string codes and a fixed
+  fallback.
+- **DATA-232**: Runtime contains unexpected initialization exits using controller-owned provenance.
+  Settled pure-constructor/pre-repository owners may be disposed under the existing lock and
+  identity check; active work, recovered content and durable/read/publication uncertainty remain
+  protected.
+- **DATA-233**: Readiness/health require an acknowledged initialized checkpoint and an explicitly
+  permitted controller state. CREATED/VALIDATING, active owner work, FAILED/recovery or pending
+  control publication cannot be falsely certified when the runtime lock is clear.
+- **DATA-234**: Optional disposed-admission sampling occurs after authoritative disposal. Sampling
+  failures are counted without fabricated timestamps, unbounded payload retention or effects on
+  durable obligations. Volatile diagnostic eviction does not constitute recovery certification.
+
+CODEX-004A/C/E failed audit history is preserved. Remediation remains pending independent re-audit
+and acceptance; DATA-201–230, F05/F06/T01/M02, existing owner boundaries and Prompt 20 restrictions
+remain.

@@ -20,6 +20,24 @@ import type {
 export type ReplayCommandResult =
   | Readonly<{ ok: true; checkpoint: ReplayCheckpoint }>
   | Readonly<{ ok: false; code: string; state: ReplayState }>;
+function initializationFailureCode(rejection: unknown): string {
+  // Arbitrary verifier rejection values are not trusted diagnostic objects.
+  // Read at most once; never coerce, inspect stacks or format the rejection.
+  try {
+    if (typeof rejection === "object" && rejection !== null) {
+      const message = (rejection as { message?: unknown }).message;
+      if (
+        typeof message === "string" &&
+        message.length <= 128 &&
+        /^[A-Z][A-Z0-9_]{0,127}$/u.test(message)
+      )
+        return message;
+    }
+  } catch {
+    // Diagnostic extraction cannot interrupt authoritative failure handling.
+  }
+  return "UNCLASSIFIED_INITIALIZATION_FAILURE";
+}
 export class ReplayController {
   private readonly sequencer: DeterministicReplaySequencer;
   private checkpoint: ReplayCheckpoint | undefined;
@@ -77,8 +95,8 @@ export class ReplayController {
       !this.busy &&
       !this.checkpoint &&
       !this.obligation &&
-      ((this.state === "FAILED" &&
-        this.sourceVerification === "FAILED" &&
+      ((["FAILED", "STOPPING"].includes(this.state) &&
+        ["FAILED", "NOT_STARTED", "VERIFIED"].includes(this.sourceVerification) &&
         this.repositoryPhase === "NOT_INITIATED") ||
         (this.state === "STOPPING" &&
           this.sourceVerification === "VERIFIED" &&
@@ -87,6 +105,19 @@ export class ReplayController {
   }
   public currentCheckpoint(): ReplayCheckpoint | undefined {
     return this.checkpoint;
+  }
+  private finishInitializationFailure(rejection: unknown): ReplayCommandResult {
+    // Complete lifecycle classification before optional diagnostic callbacks.
+    if (this.sourceVerification === "IN_FLIGHT") this.sourceVerification = "FAILED";
+    this.state = this.obligation ? "RECOVERY_REQUIRED" : "FAILED";
+    this.lastFailureCode = initializationFailureCode(rejection);
+    return this.fail("INITIALIZATION_FAILED");
+  }
+  /** Runtime containment for an exceptional initialization exit. Active owner work
+   * cannot be certified settled or discarded by an outer exception handler. */
+  public containInitializationException(rejection: unknown): ReplayCommandResult {
+    if (this.busy) return this.fail("INITIALIZATION_FAILED");
+    return this.finishInitializationFailure(rejection);
   }
   private fail(code: string, state: ReplayState = this.state): ReplayCommandResult {
     return { ok: false, code, state };
@@ -185,13 +216,7 @@ export class ReplayController {
         }),
       );
     } catch (error) {
-      if (this.sourceVerification === "IN_FLIGHT") this.sourceVerification = "FAILED";
-      this.lastFailureCode =
-        error instanceof Error && /^[A-Z][A-Z0-9_]{0,127}$/u.test(error.message)
-          ? error.message
-          : "UNCLASSIFIED_INITIALIZATION_FAILURE";
-      this.state = this.obligation ? "RECOVERY_REQUIRED" : "FAILED";
-      return this.fail("INITIALIZATION_FAILED");
+      return this.finishInitializationFailure(error);
     } finally {
       this.busy = false;
     }

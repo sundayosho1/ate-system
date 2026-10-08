@@ -283,3 +283,24 @@ final commands/probe outcomes and commit/publication evidence are in its externa
 See [remediation evidence](prompt-19-completion-evidence.md). No acceptance successor, unrelated
 prompt status change or modification of accepted Prompt 17/18 governance is made. All inherited
 F05/F06/T01/M02, single-writer/trusted-root and offline restrictions remain mandatory.
+
+## Prompt 19 third exception-safety remediation — CODEX-004E/004F
+
+CODEX-004E audited `eb9b54273f580d81610a84dd0f924a6b47dfe095` and returned RE-AUDIT FAILED for HIGH
+A19-H01-R2: diagnostic extraction could interrupt terminal failure classification, retain an
+unusable VALIDATING session and falsely report READY/HEALTHY. CODEX-004A/C/E failed audits and
+CODEX-004B/D remediation history remain preserved above.
+
+| Prompt | Current status                                                    | Version                  | Independent acceptance      |
+| ------ | ----------------------------------------------------------------- | ------------------------ | --------------------------- |
+| 19     | THIRD EXCEPTION-SAFETY REMEDIATION — PENDING INDEPENDENT RE-AUDIT | `0.19.0-market-replay.1` | PENDING — not self-accepted |
+| 20     | NOT STARTED — NOT AUTHORIZED                                      | None                     | None                        |
+
+CODEX-004F uses only `codex/prompt-19-exception-safety-remediation`. It isolates optional
+diagnostics from authoritative failure finalization, contains unexpected initialization exits and
+hardens readiness using existing owner state/checkpoint authority. Exact
+verification/probe/publication results are in its external delivery report; see
+[remediation evidence](prompt-19-completion-evidence.md). No unrelated prompt status or accepted
+Prompt 17/18 governance history changes. No acceptance successor, main merge, financial capability
+or Prompt 20 work is authorized. F05/F06/T01/M02, single-writer/trusted-root, offline scope and all
+inherited operational restrictions remain mandatory.

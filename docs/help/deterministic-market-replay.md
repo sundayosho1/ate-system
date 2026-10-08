@@ -308,3 +308,34 @@ attempts and pending publications remain governed by existing recovery/stop cont
 The failed CODEX-004C admission audit and prior failures remain historical evidence. CODEX-004D is
 targeted remediation only, pending independent re-audit/acceptance. Version, F05/F06/T01/M02,
 single-writer/trusted-root, offline-only scope and no Prompt 20/trading restrictions are unchanged.
+
+## Exception-safe admission — CODEX-004F
+
+Verifier rejection values may be ordinary errors, primitives, proxies or malformed message values.
+Admission completes its authoritative failure transition before extracting optional diagnostics. The
+public rejection remains INITIALIZATION_FAILED; bounded diagnostics retain a format-valid code from
+a single guarded message read or UNCLASSIFIED_INITIALIZATION_FAILURE. Arbitrary text, stacks and
+implicit coercion are not used. A diagnostic failure is not evidence of an uncertain repository
+write.
+
+After a proven pre-repository failure, restore the original immutable source and retry the same
+identity through normal governed admission. Pure construction followed by an unexpected
+initialization exit may similarly release its settled provisional owner. No source validation is
+bypassed. Reentrant shutdown remains truthful; active owner work cannot be disposed until settled.
+Real recovery/write uncertainty, recovered content and pending control publication retain their
+existing fresh-recovery and reconciliation requirements, even with a null checkpoint.
+
+READY/HEALTHY requires a verified initialized checkpoint, an allowed controller state and no active
+controller work or recovery/read/control-publication obligation. A registered CREATED/VALIDATING
+controller is unavailable even if the runtime admission lock is clear. A disposed source rejection
+leaves an otherwise available empty runtime healthy; STOPPING/STOPPED runtime remains unavailable.
+
+Disposed admission summaries are optional volatile evidence. failedAdmissionDiagnosticSamples counts
+sampling failures; evictedAdmissionDiagnostics counts actual sample eviction. Neither counter proves
+recovery or modifies durable obligations. A failed clock sample is omitted rather than given an
+invented timestamp. Successfully retained summaries remain immutable and bounded.
+
+CODEX-004E's failed audit remains historical; CODEX-004F is remediation pending independent
+re-audit, not Prompt 19 acceptance. F05/F06/T01/M02, trusted-root/single-writer, bounded quality,
+explicit source-loss reconciliation, offline scope and no live/broker/trading/production/Prompt-20
+restrictions remain.

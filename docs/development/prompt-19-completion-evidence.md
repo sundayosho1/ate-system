@@ -144,3 +144,35 @@ external assertion is suppressed or described as passing if its unchanged run fa
 Current status: SECOND TARGETED LIFECYCLE REMEDIATION — PENDING INDEPENDENT RE-AUDIT. Neither
 implementation tests nor probe reproduction constitute acceptance. F05/F06/T01/M02 and
 offline/no-broker/no-trading/Prompt-20 restrictions remain mandatory.
+
+## CODEX-004E failure and CODEX-004F exception-safety remediation
+
+CODEX-004E independently re-examined `eb9b54273f580d81610a84dd0f924a6b47dfe095` and returned
+RE-AUDIT FAILED for HIGH A19-H01-R2 despite all 613 permanent tests passing. Four adversarial cases
+showed diagnostic extraction escaping initialization failure handling, stranding VALIDATING and
+falsely certifying READY/HEALTHY. The original source/results and failed report remain unchanged.
+
+CODEX-004F uses `codex/prompt-19-exception-safety-remediation` from that exact source. Changes are
+limited to the existing replay controller/runtime, one new permanent regression file and necessary
+lifecycle documentation. Failure finalization precedes total bounded diagnostic extraction; runtime
+contains exceptional initialization exits through authoritative controller provenance, disposes only
+settled provisional owners and requires initialized checkpoint/state evidence for readiness.
+
+`tests/market-replay/exception-safety-remediation.test.ts` adds 33 permanent regressions for
+required A–O cases: hostile/second-read/Symbol/proxy/primitive rejection values, actual file and
+historical-owner failures, unexpected initialization exit before/after repository activity, real
+uncertain and confirmed commitment, corrupt recovered view, readiness views and actual held
+admission/control publication, concurrent/reentrant shutdown, same-identity replacement, immutable
+bounded diagnostics and failed optional sampling. The 613 prior permanent tests remain
+byte-unchanged. Version, dependencies, capability flags and all 11 upstream owner packages remain
+unchanged.
+
+The external delivery report records actual permanent/security results, unchanged original A/C/E
+probe assertions, original-versus-approved-phase accounting, and exact commit/remote verification.
+The two unchanged C cumulative-counter failures remain reported separately as historical measurement
+defects; they are never relabeled passing. No audit source, assertion or failed history is replaced.
+
+Current status: THIRD EXCEPTION-SAFETY REMEDIATION — PENDING INDEPENDENT RE-AUDIT AND ACCEPTANCE.
+F05/F06/T01/M02, single-writer/trusted-root, bounded quality and explicit loss reconciliation
+remain. No Prompt 19 acceptance successor, production/trading approval or Prompt 20 authorization is
+created.

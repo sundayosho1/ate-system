@@ -110,3 +110,41 @@ failure code and source/repository phase. This volatile diagnostic history is ca
 maxEvidenceRecords resource policy; eviction affects diagnostic samples only and is counted with a
 saturated scalar. It never evicts authoritative checkpoint/read/publication obligations. Arbitrary
 verifier text is not retained. Independent acceptance is still pending.
+
+## CODEX-004F exception-safe initialization (acceptance pending)
+
+CODEX-004E audited `eb9b54273f580d81610a84dd0f924a6b47dfe095` and failed HIGH A19-H01-R2: reading a
+verifier rejection's message could throw before terminal failure classification. The registered
+controller remained VALIDATING after the admission lock cleared, blocked identity retry and
+shutdown, and falsely reported healthy/ready. The failed audit remains historical.
+
+Initialization now establishes source-verification failure and authoritative FAILED or
+RECOVERY_REQUIRED state before optional diagnostic extraction. A bounded normalizer performs at most
+one guarded message read, accepts only a string matching the existing bounded uppercase-code format,
+and otherwise uses UNCLASSIFIED_INITIALIZATION_FAILURE. It never coerces rejection values or retains
+stacks/arbitrary text. Recognized code format is syntactic, not a separate error-code registry.
+
+Runtime additionally contains an unexpected initialization rejection through the existing
+controller. Only settled, proven provisional owners are disposed under the admission lock and
+exact-identity check. A pure constructor followed by an exceptional exit before verification retains
+NOT_STARTED provenance; no repository entry occurred. A verified source followed by a pure
+pre-repository failure also retains VERIFIED/NOT_INITIATED provenance and may be disposed only when
+settled with no checkpoint or obligation. Active work is not declared settled. Reentrant stop during
+failure diagnostics may leave STOPPING, but failed/unstarted verification with NOT_INITIATED, no
+checkpoint and no obligation still proves provisional disposal. Honest empty-recovery cancellation
+retains its existing explicit certificate. Repository access, recovered content, attempted writes,
+unknown/committed obligations and pending events are never cleared by exception text or null checks.
+
+Optional disposed-admission sampling follows owner disposal. Sampling failure cannot replace the
+public INITIALIZATION_FAILED result or block retry; failedAdmissionDiagnosticSamples counts failures
+with a saturated scalar and no fabricated timestamp. Successfully retained samples and eviction
+counts remain bounded by the governed policy; they are volatile diagnostics, not durable
+certificates.
+
+Readiness requires an acknowledged checkpoint, VERIFIED initialization, no controller work/read or
+recovery obligation, and READY/RUNNING/PAUSED/STOPPED/COMPLETED controller state. A runtime that is
+STOPPING/STOPPED is unavailable. CREATED/VALIDATING cannot be certified merely because the runtime
+lock cleared. No second lifecycle, clock or persistence authority is introduced.
+
+This is targeted remediation pending independent re-audit, not acceptance. F05/F06/T01/M02,
+single-writer/trusted-root, offline scope and no Prompt 20/trading restrictions remain mandatory.

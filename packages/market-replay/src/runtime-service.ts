@@ -85,6 +85,7 @@ export class ReplayRuntimeService {
     repositoryPhase: string;
   }>[] = [];
   private evictedAdmissionDiagnostics = 0;
+  private failedAdmissionDiagnosticSamples = 0;
   public constructor(private readonly ports: ReplayRuntimePorts) {
     const id = serviceId("data.replay");
     this.managedService = {
@@ -147,6 +148,7 @@ export class ReplayRuntimeService {
       sessionStates: [...this.sessions.values()].map((c) => c.diagnostics()),
       disposedAdmissions: [...this.disposedAdmissions],
       evictedAdmissionDiagnostics: this.evictedAdmissionDiagnostics,
+      failedAdmissionDiagnosticSamples: this.failedAdmissionDiagnosticSamples,
     });
   }
   private ready(): boolean {
@@ -156,14 +158,58 @@ export class ReplayRuntimeService {
       !this.busy &&
       !this.pendingEvents.size &&
       replayFromEffective(effective).enabled &&
-      [...this.sessions.values()].every(
-        (c) =>
+      [...this.sessions.values()].every((c) => {
+        const diagnostic = c.diagnostics();
+        return (
           c.specification.configurationFingerprint === effective.fingerprint &&
-          !c.diagnostics().obligation &&
-          !c.diagnostics().pendingConsumerReads &&
-          !["FAILED", "STOPPING", "RECOVERY_REQUIRED"].includes(c.diagnostics().state),
-      )
+          !!c.currentCheckpoint() &&
+          diagnostic.sourceVerification === "VERIFIED" &&
+          !diagnostic.busy &&
+          !diagnostic.obligation &&
+          !diagnostic.pendingConsumerReads &&
+          ["READY", "RUNNING", "PAUSED", "STOPPED", "COMPLETED"].includes(diagnostic.state)
+        );
+      })
     );
+  }
+  private disposeProvisionalAdmission(controller: ReplayController, failureCode: string): void {
+    const specification = controller.specification;
+    if (
+      !controller.canDisposeProvisionalAdmission() ||
+      this.sessions.get(specification.sessionId) !== controller ||
+      [...this.pendingEvents.values()].some((cp) => cp.sessionId === specification.sessionId)
+    )
+      return;
+    // Exact-owner disposal is complete before optional sampling, under the lock.
+    this.sessions.delete(specification.sessionId);
+    try {
+      const diagnostic = controller.diagnostics();
+      this.disposedAdmissions.push(
+        freeze({
+          sessionId: specification.sessionId,
+          specificationFingerprint: specification.fingerprint,
+          at: this.ports.clock.now(),
+          failureCode: diagnostic.lastFailureCode ?? failureCode,
+          sourceVerification: diagnostic.sourceVerification,
+          repositoryPhase: diagnostic.repositoryPhase,
+        }),
+      );
+      const excess =
+        this.disposedAdmissions.length - specification.resourceLimits.maxEvidenceRecords;
+      if (excess > 0) {
+        this.disposedAdmissions.splice(0, excess);
+        this.evictedAdmissionDiagnostics = Math.min(
+          Number.MAX_SAFE_INTEGER,
+          this.evictedAdmissionDiagnostics + excess,
+        );
+      }
+    } catch {
+      // No fabricated timestamp or sample; failed sampling is a bounded scalar.
+      this.failedAdmissionDiagnosticSamples = Math.min(
+        Number.MAX_SAFE_INTEGER,
+        this.failedAdmissionDiagnosticSamples + 1,
+      );
+    }
   }
   public async admit(
     raw: unknown,
@@ -182,36 +228,16 @@ export class ReplayRuntimeService {
       // Every operation after acquiring the lock must share its cleanup guard.
       const controller = new ReplayController(specification, inputs, repository);
       this.sessions.set(specification.sessionId, controller);
-      const initialized = await controller.initialize();
+      let initialized: ReplayCommandResult;
+      try {
+        initialized = await controller.initialize();
+      } catch (error) {
+        // An unexpected rejection is not a repository certificate. The controller
+        // finalizes from its own provenance; only proven provisional owners go.
+        initialized = controller.containInitializationException(error);
+      }
       if (!initialized.ok) {
-        if (
-          controller.canDisposeProvisionalAdmission() &&
-          this.sessions.get(specification.sessionId) === controller &&
-          ![...this.pendingEvents.values()].some((cp) => cp.sessionId === specification.sessionId)
-        ) {
-          // Atomic while the admission lock remains held; never delete a later identity owner.
-          const diagnostic = controller.diagnostics();
-          this.sessions.delete(specification.sessionId);
-          this.disposedAdmissions.push(
-            freeze({
-              sessionId: specification.sessionId,
-              specificationFingerprint: specification.fingerprint,
-              at: this.ports.clock.now(),
-              failureCode: diagnostic.lastFailureCode ?? initialized.code,
-              sourceVerification: diagnostic.sourceVerification,
-              repositoryPhase: diagnostic.repositoryPhase,
-            }),
-          );
-          const excess =
-            this.disposedAdmissions.length - specification.resourceLimits.maxEvidenceRecords;
-          if (excess > 0) {
-            this.disposedAdmissions.splice(0, excess);
-            this.evictedAdmissionDiagnostics = Math.min(
-              Number.MAX_SAFE_INTEGER,
-              this.evictedAdmissionDiagnostics + excess,
-            );
-          }
-        }
+        this.disposeProvisionalAdmission(controller, initialized.code);
         throw Error(initialized.code);
       }
       if (this.lifecycle !== "READY") throw Error("SHUTDOWN_DURING_ADMISSION");
