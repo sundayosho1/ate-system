@@ -8,3 +8,7 @@ export * from "./pipeline.js";
 export * from "./controller.js";
 export * from "./sources.js";
 export * from "./evidence.js";
+export * from "./aggregate-source.js";
+export * from "./runtime-service.js";
+export * from "./branch.js";
+export * from "./comparison.js";

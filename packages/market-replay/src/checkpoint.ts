@@ -38,6 +38,30 @@ export function validateReplayCheckpoint(
   )
     throw Error("CHECKPOINT_INTEGRITY");
   instant(c.logicalTime);
+  const pendingReads = new Map<string, string>();
+  const evidenceKeys = new Set<string>();
+  for (const evidence of c.evidence) {
+    const key = `${evidence.kind}:${evidence.identity}`;
+    if (
+      !/^[a-f0-9]{64}$/u.test(evidence.identity) ||
+      evidenceKeys.has(key) ||
+      instant(evidence.at) > c.logicalTime ||
+      evidence.at < spec.startTime
+    )
+      throw Error("CHECKPOINT_EVIDENCE_INTEGRITY");
+    evidenceKeys.add(key);
+    if (evidence.kind === "CHANNEL_READ_PENDING") pendingReads.set(evidence.identity, evidence.at);
+    else if (["CHANNEL_READ_COMPLETED", "CHANNEL_READ_RECONCILED"].includes(evidence.kind)) {
+      if (
+        !pendingReads.has(evidence.identity) ||
+        pendingReads.get(evidence.identity)! > evidence.at
+      )
+        throw Error("CHECKPOINT_READ_LINEAGE");
+      pendingReads.delete(evidence.identity);
+    } else throw Error("CHECKPOINT_EVIDENCE_KIND");
+  }
+  if (["COMPLETED", "STOPPED"].includes(c.state) && pendingReads.size)
+    throw Error("COMPLETION_OBLIGATION");
   const expectedTasks = new Map(spec.tasks.map((t) => [t.taskId, hash(t)]));
   const ids = [...c.pendingTasks.map((t) => t.taskId), ...c.executedTaskIds];
   if (

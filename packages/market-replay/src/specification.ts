@@ -8,6 +8,8 @@ import {
   hash,
   freeze,
   safeClone,
+  optionsFromEffective,
+  materialPolicyFromEffective,
 } from "@ate/multitimeframe";
 import type { EffectiveConfiguration } from "@ate/configuration";
 import { replayFromEffective, validateReplayLimits } from "./configuration.js";
@@ -36,10 +38,16 @@ export const replayStreamSchema = z
   .strict();
 const timestamp = schemas.timestamp;
 export const taskActionSchema = z.discriminatedUnion("kind", [
-  z.object({ kind: z.literal("FENCE"), streamId: replayFingerprint, reason: replayId }).strict(),
   z
     .object({
-      kind: z.literal("LOSS"),
+      kind: z.enum(["FENCE", "FORK_FENCE"]),
+      streamId: replayFingerprint,
+      reason: replayId,
+    })
+    .strict(),
+  z
+    .object({
+      kind: z.enum(["LOSS", "FORK_LOSS"]),
       consumerId: replayId,
       rejected: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER),
       discarded: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER),
@@ -88,7 +96,9 @@ export const taskSchema = z
   .object({ taskId: replayId, dueAt: timestamp, action: taskActionSchema })
   .strict();
 export const taskPhase = (t: ReplayTaskDescriptor) =>
-  ({ FENCE: 0, LOSS: 0, WATERMARK: 1, PUBLISH: 2, SNAPSHOT: 3 })[t.action.kind];
+  ({ FENCE: 0, LOSS: 0, WATERMARK: 1, PUBLISH: 2, SNAPSHOT: 3, FORK_FENCE: 4, FORK_LOSS: 4 })[
+    t.action.kind
+  ];
 const ordinal = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
 export const taskOrder = (a: ReplayTaskDescriptor, b: ReplayTaskDescriptor) =>
   ordinal(a.dueAt, b.dueAt) || taskPhase(a) - taskPhase(b) || ordinal(a.taskId, b.taskId);
@@ -192,6 +202,21 @@ export function createGovernedReplaySpecification(
   const governed = replayFromEffective(effective);
   if (!governed.enabled) throw Error("REPLAY_DISABLED");
   const candidate = createReplaySpecification(raw);
+  const ownedOptions = optionsFromEffective(effective);
+  if (!ownedOptions.options.enabled) throw Error("AGGREGATION_DISABLED");
+  const ownedMaterial = materialPolicyFromEffective(effective);
+  const orderedDefinitions = (r: TimeframeRegistry) =>
+    [...r.values()].sort((a, b) => ordinal(a.code, b.code));
+  if (
+    hash(candidate.aggregation.options ?? defaultOptions) !== hash(ownedOptions.options) ||
+    hash(candidate.aggregation.calendar) !== hash(ownedMaterial.calendar) ||
+    hash(orderedDefinitions(new TimeframeRegistry(candidate.aggregation.timeframes))) !==
+      hash(orderedDefinitions(ownedMaterial.registry)) ||
+    hash([...(candidate.aggregation.directTimeframes ?? [])].sort()) !==
+      hash([...ownedMaterial.directTimeframes].sort()) ||
+    hash(candidate.aggregation.edges ?? []) !== hash(ownedMaterial.edges)
+  )
+    throw Error("GOVERNED_AGGREGATION_MISMATCH");
   if (
     candidate.configurationFingerprint !== governed.configurationFingerprint ||
     hash(candidate.resourceLimits) !== hash(governed.limits) ||

@@ -1,0 +1,94 @@
+# CODEX-004R — Prompt 19 implementation evidence index
+
+Starting checkpoint: `bd37a789e6ccac5ba6b7ab2e87a050581df40be1`. Released Prompt 18 governance
+ancestor: `b69530ac75210e62780082034d90e8b1a0a18443`. Development branch:
+`codex/prompt-19-completion`; no main merge or accepted-history modification. Release target:
+`0.19.0-market-replay.1`. Implementation completion is separate from independent acceptance, which
+remains PENDING. The final external delivery report records the exact published source SHA and
+actual final gate results. Prompt 20 is NOT STARTED / NOT AUTHORIZED.
+
+## G01–G09 closure evidence
+
+| Gap | Implementation                                                                                                                   | Permanent evidence / observed result                                                                                                                                                                                                                                                                                                                                                                                                       |
+| --- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| G01 | Controller/pipeline; joined real canonical import/quality/catalogue; accepted cutoff selection                                   | `acceptance.test.ts`: four streams, two instruments/providers, both modes, missing sequence, actual overflow, gap/reconnect, incomplete H1, late correction, pause/recovery, branch and two equivalent uninterrupted runs. `original-cutoffs.test.ts` matches the actual original owner's exact revision IDs/time/state at all seven cutoffs and rejects expired correction after recovery.                                                |
+| G02 | `branch.ts`; immutable reservation, private child namespace, publication marker and exact marked operation verification          | `branch.test.ts`: parent checkpoint/files byte-for-byte preserved; independently reconstructed policy; governed configuration; retries; after-reservation/child/publication interrupts; incompatible context; competing child IDs; bounded capacity; corrupt marker; completed parent. Whole fixture retains parent read/loss history in child tasks.                                                                                      |
+| G03 | `controller.ts:observeConsumerChannel/reconcileConsumerRead`; pending durable fence before actual await                          | `async-consumer.test.ts`: capacity-one overflow, loss during read, interrupted stop, repeated stop, fresh pending guard, source reconciliation, post-read persistence failure, future input rejection, closed discard. `owner-integration.test.ts`: actual P17 service, two adapters/four subscriptions, captures/shared channel, three rejected deliveries, all-stream fence. First-guard failure covered in `completion-faults.test.ts`. |
+| G04 | `runtime-service.ts`; Prompt 3 runtime, configuration, Prompt 5 derived authority and Prompt 4 event owners                      | `runtime-integration.test.ts`: actual managed runtime start/stop, registration, lifecycle/config drift/disabled/capacity checks, retained event failure and retry, policy mismatch rejection. No trading capabilities.                                                                                                                                                                                                                     |
+| G05 | `aggregate-source.ts`; actual owner snapshot/read, exact selected IDs and canonical quality handoff                              | `aggregate-source.test.ts`: committed evidence, source/calendar mismatch, invented/future selection, inconsistent content, mutation, corrupt inherited evidence rejected during real replay with cursor unchanged.                                                                                                                                                                                                                         |
+| G06 | `sources.ts`; bounded P14 pagination, real P15/P16 binding and full selected artifact identity                                   | `source-integrity.test.ts`: real import/report/catalogue; missing/repeated/regressed/oversized/corrupt pages, mutation, schema, missing/mismatched/oversized report, lifecycle/content/metadata mutation, unknown publication, source/calendar. `owner-integration.test.ts` preserves real quality through hierarchical M1→M5 and retains incomplete coverage.                                                                             |
+| G07 | Atomic staging/cursor/checkpoint; deterministic scheduler cleanup and honest commitment handling                                 | 24-fault matrix below plus existing permanent suites; all 498 starting tests unchanged. New architecture and resource guards do not replace any existing control.                                                                                                                                                                                                                                                                          |
+| G08 | `comparison.ts`; full checkpoint and owner state validation, semantic projection and independently reconstructed child reference | `comparison.test.ts`, `branch.test.ts`, whole fixture and `reproducibility.test.ts`: IDENTICAL / EXPECTED_DIFFERENCE / UNEXPLAINED_DIVERGENCE / INCOMPARABLE; policy, missing/corrupt evidence, continuity, lineage/quality, checkpoint boundary; storage/host/lifecycle metadata separated. Legacy metadata-only API cannot certify changed policy.                                                                                       |
+| G09 | Complete replay help/config guide; ADRs 0085–0087; DATA-211–223; release/capability/ledger distinction                           | `docs/help/deterministic-market-replay.md`, current evidence index, capabilities and prompt ledger. Root release advanced only after the full pre-release gate passed (578 tests / 48 files, zero audit findings), and the final tree is verified separately before publication.                                                                                                                                                           |
+
+All test paths in this document are under `tests/market-replay/`; implementation paths are under
+`packages/market-replay/src/` unless stated otherwise.
+
+## A–L permanent coverage
+
+| Group           | Evidence                                                                                                                                                                                                                                     |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A specification | `sequencer.test.ts`, `temporal-evidence.test.ts`, `runtime-integration.test.ts`: immutable identities, scopes, modes, ranges, limit/cfg fingerprints, finance flags rejected.                                                                |
+| B manifests     | `source-integrity.test.ts`, `owner-boundaries.test.ts`, `aggregate-source.test.ts`: actual owner imports/captures/revisions, corruption, schema and paging faults.                                                                           |
+| C ordering      | `sequencer.test.ts`, `acceptance.test.ts`: equal/missing/mixed sequence, conflicting duplicates, canonical permutations, cross-provider uncertainty.                                                                                         |
+| D clock         | `controller.test.ts`, `reproducibility.test.ts`, `original-cutoffs.test.ts`: existing virtual time, stepping/cohorts, forward boundaries, scheduler order, pause/resume and same outputs.                                                    |
+| E lifecycle     | `controller.test.ts`, `storage-faults.test.ts`, `async-consumer.test.ts`, `runtime-integration.test.ts`: reentrancy, pending stop/pause, failed commit, repeated shutdown and explicit recovery.                                             |
+| F owners        | `source-integrity.test.ts`, `owner-integration.test.ts`, `aggregate-source.test.ts`: actual P14/P15/P16/P17/P18 APIs; no parallel canonical, calendar or scoring authority.                                                                  |
+| G temporal      | `temporal-evidence.test.ts`, `original-cutoffs.test.ts`, `acceptance.test.ts`: delayed receipt/publication/quality, incomplete H1/H4 selection, unknown successors, correction knowledge and horizon; current registry restriction explicit. |
+| H integrity     | `async-consumer.test.ts`, `owner-integration.test.ts`, `acceptance.test.ts`: source gap/reconnect, unknown-scope overflow, reconciliation, incomplete/end-of-stream evidence.                                                                |
+| I recovery      | `storage-faults.test.ts`, `completion-faults.test.ts`, `controller.test.ts`, `resource-bounds.test.ts`: exact cursor/time/tasks, real partial/post-content/post-marker artifacts, repeat/corrupt/cfg/capacity faults.                        |
+| J branches      | `branch.test.ts`, `acceptance.test.ts`: parent immutability, lineage, independently reconstructed policy, context/resource/retry/fresh-registry recovery.                                                                                    |
+| K comparison    | `comparison.test.ts`, `branch.test.ts`, `reproducibility.test.ts`, `acceptance.test.ts`: all classifications, missing/corrupt/incompatible evidence, semantic versus operational differences.                                                |
+| L architecture  | `architecture.test.ts`, `storage-faults.test.ts`, `resource-bounds.test.ts`, existing P17/P18 architecture tests: owner imports, no wall-clock/random/financial/provider/future authority, trusted roots, parsing/retention bounds.          |
+
+## Mandatory 24-fault matrix
+
+| #   | Fault                             | Permanent test and actual required observation                                                                                                                                               |
+| --- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Before write                      | `controller.test.ts`: certified rejection leaves cursor/obligation unchanged; `storage-faults.test.ts` exception still retains uncertainty.                                                  |
+| 2   | After content                     | `storage-faults.test.ts`: committed real content, no false shutdown; fresh exact cursor recovery.                                                                                            |
+| 3   | After marker                      | `storage-faults.test.ts`: real visible marker with lost acknowledgment; fresh recovery retains effect once.                                                                                  |
+| 4   | Partial artifact                  | `storage-faults.test.ts`: real partial JSON remains; RECOVERY_REQUIRED, no cleanup.                                                                                                          |
+| 5   | Unknown commitment                | `storage-faults.test.ts`, `completion-faults.test.ts`: operation identity retained; repeated stop fails.                                                                                     |
+| 6   | Repeated recovery                 | `storage-faults.test.ts`, `branch.test.ts`: no new publication time, checkpoint or branch effect.                                                                                            |
+| 7   | Reentrant shutdown                | `controller.test.ts`, `storage-faults.test.ts`: dispatch/commit cannot falsely acknowledge shutdown.                                                                                         |
+| 8   | Pause with tasks                  | `acceptance.test.ts`, `controller.test.ts`: pending descriptors/time/cursor recovered exactly.                                                                                               |
+| 9   | Failed cancellation               | `completion-faults.test.ts`: actual scheduler cancellation rejection, stop invoked, private staged work unpublished, durable descriptors remain.                                             |
+| 10  | Source mutation                   | `controller.test.ts`, `source-integrity.test.ts`: no cursor advancement or source substitution.                                                                                              |
+| 11  | Missing page                      | `source-integrity.test.ts`: cardinality/content failure.                                                                                                                                     |
+| 12  | Repeated page                     | `source-integrity.test.ts`: advancing cursor/content failure, no unbounded loop.                                                                                                             |
+| 13  | Consumer overflow                 | `owner-integration.test.ts`, `acceptance.test.ts`: actual queue rejection and conservative all-stream fence.                                                                                 |
+| 14  | Await-time loss                   | `async-consumer.test.ts`: actual read gate with additional queue loss before completion; durable guard.                                                                                      |
+| 15  | Checkpoint capacity               | `completion-faults.test.ts`: no cursor acknowledgment; original durable state remains recoverable.                                                                                           |
+| 16  | Evidence capacity                 | `completion-faults.test.ts`: admission rejects; authoritative evidence not evicted.                                                                                                          |
+| 17  | Correction after cutoff           | `original-cutoffs.test.ts`, `acceptance.test.ts`: old selection unchanged; corrected successor appears only at knowledge time.                                                               |
+| 18  | Expired correction after recovery | `original-cutoffs.test.ts`: CORRECTION_HORIZON, acknowledged revision history unchanged.                                                                                                     |
+| 19  | Corrupt inherited quality         | `aggregate-source.test.ts`: INHERITED_QUALITY_INTEGRITY during actual replay, cursor 0. Existing P18 adversarial handoff tests preserved.                                                    |
+| 20  | Conflicting duplicate             | `sequencer.test.ts`: conflicting canonical identity rejected before sequencing.                                                                                                              |
+| 21  | Incompatible branch checkpoint    | `branch.test.ts`: incompatible parent/source/scopes or marker rejected, no parent rewrite.                                                                                                   |
+| 22  | Competing output identity         | `completion-faults.test.ts`: second different effect at same session generation rejected; first remains recoverable. `branch.test.ts`: competing child identity rejected before reservation. |
+| 23  | Pending publication at completion | `completion-faults.test.ts`, `runtime-integration.test.ts`: incomplete publication/event obligation blocks completion claim or successful shutdown; retry explicit.                          |
+| 24  | Changed-config resume             | `completion-faults.test.ts`, `runtime-integration.test.ts`: mismatch/drift rejection, artifacts byte-for-byte unchanged.                                                                     |
+
+## Definition-of-done mapping (original 19.36)
+
+1–2: exact ancestry/branch recorded in preflight and final external Git evidence. 3–13: existing
+authorities, immutable specification, ordering/clock/playback/scheduler/lifecycle tests. 14–19: real
+bounded source adapters, aggregation/quality/loss and original/whole temporal fixtures. 20–22:
+atomic full checkpoint and real filesystem fault/idempotent recovery tests. 23–25: immutable durable
+branch and independently explained comparison. 26–29: operation reservations, resource guards,
+security gates and actual configuration validation. 30–32: help/configuration, safety invariants and
+ADRs. 33–35: all starting tests preserved; full tests, secret scan and security gates recorded. 36:
+generated exact whole-system/original-cutoff evidence plus complete external delivery report. 37–38:
+published SHA match and clean tree recorded after commit in that report. 39–40: independent
+acceptance PENDING; Prompt 20 NOT STARTED / NOT AUTHORIZED.
+
+## Boundaries retained
+
+F05 Windows behavior/durability unqualified; F06 production throughput/power-loss durability
+unqualified. T01 trusted owner/repository/certificate, single-writer/trusted-root restrictions
+remain. M02 current registry context is not historical membership authority. Quality handoff is
+bounded; loss scope is conservatively fenced. Native corrected-trade cancellation/migration,
+automatic dataset qualification and all broker/trading/Prompt 20 work are absent. Actual bus
+summaries remain volatile; checkpoint history owns durable research audit. These are explicit scope
+limitations, not waived acceptance criteria or production claims.

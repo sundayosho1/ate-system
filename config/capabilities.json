@@ -4,8 +4,8 @@
   "manifest_version": 1,
   "updated_at": "2026-10-08",
   "development_phase": "Phase III \u2014 Universal Data Platform",
-  "completed_prompt": 18,
-  "pre_production_version": "0.18.0-multitimeframe.1",
+  "completed_prompt": 19,
+  "pre_production_version": "0.19.0-market-replay.1",
   "capabilities": {
     "repository_foundation": true,
     "engineering_constitution": true,
@@ -236,7 +236,7 @@
     "trade_management": false,
     "historical_data_lab": true,
     "data_quality_lab": true,
-    "historical_replay_engine": false,
+    "historical_replay_engine": true,
     "backtesting": false,
     "simulation": false,
     "paper_trading": false,
@@ -294,7 +294,15 @@
     "immutable_aggregate_revisions": true,
     "bitemporal_aggregate_snapshots": true,
     "aggregation_checkpoint_recovery": true,
-    "aggregation_quality_propagation": true
+    "aggregation_quality_propagation": true,
+    "deterministic_replay_sessions": true,
+    "replay_source_integrity": true,
+    "replay_point_in_time_evidence": true,
+    "replay_checkpoint_recovery": true,
+    "replay_durable_branches": true,
+    "replay_semantic_comparison": true,
+    "replay_governed_runtime": true,
+    "replay_asynchronous_consumer_integrity": true
   },
-  "truth_statement": "Prompts 1\u201318 implement bounded offline research foundations. Prompts 17 and 18 are conditionally accepted. CODEX-004 / Prompt 19 is authorized and IN PROGRESS: replay session, ordering, virtual-time staging and checkpoint primitives exist, but the complete whole-system replay capability is not qualified or independently accepted. Windows, production throughput and power-loss durability remain unqualified. Trusted repository/certificate compliance, single-writer/trusted-root, current registry context, bounded quality, legacy lineage and conservative consumer-loss restrictions remain mandatory. No universal instrument intelligence, automatic dataset registration, research qualification, broker connectivity or trading approval is inferred. ATE cannot trade, connect to MT5, submit orders or perform paper/live trading. Prompt 20 is not started."
+  "truth_statement": "Prompts 1\u201319 implement bounded offline research foundations. Prompts 17 and 18 remain conditionally accepted; CODEX-004R / Prompt 19 implementation is complete and independent acceptance is PENDING. Windows, production throughput and power-loss durability remain unqualified. Trusted owner/repository implementations and honest commitment certificates, single-writer/trusted-root, current registry context (not historical membership), bounded quality/legacy lineage and conservative consumer-loss restrictions remain mandatory. Replay-derived publication is not historical ATE publication; in-process event summaries are volatile and checkpoint history owns durable audit. No universal instrument intelligence, automatic dataset registration or research qualification, broker connectivity, production deployment or trading approval is inferred. ATE cannot trade, connect to MT5, submit orders or perform paper/live trading. Prompt 20 is not started or authorized."
 }

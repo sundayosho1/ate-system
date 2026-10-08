@@ -72,9 +72,9 @@ export type ReplayResolvedInputs = Readonly<{
 }>;
 export type WatermarkEvidence = Parameters<AggregationEngine["watermark"]>[1];
 export type ReplayTaskAction =
-  | Readonly<{ kind: "FENCE"; streamId: string; reason: string }>
+  | Readonly<{ kind: "FENCE" | "FORK_FENCE"; streamId: string; reason: string }>
   | Readonly<{
-      kind: "LOSS";
+      kind: "LOSS" | "FORK_LOSS";
       consumerId: string;
       rejected: number;
       discarded: number;

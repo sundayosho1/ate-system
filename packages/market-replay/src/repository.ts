@@ -227,4 +227,24 @@ export class FilesystemReplayCheckpointRepository implements ReplayCheckpointRep
       };
     }
   }
+  public readPublished(
+    operationId: string,
+    spec: ReplaySessionSpecification,
+  ): ReplayStorageResult<StoredReplayCheckpoint> {
+    try {
+      this.inventory();
+      const content = this.read(operationId);
+      validateReplayCheckpoint(content.checkpoint, spec);
+      const publishedAt = this.marker(operationId, content);
+      if (!publishedAt) throw Error("UNPUBLISHED_CHECKPOINT");
+      return { ok: true, value: freeze({ ...content, publishedAt }) };
+    } catch {
+      return {
+        ok: false,
+        code: "CHECKPOINT_READ_FAILED",
+        operationId,
+        commitment: "UNKNOWN_COMMITMENT",
+      };
+    }
+  }
 }

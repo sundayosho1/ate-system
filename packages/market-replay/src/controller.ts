@@ -1,5 +1,6 @@
 import { hash, freeze, instant } from "@ate/multitimeframe";
 import type { UtcTimestamp } from "@ate/domain";
+import type { ConsumerChannel } from "@ate/realtime-data";
 import { DeterministicReplaySequencer } from "./input.js";
 import { verifyReplaySpecification } from "./specification.js";
 import {
@@ -26,6 +27,8 @@ export class ReplayController {
   private busy = false;
   private stopRequested = false;
   private pauseRequested = false;
+  private lastFailureCode: string | null = null;
+  private readonly observedChannels = new WeakSet<ConsumerChannel>();
   private obligation: Readonly<{ operationId: string; commitment: string }> | undefined;
   public constructor(
     public readonly specification: ReplaySessionSpecification,
@@ -39,12 +42,23 @@ export class ReplayController {
   public diagnostics() {
     return freeze({
       state: this.state,
+      lastFailureCode: this.lastFailureCode,
       busy: this.busy,
       checkpointId: this.checkpoint?.checkpointId ?? null,
       cursor: this.checkpoint?.cursor ?? 0,
       logicalTime: this.checkpoint?.logicalTime ?? this.specification.startTime,
       obligation: this.obligation ?? null,
       remainingEvents: this.sequencer.events.length - (this.checkpoint?.cursor ?? 0),
+      pendingConsumerReads:
+        this.checkpoint?.evidence.filter(
+          (e) =>
+            e.kind === "CHANNEL_READ_PENDING" &&
+            !this.checkpoint!.evidence.some(
+              (x) =>
+                x.identity === e.identity &&
+                ["CHANNEL_READ_COMPLETED", "CHANNEL_READ_RECONCILED"].includes(x.kind),
+            ),
+        ).length ?? 0,
     });
   }
   public currentCheckpoint(): ReplayCheckpoint | undefined {
@@ -215,6 +229,7 @@ export class ReplayController {
         cursor === this.sequencer.events.length &&
         !pending.length &&
         cohortComplete &&
+        !this.diagnostics().pendingConsumerReads &&
         at === this.specification.endTime;
       const state = completed
         ? "COMPLETED"
@@ -237,7 +252,11 @@ export class ReplayController {
       const result = this.publish(c);
       this.pauseRequested = false;
       return result;
-    } catch {
+    } catch (error) {
+      this.lastFailureCode =
+        error instanceof Error && /^[A-Z][A-Z0-9_]{0,127}$/u.test(error.message)
+          ? error.message
+          : "UNCLASSIFIED_BOUNDARY_FAILURE";
       if (this.state !== "RECOVERY_REQUIRED") this.state = "FAILED";
       return this.fail("REPLAY_BOUNDARY_FAILED");
     } finally {
@@ -285,6 +304,7 @@ export class ReplayController {
     }
     if (this.obligation || this.state === "RECOVERY_REQUIRED")
       return this.fail("RECOVERY_OBLIGATION");
+    if (this.diagnostics().pendingConsumerReads) return this.fail("CHANNEL_RECOVERY_OBLIGATION");
     if (this.state === "STOPPED" && this.checkpoint)
       return { ok: true, checkpoint: this.checkpoint };
     this.stopRequested = false;
@@ -354,23 +374,159 @@ export class ReplayController {
       this.busy = false;
     }
   }
-  public async recordBranch(evidence: ReplayBranchEvidence): Promise<ReplayCommandResult> {
-    if (this.busy || !this.checkpoint || this.obligation || !this.checkpoint.timestampComplete)
-      return this.fail("INVALID_BRANCH_BOUNDARY");
-    const prior = this.checkpoint.children.find((b) => b.branchId === evidence.branchId);
-    if (prior)
-      return hash(prior) === hash(evidence)
-        ? { ok: true, checkpoint: this.checkpoint }
-        : this.fail("BRANCH_IDENTITY_CONFLICT");
+  /** Consume the real P17 transport as an integrity side-channel for immutable recorded inputs.
+   * Source replay/cursor authority stays with the manifest. No channel read fabricates a source event.
+   * A durable read fence precedes the await, so interruption cannot erase unknown loss scope.
+   */
+  public async observeConsumerChannel(
+    consumer: ConsumerChannel,
+    artifactId: string,
+    limit = 1,
+  ): Promise<ReplayCommandResult> {
     if (
-      evidence.parentCheckpointId !== this.checkpoint.checkpointId ||
-      evidence.parentSessionId !== this.specification.sessionId ||
-      evidence.parentSpecificationFingerprint !== this.specification.fingerprint ||
-      evidence.forkTime !== this.checkpoint.logicalTime
+      this.busy ||
+      !this.checkpoint ||
+      this.obligation ||
+      !["READY", "RUNNING", "PAUSED"].includes(this.state)
     )
-      return this.fail("BRANCH_CONTEXT");
-    if (this.checkpoint.children.length >= this.specification.resourceLimits.maxBranches)
-      return this.fail("BRANCH_CAPACITY");
+      return this.fail("INVALID_LIFECYCLE");
+    if (
+      !Number.isSafeInteger(limit) ||
+      limit < 1 ||
+      limit > this.specification.resourceLimits.maxEventsPerBatch
+    )
+      return this.fail("CONSUMER_LIMIT");
+    this.busy = true;
+    const contextFingerprint = hash({ inputs: this.inputs.fingerprint, artifactId });
+    const readId = hash({
+      contextFingerprint,
+      consumerId: consumer.consumerId,
+      generation: this.checkpoint.generation,
+    });
+    try {
+      await this.inputs.verify();
+      const guarded = new ReplayAggregationPipeline(this.specification, this.checkpoint);
+      for (const stream of this.specification.streams) {
+        const fenced = guarded.engine.fence(hash(stream), "ASYNC_CHANNEL_READ_PENDING");
+        if (!fenced.ok) throw Error(fenced.error.code);
+      }
+      const guard = guarded.engine.exportReplayCheckpoint();
+      if (!guard.ok) throw Error(guard.error.code);
+      if (
+        this.checkpoint.evidence.length + 2 >
+        this.specification.resourceLimits.maxEvidenceRecords
+      )
+        throw Error("EVIDENCE_CAPACITY");
+      const persisted = this.publish(
+        createReplayCheckpoint({
+          ...this.checkpoint,
+          generation: this.checkpoint.generation + 1,
+          aggregation: guard.value,
+          evidence: [
+            ...this.checkpoint.evidence,
+            { kind: "CHANNEL_READ_PENDING", identity: readId, at: this.checkpoint.logicalTime },
+          ],
+        }),
+      );
+      if (!persisted.ok) {
+        // No channel read occurred. Admission itself is unacknowledged, and known loss
+        // must not disappear merely because its guard could not be written.
+        if (!this.obligation)
+          this.obligation = freeze({
+            operationId: readId,
+            commitment: "CHANNEL_ADMISSION_UNACKNOWLEDGED",
+          });
+        this.state = "RECOVERY_REQUIRED";
+        return persisted;
+      }
+      const pipeline = new ReplayAggregationPipeline(this.specification, this.checkpoint);
+      const observe = () => {
+        const discarded = consumer.queue.enqueued - consumer.queue.dequeued - consumer.queue.depth;
+        const result = pipeline.engine.observeConsumerLoss({
+          consumerId: consumer.consumerId,
+          contextFingerprint,
+          rejected: consumer.queue.rejected,
+          discarded,
+          degraded: consumer.degraded,
+          closed: consumer.closed,
+          newChannel: !this.observedChannels.has(consumer),
+        });
+        if (!result.ok) throw Error(result.error.code);
+      };
+      const eligible = new Set(
+        this.sequencer.events
+          .filter((e) => e.eligibilityAt <= this.checkpoint!.logicalTime)
+          .map((e) => hash(e.record.input.observation)),
+      );
+      for (let i = 0; i < limit; i++) {
+        observe();
+        const accepted = await consumer.read();
+        observe();
+        if (this.stopRequested) break;
+        if (!accepted) break;
+        if (!eligible.has(hash(accepted.observation)))
+          throw Error("UNRECORDED_OR_FUTURE_CHANNEL_OBSERVATION");
+      }
+      const aggregate = pipeline.engine.exportReplayCheckpoint();
+      if (!aggregate.ok) throw Error(aggregate.error.code);
+      if (this.stopRequested) {
+        this.state = "RECOVERY_REQUIRED";
+        this.obligation = freeze({ operationId: readId, commitment: "UNRESOLVED_CHANNEL_READ" });
+        return this.fail("CHANNEL_READ_INTERRUPTED");
+      }
+      const result = this.publish(
+        createReplayCheckpoint({
+          ...this.checkpoint,
+          generation: this.checkpoint.generation + 1,
+          aggregation: aggregate.value,
+          evidence: [
+            ...this.checkpoint.evidence,
+            { kind: "CHANNEL_READ_COMPLETED", identity: readId, at: this.checkpoint.logicalTime },
+          ],
+        }),
+      );
+      if (result.ok) this.observedChannels.add(consumer);
+      return result;
+    } catch {
+      if (this.state !== "RECOVERY_REQUIRED") this.state = "FAILED";
+      return this.fail("CONSUMER_INTEGRITY_FAILED");
+    } finally {
+      this.busy = false;
+    }
+  }
+  public async reconcileConsumerRead(identity: string): Promise<ReplayCommandResult> {
+    if (
+      this.busy ||
+      !this.checkpoint ||
+      this.obligation ||
+      !["READY", "RUNNING", "PAUSED"].includes(this.state)
+    )
+      return this.fail("INVALID_LIFECYCLE");
+    const pending = this.checkpoint.evidence.find(
+      (e) => e.identity === identity && e.kind === "CHANNEL_READ_PENDING",
+    );
+    if (
+      !pending ||
+      this.checkpoint.evidence.some(
+        (e) =>
+          e.identity === identity &&
+          ["CHANNEL_READ_COMPLETED", "CHANNEL_READ_RECONCILED"].includes(e.kind),
+      )
+    )
+      return this.fail("UNKNOWN_OR_COMPLETED_CHANNEL_READ");
+    for (const m of Object.values(this.checkpoint.aggregation.watermarks)) {
+      const proof = this.specification.tasks.find(
+        (t) =>
+          this.checkpoint!.executedTaskIds.includes(t.taskId) &&
+          t.action.kind === "WATERMARK" &&
+          t.action.evidence.evidenceId === m.evidenceId &&
+          t.action.evidence.reconciled,
+      );
+      if (m.status !== "CONTINUOUS" || !m.observedAt || m.observedAt < pending.at || !proof)
+        return this.fail("SOURCE_RECONCILIATION_REQUIRED");
+    }
+    if (this.checkpoint.evidence.length >= this.specification.resourceLimits.maxEvidenceRecords)
+      return this.fail("EVIDENCE_CAPACITY");
     this.busy = true;
     try {
       await this.inputs.verify();
@@ -378,12 +534,20 @@ export class ReplayController {
         createReplayCheckpoint({
           ...this.checkpoint,
           generation: this.checkpoint.generation + 1,
-          children: [...this.checkpoint.children, evidence],
+          evidence: [
+            ...this.checkpoint.evidence,
+            { kind: "CHANNEL_READ_RECONCILED", identity, at: this.checkpoint.logicalTime },
+          ],
         }),
       );
     } finally {
       this.busy = false;
     }
+  }
+  /** @deprecated Authoritative branch registration belongs to FilesystemReplayBranchRegistry.
+   * Retain the call shape but reject ungoverned parent metadata mutation. */
+  public recordBranch(_evidence: ReplayBranchEvidence): Promise<ReplayCommandResult> {
+    return Promise.resolve(this.fail("BRANCH_REGISTRY_REQUIRED"));
   }
   public semanticFingerprint(): string | undefined {
     return this.checkpoint

@@ -1,8 +1,8 @@
 {
   "name": "ate-system",
-  "version": "0.18.0-multitimeframe.1",
+  "version": "0.19.0-market-replay.1",
   "private": true,
-  "description": "ATE offline research foundations through deterministic multi-timeframe aggregation.",
+  "description": "ATE bounded offline research foundations through deterministic whole-system market-data replay.",
   "license": "UNLICENSED",
   "type": "module",
   "engines": {

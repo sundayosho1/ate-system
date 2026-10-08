@@ -82,19 +82,12 @@ export function compareReplayEvidence(
     classification = "IDENTICAL";
     reasons.push("Qualified semantic evidence is identical.");
   } else if (
-    right.branch?.parentSessionId === left.sessionId &&
-    right.branch.parentCheckpointId === left.semanticCheckpointId &&
-    right.branch.parentConfigurationFingerprint === left.configurationFingerprint &&
-    right.branch.branchConfigurationFingerprint === right.configurationFingerprint &&
-    right.branch.changedFields.length > 0 &&
-    hash(left.revisions) === hash(right.revisions) &&
-    hash(left.snapshots) === hash(right.snapshots) &&
-    left.qualityFingerprint === right.qualityFingerprint &&
-    left.continuityFingerprint === right.continuityFingerprint
+    left.configurationFingerprint !== right.configurationFingerprint ||
+    left.calendarFingerprint !== right.calendarFingerprint
   ) {
-    classification = "EXPECTED_DIFFERENCE";
+    classification = "INCOMPARABLE";
     reasons.push(
-      "Recorded reconstructed branch changed configuration; this explains divergence scope, not research quality.",
+      "Metadata alone cannot explain a policy change; compare validated checkpoints and an independent child-policy reference.",
     );
   } else {
     classification = "UNEXPLAINED_DIVERGENCE";

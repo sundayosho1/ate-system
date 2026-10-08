@@ -1537,5 +1537,34 @@ Capture completion never automatically grants research eligibility.
 - **DATA-210**: Prompt 19 implementation completion and independent acceptance remain distinct;
   Prompt 20 is unauthorized.
 
-These invariants describe the implemented primitive boundaries. The complete CODEX-004 system and
-all mandated adversarial scenarios remain unqualified; see the implementation gap report.
+The original CODEX-004 gap report records the historical starting checkpoint. CODEX-004R completes
+the bounded replay implementation below; independent acceptance remains pending.
+
+## CODEX-004R whole-system replay completion
+
+- **DATA-211**: Replay admission uses the existing runtime/configuration/state/event authorities and
+  grants only offline MARKET_DATA_READ.
+- **DATA-212**: Both replay and Prompt 18 material policies must match the actual effective
+  configuration; drift cannot resume an old session.
+- **DATA-213**: Historical pagination/cardinality/content/schema and selected full quality/catalogue
+  artifacts are reverified before acknowledgment.
+- **DATA-214**: Aggregate replay input is selected/read/projected by the existing aggregation owner,
+  with exact committed revision and publication/quality/lineage context.
+- **DATA-215**: An actual asynchronous consumer read requires a durable all-stream pending fence;
+  before/after queue loss cannot advance the immutable source cursor.
+- **DATA-216**: Failed initial channel admission, interrupted reads and unknown commitment block
+  false successful shutdown; pending durable reads survive fresh recovery.
+- **DATA-217**: Only actually executed, recorded source reconciliation can close recovered
+  unknown-scope read obligations.
+- **DATA-218**: An immutable branch reservation and exact child publication marker govern
+  visibility, retry and recovery; parent history is never written.
+- **DATA-219**: Changed-policy branches reconstruct from immutable origin and include acknowledged
+  parent read/loss facts; configuration change cannot heal loss.
+- **DATA-220**: Child identities/namespace/capacity conflicts and partial/corrupt unknown artifacts
+  fail closed without evidence deletion.
+- **DATA-221**: Comparison validates owner checkpoints; expected divergence requires a compatible
+  immutable fork and an independent child-policy reference.
+- **DATA-222**: Scheduler dispatch/cancellation failure cannot publish partial staging effects; all
+  resource bounds reject rather than evict acknowledged evidence.
+- **DATA-223**: Implementation completion, independent acceptance and production qualification
+  remain distinct; F05/F06/T01/M02 and no Prompt 20/trading restrictions remain mandatory.

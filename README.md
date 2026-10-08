@@ -8,14 +8,14 @@ ATE is **not** currently a trading bot, MetaTrader Expert Advisor, or live execu
 ## Current development status
 
 - Phase: III — Universal Data Platform
-- Prompt: 18 of 84 — implementation pending independent acceptance
+- Prompt: 19 of 84 — implementation complete; independent acceptance pending
 - Status: foundation, domain contracts, runtime lifecycle, internal event architecture,
   persistence/state authority, temporal integrity, hierarchical configuration, and configuration
   schema validation, immutable configuration version-history, feature-flag/capability-control, and
   maker-checker approval governance, controlled configuration promotion/rollback foundation,
   universal market-data contract authority, historical data laboratory foundations, data quality
   engine foundations, and dataset catalogue/lineage and real-time ingestion and bounded
-  multi-timeframe aggregation foundations
+  multi-timeframe aggregation and deterministic whole-system replay foundations
 - Market-data ingestion: **implemented through provider-neutral ports and a scripted adapter**
 - Commercial provider configured: **no**
 - Capture dataset materialization: **not implemented**
@@ -43,7 +43,7 @@ ATE must always be able to return `NO_ACTION` when conditions do not justify cap
 
 ## Currently implemented functionality
 
-Prompts 1–18 implement only:
+Prompts 1–19 implement bounded offline research functionality:
 
 - repository foundation and documentation hierarchy;
 - engineering constitution and safety invariants;
@@ -234,3 +234,14 @@ See the [operating guide](docs/help/multi-timeframe-aggregation.md) for explicit
 watermark evidence, immutable corrections, point-in-time snapshots and recovery. Prompt 17 remains
 conditionally accepted; Prompt 18 requires independent acceptance. No production or trading approval
 is conferred. Windows and production throughput/power-loss durability remain unqualified.
+
+## Prompt 19 replay implementation
+
+CODEX-004R implements deterministic offline multi-provider research replay, point-in-time evidence,
+full checkpoint recovery, conservative asynchronous consumer-loss fencing, governed reconstructed
+branches and validated semantic comparison. See
+[replay help/configuration](docs/help/deterministic-market-replay.md) and
+[permanent completion evidence](docs/development/prompt-19-completion-evidence.md). Prompts 17/18
+remain conditionally accepted; Prompt 19 independent acceptance is pending. F05/F06/T01 and
+current-registry limitations remain mandatory. No production/trading approval or Prompt 20 work is
+implied.

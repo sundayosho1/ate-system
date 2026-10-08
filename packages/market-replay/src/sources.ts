@@ -9,8 +9,16 @@ import type {
   HistoricalDatasetId,
   HistoricalDatasetManifest,
 } from "@ate/historical-data";
-import type { DataQualityReportRepository, DataQualityReportId } from "@ate/data-quality";
-import type { DatasetCatalogueRepository, DatasetVersionId } from "@ate/dataset-catalogue";
+import type {
+  DataQualityReportRepository,
+  DataQualityReportId,
+  DataQualityReport,
+} from "@ate/data-quality";
+import type {
+  DatasetCatalogueRepository,
+  DatasetVersionId,
+  DatasetVersionRecord,
+} from "@ate/dataset-catalogue";
 import type { FilesystemCaptureRepository } from "@ate/realtime-data";
 import { hash, safeClone, realtimeInput, qualityEvidence } from "@ate/multitimeframe";
 import type { Stream } from "@ate/multitimeframe";
@@ -53,7 +61,7 @@ export async function resolveHistoricalReplayInputs(
     // Manifest fields are validated by their owner/content checks below; do not infer qualification.
     if (
       manifest.datasetId !== o.datasetId ||
-      manifest.canonicalSchemaVersion !== "1" ||
+      manifest.canonicalSchemaVersion !== "prompt-13-market-observation-v1" ||
       !Number.isSafeInteger(manifest.observationCount) ||
       manifest.observationCount < 1 ||
       manifest.observationCount > o.limits.maxEventsPerSession
@@ -99,7 +107,10 @@ export async function resolveHistoricalReplayInputs(
     )
       throw Error("HISTORICAL_CONTENT_INTEGRITY");
     const report = o.quality
-      ? unwrap(await o.quality.repository.getReport(o.quality.reportId))
+      ? (safeClone(
+          unwrap(await o.quality.repository.getReport(o.quality.reportId)),
+          o.limits.maxInputBytes,
+        ) as DataQualityReport)
       : undefined;
     if (
       report &&
@@ -108,8 +119,12 @@ export async function resolveHistoricalReplayInputs(
         report.reportFingerprint !== o.quality!.expectedFingerprint)
     )
       throw Error("QUALITY_BINDING");
+    let catalogueVersion: DatasetVersionRecord | undefined;
     if (o.catalogue) {
-      const version = unwrap(await o.catalogue.repository.getVersion(o.catalogue.versionId));
+      const version = safeClone(
+        unwrap(await o.catalogue.repository.getVersion(o.catalogue.versionId)),
+        o.limits.maxInputBytes,
+      ) as DatasetVersionRecord;
       if (
         version.versionFingerprint !== o.catalogue.expectedVersionFingerprint ||
         version.historicalManifest?.datasetId !== o.datasetId ||
@@ -117,6 +132,12 @@ export async function resolveHistoricalReplayInputs(
         ["INVALIDATED", "QUARANTINED", "RETIRED"].includes(version.lifecycleState)
       )
         throw Error("CATALOGUE_BINDING");
+      if (
+        report &&
+        !version.qualityReferences.some((r) => r.reportFingerprint === report.reportFingerprint)
+      )
+        throw Error("CATALOGUE_QUALITY_BINDING");
+      catalogueVersion = version;
     }
     const records = observations.map((observation) => {
       const evidence = o.availability?.(observation);
@@ -131,6 +152,9 @@ export async function resolveHistoricalReplayInputs(
           sourceFingerprint: o.stream.sourceFingerprint,
           artifactId: o.datasetId,
           availability: evidence ? ("VERIFIED" as const) : ("UNKNOWN" as const),
+          ...(evidence && evidence.kind !== "RECORDED_RECEIPT"
+            ? { sourcePublishedAt: evidence.availableAt }
+            : {}),
           continuity: "UNKNOWN" as const,
           warnings: [],
           ...(report ? { quality: qualityEvidence(report) } : {}),
@@ -158,7 +182,11 @@ export async function resolveHistoricalReplayInputs(
         calendarFingerprint: o.calendarFingerprint,
         validation: "VALIDATED",
         originReference: o.datasetId,
-        originFingerprint: hash(manifest),
+        originFingerprint: hash({
+          manifest,
+          ...(report ? { report } : {}),
+          ...(catalogueVersion ? { catalogueVersion } : {}),
+        }),
       },
       o.limits,
     );
@@ -242,9 +270,9 @@ export async function resolveCaptureReplayInputs(
     );
   };
   const manifest = await Promise.resolve(read());
-  return immutableReplayInputs([manifest], () => {
-    if (read().fingerprint !== manifest.fingerprint)
-      return Promise.reject(Error("CAPTURE_CHANGED"));
-    return Promise.resolve();
-  });
+  return immutableReplayInputs([manifest], () =>
+    Promise.resolve().then(() => {
+      if (read().fingerprint !== manifest.fingerprint) throw Error("CAPTURE_CHANGED");
+    }),
+  );
 }

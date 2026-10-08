@@ -107,40 +107,60 @@ export class ReplayAggregationPipeline {
     const scheduler = new DeterministicScheduler(this.clock, undefined, {
       maxScheduledTasks: this.spec.resourceLimits.maxPendingTasks,
     });
-    for (const task of [...tasks].sort(taskOrder)) {
-      unwrap(
-        scheduler.scheduleAt(
-          task.dueAt,
-          () => {
-            const a = task.action;
-            switch (a.kind) {
-              case "FENCE":
-                unwrap(this.engine.fence(a.streamId, a.reason));
-                break;
-              case "LOSS": {
-                const { kind: _kind, ...loss } = a;
-                unwrap(this.engine.observeConsumerLoss({ ...loss, newChannel: true }));
-                break;
-              }
-              case "WATERMARK":
-                unwrap(this.engine.watermark(a.streamId, a.evidence));
-                break;
-              case "PUBLISH":
-                unwrap(this.engine.publishWindow(a.streamId, a.timeframe, a.eventAt, a.final));
-                break;
-              case "SNAPSHOT":
-                snapshots.push(
-                  this.snapshot(a.streamId, a.timeframes, cursor, a.includeIncomplete, []),
-                );
-                break;
-            }
-          },
-          4 - taskPhase(task),
-        ),
-      );
+    const scheduled: { taskId: string; id: Parameters<DeterministicScheduler["cancel"]>[0] }[] = [];
+    const entered = new Set<string>();
+    try {
+      for (const task of [...tasks].sort(taskOrder)) {
+        scheduled.push({
+          taskId: task.taskId,
+          id: unwrap(
+            scheduler.scheduleAt(
+              task.dueAt,
+              () => {
+                entered.add(task.taskId);
+                const a = task.action;
+                switch (a.kind) {
+                  case "FORK_FENCE":
+                  case "FENCE":
+                    unwrap(this.engine.fence(a.streamId, a.reason));
+                    break;
+                  case "FORK_LOSS":
+                  case "LOSS": {
+                    const { kind: _kind, ...loss } = a;
+                    unwrap(this.engine.observeConsumerLoss({ ...loss, newChannel: true }));
+                    break;
+                  }
+                  case "WATERMARK":
+                    unwrap(this.engine.watermark(a.streamId, a.evidence));
+                    break;
+                  case "PUBLISH":
+                    unwrap(this.engine.publishWindow(a.streamId, a.timeframe, a.eventAt, a.final));
+                    break;
+                  case "SNAPSHOT":
+                    snapshots.push(
+                      this.snapshot(a.streamId, a.timeframes, cursor, a.includeIncomplete, []),
+                    );
+                    break;
+                }
+              },
+              4 - taskPhase(task),
+            ),
+          ),
+        });
+      }
+      unwrap(await scheduler.runDueTasks());
+      return freeze(snapshots);
+    } catch (error) {
+      // Some tasks may already have run inside the private staging engine. No output
+      // transaction is published on failure. Cancellation failure is explicit.
+      const failed = scheduled
+        .filter((task) => !entered.has(task.taskId))
+        .map((task) => scheduler.cancel(task.id))
+        .some((ok) => !ok);
+      if (failed) throw Error("SCHEDULER_CANCELLATION_FAILED", { cause: error });
+      throw error;
+    } finally {
+      scheduler.stop();
     }
-    unwrap(await scheduler.runDueTasks());
-    scheduler.stop();
-    return freeze(snapshots);
   }
 }

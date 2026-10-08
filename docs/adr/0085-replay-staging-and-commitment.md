@@ -1,6 +1,6 @@
 # ADR-0085: Whole-system replay staging and commitment
 
-Status: Implementation in progress; Prompt 19 acceptance pending.
+Status: Implemented under CODEX-004R; independent Prompt 19 acceptance pending.
 
 Date: 2026-10-08
 
@@ -28,10 +28,19 @@ commit/publication leave RECOVERY_REQUIRED. Repeated stop cannot certify success
 Content and marker times belong to the injected storage clock; replay-derived aggregate timestamps
 belong to the virtual clock and do not certify historical ATE publication.
 
-## Consequences and outstanding work
+## Historical starting checkpoint and consequences
 
 Single-writer trusted roots and repository implementations remain mandatory. This design does not
 qualify Windows, power-loss durability or production throughput. Cross-session branch transactions,
 full historical/capture/quality/catalogue fault qualification, runtime/state/event authority
 registration and complete end-to-end acceptance evidence remain unfinished. Do not infer Prompt 19
 completion from the passing primitive tests.
+
+## CODEX-004R completion
+
+The outstanding work above records the scope at starting checkpoint
+`bd37a789e6ccac5ba6b7ab2e87a050581df40be1`. CODEX-004R completes durable branch orchestration,
+actual asynchronous channel integration, actual source/quality/catalogue/runtime authorities,
+aggregate adapters and the permanent full-system/fault evidence. See ADRs 0086–0087 and
+[the completion evidence index](../development/prompt-19-completion-evidence.md). Implementation
+completion does not grant independent acceptance or production qualification.

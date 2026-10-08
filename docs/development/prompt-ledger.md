@@ -207,7 +207,7 @@ Prompt 19 may use that verified governance successor only after a separate imple
 specification and explicit authorization. **Prompt 19: NOT STARTED — IMPLEMENTATION NOT
 AUTHORIZED.** This governance release does not implement Prompt 19 or expand any capability.
 
-## Prompt 19 implementation work — CODEX-004
+## Prompt 19 implementation work — CODEX-004 (historical starting checkpoint)
 
 The separate CODEX-004 specification explicitly authorizes Prompt 19 from governance successor
 `b69530ac75210e62780082034d90e8b1a0a18443`. Earlier NOT STARTED / NOT AUTHORIZED statements above
@@ -222,3 +222,24 @@ Work is isolated on `codex/prompt-19-market-replay`. Accepted Prompt 17/18 commi
 The application release version and `completed_prompt` remain at Prompt 18; the new workspace
 package identifies its development target only. A passing regression suite does not satisfy the
 complete Prompt 19 definition of done. See [replay help](../help/deterministic-market-replay.md).
+
+## Prompt 19 completion — CODEX-004R
+
+CODEX-004R supplements the original full Prompt 19 specification from exact starting checkpoint
+`bd37a789e6ccac5ba6b7ab2e87a050581df40be1` on dedicated `codex/prompt-19-completion`. All G01–G09
+and original mandatory implementation criteria are covered by the source and permanent
+[evidence index](prompt-19-completion-evidence.md). The full pre-release gate passed 578 tests
+across 48 files with zero audit findings before advancing the root release; the final source commit
+and publication/gate evidence are recorded in the external CODEX-004R delivery report.
+
+| Prompt | Current implementation status                         | Version                  | Independent acceptance      |
+| ------ | ----------------------------------------------------- | ------------------------ | --------------------------- |
+| 19     | IMPLEMENTATION COMPLETE — READY FOR INDEPENDENT AUDIT | `0.19.0-market-replay.1` | PENDING — not self-accepted |
+| 20     | NOT STARTED — NOT AUTHORIZED                          | None                     | None                        |
+
+Historical audit/remediation and Prompt 17/18 conditional acceptance references above remain intact.
+No unrelated prompt status is changed. F05 Windows qualification, F06 production capture throughput/
+durability, T01 trusted implementations/certificates and single-writer/trusted-root, M02 current
+registry context, bounded quality handoff and conservative source-loss restrictions remain
+mandatory. No production deployment, broker connectivity, trading or future-prompt approval is
+inferred.
