@@ -286,6 +286,28 @@ qualification remain outstanding.
 
 ### Capture cleanup failure and recovery
 
+Successful repository creation confirms the capture and registers it as active, unless lifecycle
+permission was lost during the synchronous call, in which case confirmed creation is compensated.
+The `CaptureRepository.start` result has no failure-atomicity guarantee: a structured failure or
+exception does not prove that no durable artifact was created. Without explicit no-commit evidence,
+both retain UNKNOWN commitment immediately, even before shutdown starts. The service fails closed,
+rejects further creation and readiness, and propagates the obligation through subsequent and
+repeated shutdown. It does not abort an uncertain identity that may belong to a preexisting or
+unrelated capture.
+
+Only explicit `commitment: "NOT_CREATED"` on a failed start certifies that the attempt performed no
+mutating storage operation. The filesystem repository provides this evidence only when validation,
+discovery or path checks fail before its first mutating call is attempted. It does not assert that
+no preexisting artifact exists. Once directory creation is attempted, later failures remain UNKNOWN,
+even if that call reports failure. Custom repositories must honor the same contract; absent evidence
+fails closed. A pre-call lifecycle or ID rejection invokes no repository operation. Generic error
+codes alone never establish no-commit, and the service does not acquire an obligation for an
+explicitly proven no-mutation rejection. UNKNOWN does not assert an artifact exists. Fresh startup
+uses existing discovery: no discovered manifest means no capture to recover; RUNNING is marked
+ABORTED only after successful abort; COMPLETED remains immutable and is verified. Failed discovery
+or recovery fails startup. Partial or malformed artifacts continue to follow the existing
+fail-closed repository policy.
+
 Capture creation reserves one slot per provider before invoking the synchronous repository port.
 Reentrant starts for that provider are rejected. If creation initiates shutdown, a confirmed created
 capture is compensated exactly once through the existing repository abort operation. Structured

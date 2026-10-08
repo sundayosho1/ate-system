@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -454,5 +454,278 @@ describe("CODEX-002D F04-R1 capture cleanup obligations", () => {
     expect(f.service.readiness()).toBe(false);
     expect(f.repository!.recover()).toMatchObject({ ok: true, value: [] });
     expect((await f.service.stop()).ok).toBe(false);
+  });
+});
+
+// A failure result does not prove that start had no durable side effects.
+const creationFailure = (f: ReturnType<typeof fixture>) => ({
+  ok: false as const,
+  error: {
+    code: "PERSISTENCE_FAILED" as const,
+    scope: "capture creation",
+    timestamp: f.clock.now(),
+    message: "creation commitment unknown",
+  },
+});
+function freshService(f: ReturnType<typeof fixture>, repository: FilesystemCaptureRepository) {
+  const service = new RealtimeDataService({
+    clock: f.clock,
+    scheduler: f.scheduler,
+    options: { ...defaultRealtimeOptions, enabled: true, captureEnabled: true },
+    configurationFingerprint: fingerprint("creation recovery"),
+    requiredSources: [sourceId],
+    captureRepository: repository,
+  });
+  expect(service.register(new ScriptedAdapter(source)).ok).toBe(true);
+  return service;
+}
+describe("CODEX-002F F04-R2 creation commitment obligations", () => {
+  it("accounts structured failure after real commitment before shutdown and recovers durably", async () => {
+    const f = await active({ captureEnabled: true }, true);
+    await emit(f);
+    expect(f.service.readiness()).toBe(true);
+    const start = f.repository!.start.bind(f.repository);
+    let starts = 0,
+      aborts = 0;
+    f.repository!.start = (m) => {
+      starts++;
+      expect(start(m).ok).toBe(true);
+      return creationFailure(f);
+    };
+    f.repository!.abort = () => {
+      aborts++;
+      throw Error("uncertain ownership must not be compensated");
+    };
+    const created = f.service.startCapture(sourceId, "committed-unknown");
+    expect(created).toEqual(creationFailure(f));
+    expect(manifestState(f, "committed-unknown")).toBe("RUNNING");
+    expect(f.service.diagnostics()).toMatchObject({ state: "FAILED", recoveryRequired: true });
+    expect(f.service.diagnostics().providers[0]).toMatchObject({
+      captureRunning: false,
+      captureRecovery: {
+        captureId: "committed-unknown",
+        lastKnownManifestState: "UNKNOWN",
+        cleanupConfirmed: false,
+        recoveryRequired: true,
+        error: creationFailure(f).error,
+      },
+    });
+    expect(f.service.diagnostics().providers[0]!.captureCreationPending).toBeUndefined();
+    expect(f.service.readiness()).toBe(false);
+    expect(f.service.startCapture(sourceId, "forbidden").ok).toBe(false);
+    expect(await f.service.stop()).toEqual(created);
+    expect(await f.service.stop()).toEqual(created);
+    expect(starts).toBe(1);
+    expect(aborts).toBe(0);
+    expect(manifestState(f, "committed-unknown")).toBe("RUNNING");
+    const next = freshService(f, new FilesystemCaptureRepository(f.root!, f.clock, 10485760, 32));
+    expect((await next.start()).ok).toBe(true);
+    expect(manifestState(f, "committed-unknown")).toBe("ABORTED");
+    expect(next.diagnostics().recoveryRequired).toBe(false);
+    expect(await f.service.stop()).toEqual(created);
+    expect((await next.stop()).ok).toBe(true);
+  });
+  it("failed durable recovery cannot report healthy startup or a false ABORTED manifest", async () => {
+    const f = await active({ captureEnabled: true }, true);
+    const start = f.repository!.start.bind(f.repository);
+    f.repository!.start = (m) => {
+      expect(start(m).ok).toBe(true);
+      return creationFailure(f);
+    };
+    expect(f.service.startCapture(sourceId, "recovery-failed").ok).toBe(false);
+    expect((await f.service.stop()).ok).toBe(false);
+    const repository = new FilesystemCaptureRepository(f.root!, f.clock, 10485760, 32);
+    let aborts = 0;
+    repository.abort = () => {
+      aborts++;
+      return creationFailure(f);
+    };
+    const next = freshService(f, repository);
+    expect(await next.start()).toEqual(creationFailure(f));
+    expect(next.diagnostics().state).toBe("FAILED");
+    expect(next.readiness()).toBe(false);
+    expect(next.startCapture(sourceId, "forbidden").ok).toBe(false);
+    expect(manifestState(f, "recovery-failed")).toBe("RUNNING");
+    expect(aborts).toBe(1);
+  });
+  it.each(["structured", "throw"] as const)(
+    "%s failure without artifacts retains uncertainty until fresh discovery",
+    async (mode) => {
+      const f = await active({ captureEnabled: true }, true);
+      let calls = 0;
+      f.repository!.start = () => {
+        calls++;
+        if (mode === "throw") throw Error("private creation details");
+        return creationFailure(f);
+      };
+      expect(f.service.startCapture(sourceId, "unknown-empty").ok).toBe(false);
+      expect(f.service.diagnostics().providers[0]!.captureRecovery).toMatchObject({
+        captureId: "unknown-empty",
+        lastKnownManifestState: "UNKNOWN",
+        recoveryRequired: true,
+      });
+      expect(f.service.diagnostics().state).toBe("FAILED");
+      expect(f.service.readiness()).toBe(false);
+      expect(JSON.stringify(f.service.diagnostics())).not.toContain("private creation details");
+      expect(f.repository!.recover()).toEqual({ ok: true, value: [] });
+      expect((await f.service.stop()).ok).toBe(false);
+      expect((await f.service.stop()).ok).toBe(false);
+      expect(calls).toBe(1);
+      const next = freshService(f, new FilesystemCaptureRepository(f.root!, f.clock, 10485760, 32));
+      expect((await next.start()).ok).toBe(true);
+      expect(next.diagnostics().recoveryRequired).toBe(false);
+      expect((await next.stop()).ok).toBe(true);
+    },
+  );
+  it("retains structured failure after reentrant shutdown begins", async () => {
+    const f = fixture({ captureEnabled: true }, true);
+    expect((await f.service.start()).ok).toBe(true);
+    const start = f.repository!.start.bind(f.repository);
+    let stopped: ReturnType<RealtimeDataService["stop"]> | undefined;
+    f.repository!.start = (m) => {
+      expect(start(m).ok).toBe(true);
+      stopped = f.service.stop();
+      return creationFailure(f);
+    };
+    // The synchronous port reenters stop before delivering the failed creation result.
+    expect(f.service.startCapture(sourceId, "after-stop").ok).toBe(false);
+    expect((await stopped)!.ok).toBe(false);
+    expect(f.service.diagnostics()).toMatchObject({ state: "FAILED", recoveryRequired: true });
+    expect(manifestState(f, "after-stop")).toBe("RUNNING");
+    expect(await f.service.stop()).toEqual(creationFailure(f));
+    expect(await f.service.stop()).toEqual(creationFailure(f));
+  });
+  it("nested provider failures retain independent identities despite diagnostic eviction", async () => {
+    const f = fixture({ captureEnabled: true, maxEvidence: 1 }, true);
+    const other = dataSourceRefSchema.parse({
+      ...source,
+      sourceId: "30000000-0000-4000-8000-000000000003",
+    });
+    expect(f.service.register(new ScriptedAdapter(other)).ok).toBe(true);
+    expect((await f.service.start()).ok).toBe(true);
+    const start = f.repository!.start.bind(f.repository);
+    let starts = 0,
+      aborts = 0;
+    f.repository!.abort = () => {
+      aborts++;
+      return creationFailure(f);
+    };
+    f.repository!.start = (m) => {
+      starts++;
+      expect(start(m).ok).toBe(true);
+      if (m.source.sourceId === sourceId)
+        expect(f.service.startCapture(other.sourceId, "inner-unknown").ok).toBe(false);
+      return { ...creationFailure(f), error: { ...creationFailure(f).error, scope: m.captureId } };
+    };
+    expect(f.service.startCapture(sourceId, "outer-unknown").ok).toBe(false);
+    const d = f.service.diagnostics();
+    expect(d.providers.map((p) => [p.sourceId, p.captureRecovery?.captureId])).toEqual([
+      [sourceId, "outer-unknown"],
+      [other.sourceId, "inner-unknown"],
+    ]);
+    expect(d.providers.every((p) => p.captureRecovery?.lastKnownManifestState === "UNKNOWN")).toBe(
+      true,
+    );
+    expect(d.errors).toHaveLength(1);
+    expect(d.metrics.evidenceEvictions).toBeGreaterThan(0);
+    expect(d.state).toBe("FAILED");
+    expect((await f.service.stop()).ok).toBe(false);
+    expect((await f.service.stop()).ok).toBe(false);
+    expect(starts).toBe(2);
+    expect(aborts).toBe(0);
+    expect(manifestState(f, "outer-unknown")).toBe("RUNNING");
+    expect(manifestState(f, "inner-unknown")).toBe("RUNNING");
+    const recovered = new FilesystemCaptureRepository(f.root!, f.clock, 10485760, 32).recover();
+    expect(recovered.ok && recovered.value.map((m) => [m.captureId, m.state])).toEqual([
+      ["inner-unknown", "ABORTED"],
+      ["outer-unknown", "ABORTED"],
+    ]);
+  });
+  it("late callback cannot activate or retry a capture after uncertain creation", async () => {
+    const f = await active({ captureEnabled: true }, true);
+    const start = f.repository!.start.bind(f.repository);
+    let calls = 0,
+      late: boolean | undefined;
+    f.repository!.start = (m) => {
+      calls++;
+      expect(start(m).ok).toBe(true);
+      f.scheduler.scheduleAfter(durationMs(1), () => {
+        late = f.service.startCapture(sourceId, "late-unknown").ok;
+      });
+      return creationFailure(f);
+    };
+    expect(f.service.startCapture(sourceId, "before-late").ok).toBe(false);
+    await advance(f, 1);
+    expect(late).toBe(false);
+    expect(calls).toBe(1);
+    expect(f.service.diagnostics().providers[0]!.captureRecovery!.captureId).toBe("before-late");
+    expect(manifestState(f, "before-late")).toBe("RUNNING");
+    expect((await f.service.stop()).ok).toBe(false);
+  });
+  it("failure on a preexisting completed identity never aborts or changes completed content", async () => {
+    const f = await active({ captureEnabled: true }, true);
+    expect(f.service.startCapture(sourceId, "existing-complete").ok).toBe(true);
+    await emit(f);
+    const complete = f.service.finishCapture(sourceId);
+    expect(complete.ok).toBe(true);
+    const before = readFileSync(join(f.root!, "existing-complete", "manifest.json"), "utf8");
+    const abort = f.repository!.abort.bind(f.repository);
+    let aborts = 0;
+    f.repository!.abort = (id) => {
+      aborts++;
+      return abort(id);
+    };
+    // The real repository refuses the existing directory; the generic result proves no ownership.
+    expect(f.service.startCapture(sourceId, "existing-complete").ok).toBe(false);
+    expect(f.service.diagnostics().providers[0]!.captureRecovery!.lastKnownManifestState).toBe(
+      "UNKNOWN",
+    );
+    expect((await f.service.stop()).ok).toBe(false);
+    expect((await f.service.stop()).ok).toBe(false);
+    expect(aborts).toBe(0);
+    expect(readFileSync(join(f.root!, "existing-complete", "manifest.json"), "utf8")).toBe(before);
+    expect(f.repository!.verify("existing-complete")).toEqual(complete);
+    const next = freshService(f, new FilesystemCaptureRepository(f.root!, f.clock, 10485760, 32));
+    expect((await next.start()).ok).toBe(true);
+    expect(manifestState(f, "existing-complete")).toBe("COMPLETED");
+    expect((await next.stop()).ok).toBe(true);
+  });
+});
+
+describe("CODEX-002F enforced no-commit evidence", () => {
+  it("real symlink rejection certifies no mutation and preserves successful stop", async () => {
+    const f = await active({ captureEnabled: true }, true);
+    const target = mkdtempSync(join(tmpdir(), "ate-no-commit-"));
+    roots.push(target);
+    symlinkSync(target, join(f.root!, "linked"), "dir");
+    const result = f.service.startCapture(sourceId, "linked");
+    expect(result).toMatchObject({ ok: false, commitment: "NOT_CREATED" });
+    expect(existsSync(join(target, "manifest.json"))).toBe(false);
+    expect(existsSync(join(target, "records.partial"))).toBe(false);
+    expect(f.service.diagnostics().recoveryRequired).toBe(false);
+    expect(f.service.diagnostics().state).not.toBe("FAILED");
+    expect((await f.service.stop()).ok).toBe(true);
+    expect((await f.service.stop()).ok).toBe(true);
+  });
+  it("partial mutation cannot certify no commitment and fresh discovery fails closed", async () => {
+    const f = await active({ captureEnabled: true }, true);
+    const start = f.repository!.start.bind(f.repository);
+    f.repository!.start = (m) => start({ ...m, adapterId: "x".repeat(262144) });
+    const result = f.service.startCapture(sourceId, "partial-create");
+    expect(result).toMatchObject({ ok: false });
+    expect(result).not.toHaveProperty("commitment");
+    expect(existsSync(join(f.root!, "partial-create", "records.partial"))).toBe(true);
+    expect(existsSync(join(f.root!, "partial-create", "manifest.json"))).toBe(false);
+    expect(f.service.diagnostics().providers[0]!.captureRecovery).toMatchObject({
+      captureId: "partial-create",
+      lastKnownManifestState: "UNKNOWN",
+      recoveryRequired: true,
+    });
+    expect((await f.service.stop()).ok).toBe(false);
+    expect((await f.service.stop()).ok).toBe(false);
+    const next = freshService(f, new FilesystemCaptureRepository(f.root!, f.clock, 10485760, 32));
+    expect((await next.start()).ok).toBe(false);
+    expect(next.diagnostics().state).toBe("FAILED");
+    expect(next.readiness()).toBe(false);
   });
 });

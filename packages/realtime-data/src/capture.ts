@@ -35,7 +35,9 @@ const manifestShape = z
   })
   .passthrough();
 export interface CaptureRepository {
-  start(manifest: CaptureManifest): RealtimeResult<void>;
+  // NOT_CREATED certifies this attempt performed no mutating storage operation.
+  // It says nothing about artifacts predating this attempt. Missing evidence means UNKNOWN.
+  start(manifest: CaptureManifest): CaptureStartResult;
   append(captureId: string, record: AcceptedObservation): RealtimeResult<void>;
   finish(
     captureId: string,
@@ -45,6 +47,11 @@ export interface CaptureRepository {
   recover(): RealtimeResult<readonly CaptureManifest[]>;
   verify(captureId: string): RealtimeResult<MaterializationHandoff>;
 }
+export type CaptureStartResult =
+  | Extract<RealtimeResult<void>, { ok: true }>
+  | (Extract<RealtimeResult<void>, { ok: false }> & {
+      readonly commitment?: "NOT_CREATED";
+    });
 // Content final rename precedes the COMPLETED manifest commit marker. No reader infers completion
 // from a filename. A manifest/data mismatch always fails verification; running state is aborted.
 export class FilesystemCaptureRepository implements CaptureRepository {
@@ -130,7 +137,8 @@ export class FilesystemCaptureRepository implements CaptureRepository {
     }
     renameSync(temp, this.file(m.captureId, "manifest.json"));
   }
-  public start(manifest: CaptureManifest): RealtimeResult<void> {
+  public start(manifest: CaptureManifest): CaptureStartResult {
+    let mutationAttempted = false;
     try {
       if (
         manifest.state !== "RUNNING" ||
@@ -146,13 +154,17 @@ export class FilesystemCaptureRepository implements CaptureRepository {
         manifest.subscriptions.length > 1000
       )
         throw new Error("capture capacity");
-      mkdirSync(this.directory(manifest.captureId));
+      const directory = this.directory(manifest.captureId);
+      // Once a mutating call is attempted, even a failed call cannot certify no side effects.
+      mutationAttempted = true;
+      mkdirSync(directory);
       const fd = openSync(this.file(manifest.captureId, "records.partial"), "wx");
       closeSync(fd);
       this.publish(manifest);
       return { ok: true, value: undefined };
     } catch {
-      return failure(this.clock, "CAPTURE_FAILED", "capture");
+      const result = failure<void>(this.clock, "CAPTURE_FAILED", "capture");
+      return !mutationAttempted && !result.ok ? { ...result, commitment: "NOT_CREATED" } : result;
     }
   }
   public append(id: string, record: AcceptedObservation): RealtimeResult<void> {

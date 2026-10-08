@@ -25,7 +25,7 @@ import {
   immutable,
   safeId,
 } from "./primitives.js";
-import type { CaptureRepository } from "./capture.js";
+import type { CaptureRepository, CaptureStartResult } from "./capture.js";
 import {
   metricNames,
   type AcceptedObservation,
@@ -1084,7 +1084,7 @@ export class RealtimeDataService {
       return failure(this.input.clock, "CAPTURE_FAILED", "capture");
     // Reserve before calling the synchronous port: it may reenter lifecycle methods.
     p.captureCreating = captureId;
-    let result: RealtimeResult<void>;
+    let result: CaptureStartResult;
     try {
       result = this.input.captureRepository.start(
         immutable({
@@ -1111,7 +1111,9 @@ export class RealtimeDataService {
     } finally {
       delete p.captureCreating;
     }
-    if (!result.ok && this.stopping && !p.captureRecovery)
+    // Only explicit no-mutation evidence proves this attempt created nothing.
+    // Preserve uncertainty; do not abort an artifact whose ownership is unconfirmed.
+    if (!result.ok && result.commitment !== "NOT_CREATED" && !p.captureRecovery)
       this.retainCaptureFailure(p, captureId, result.error, "UNKNOWN");
     if (result.ok && (!this.running || this.stopping || this.failed || !this.initialized)) {
       const aborted = this.cleanupCapture(p, captureId);
