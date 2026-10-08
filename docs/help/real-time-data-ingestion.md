@@ -283,3 +283,33 @@ Finalization remains synchronous; pending raw ingress rejects completion and shu
 that capture by aborting it. These corrections do not alter the single-writer, synchronous storage
 or filesystem durability limitations above. Windows execution and production throughput/durability
 qualification remain outstanding.
+
+### Capture cleanup failure and recovery
+
+Capture creation reserves one slot per provider before invoking the synchronous repository port.
+Reentrant starts for that provider are rejected. If creation initiates shutdown, a confirmed created
+capture is compensated exactly once through the existing repository abort operation. Structured
+abort failures and thrown abort exceptions are failures, not confirmed cleanup. Thrown exceptions
+produce a safe `PERSISTENCE_FAILED` result without exposing exception details.
+
+Unresolved cleanup keeps bounded per-provider `captureRecovery` evidence: capture ID, last known
+manifest state, structured error, `cleanupConfirmed: false` and `recoveryRequired: true`.
+Diagnostics also expose aggregate `recoveryRequired` and a pending creation ID. A confirmed creation
+whose abort fails has last known state RUNNING; an exceptional or failed creation whose commitment
+cannot be established is UNKNOWN. These labels describe knowledge, not a fabricated filesystem
+transition. The durable manifest remains authoritative and is never changed to ABORTED merely
+because abort was attempted. Existing control summaries signal RECOVERY_REQUIRED.
+
+Shutdown consults the retained obligation after its asynchronous adapter work, so compensation
+failure inside a synchronous creation callback cannot escape the shutdown result. The existing
+FAILED service state and failed structured shutdown result represent unresolved mandatory cleanup;
+readiness is false. Repeated stop preserves this failure and does not automatically retry capture
+storage operations. Ordinary confirmed cleanup still permits successful idempotent stop.
+
+Recover through a fresh managed service instance using the same capture repository root. Startup's
+existing manifest discovery aborts recoverable RUNNING captures and verifies completed captures;
+failed recovery fails startup. The previous failed instance retains its historical failure even if
+another instance subsequently recovers the disk artifacts. Do not clear this evidence by retrying
+stop or claim success until recovery is confirmed by the existing authority. This change adds no
+storage format, lifecycle state, clock, uncontrolled retry, or unbounded recovery registry. Windows
+execution and synchronous capture throughput/durability qualification remain unverified.

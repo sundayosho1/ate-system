@@ -87,6 +87,14 @@ type ProviderState = {
   heartbeat?: UtcTimestamp;
   activity?: UtcTimestamp;
   captureId?: string;
+  captureCreating?: string;
+  captureRecovery?: Readonly<{
+    captureId: string;
+    lastKnownManifestState: "RUNNING" | "UNKNOWN";
+    cleanupConfirmed: false;
+    recoveryRequired: true;
+    error: RealtimeError;
+  }>;
   captureStartMetrics?: Pick<Metrics, "rejected" | "duplicates" | "late" | "gaps" | "overflow">;
   evidence: Pick<Metrics, "rejected" | "duplicates" | "late" | "gaps" | "overflow">;
   connectPending?: Promise<RealtimeResult<void>>;
@@ -1068,32 +1076,46 @@ export class RealtimeDataService {
       !this.options.captureEnabled ||
       !this.input.captureRepository ||
       p.captureId ||
+      p.captureCreating ||
+      p.captureRecovery ||
       !safeId(captureId) ||
       this.stopping
     )
       return failure(this.input.clock, "CAPTURE_FAILED", "capture");
-    const result = this.input.captureRepository.start(
-      immutable({
-        captureId,
-        source: p.adapter.source,
-        adapterId: p.adapter.adapterId,
-        adapterVersion: p.adapter.version,
-        configurationFingerprint: this.input.configurationFingerprint,
-        startedAt: this.input.clock.now(),
-        state: "RUNNING",
-        sessionIds: p.session ? [p.session.sessionId] : [],
-        subscriptions: [...p.subscriptions.values()]
-          .filter((s) => s.desired === "ACTIVE")
-          .map((s) => s.request),
-        count: 0,
-        bytes: 0,
-        evidence: { rejected: 0, duplicates: 0, late: 0, gaps: 0, overflow: 0 },
-        storageReference: `${captureId}/records.ndjson`,
-      }),
-    );
+    // Reserve before calling the synchronous port: it may reenter lifecycle methods.
+    p.captureCreating = captureId;
+    let result: RealtimeResult<void>;
+    try {
+      result = this.input.captureRepository.start(
+        immutable({
+          captureId,
+          source: p.adapter.source,
+          adapterId: p.adapter.adapterId,
+          adapterVersion: p.adapter.version,
+          configurationFingerprint: this.input.configurationFingerprint,
+          startedAt: this.input.clock.now(),
+          state: "RUNNING",
+          sessionIds: p.session ? [p.session.sessionId] : [],
+          subscriptions: [...p.subscriptions.values()]
+            .filter((s) => s.desired === "ACTIVE")
+            .map((s) => s.request),
+          count: 0,
+          bytes: 0,
+          evidence: { rejected: 0, duplicates: 0, late: 0, gaps: 0, overflow: 0 },
+          storageReference: `${captureId}/records.ndjson`,
+        }),
+      );
+    } catch {
+      result = failure(this.input.clock, "PERSISTENCE_FAILED", "capture creation");
+      if (!result.ok) this.retainCaptureFailure(p, captureId, result.error, "UNKNOWN");
+    } finally {
+      delete p.captureCreating;
+    }
+    if (!result.ok && this.stopping && !p.captureRecovery)
+      this.retainCaptureFailure(p, captureId, result.error, "UNKNOWN");
     if (result.ok && (!this.running || this.stopping || this.failed || !this.initialized)) {
-      const aborted = this.input.captureRepository.abort(captureId);
-      if (!aborted.ok) this.record(aborted.error);
+      const aborted = this.cleanupCapture(p, captureId);
+      if (!aborted.ok) return aborted;
       return failure(this.input.clock, "CAPTURE_FAILED", "capture lifecycle changed");
     }
     if (result.ok) {
@@ -1102,6 +1124,40 @@ export class RealtimeDataService {
       this.control(p, "CAPTURE", "RUNNING");
     }
     return result;
+  }
+  // A failed abort is an unresolved obligation, not an inactive/completed capture.
+  // One retained obligation per bounded provider; restart uses durable manifest discovery.
+  private cleanupCapture(p: ProviderState, captureId: string): RealtimeResult<void> {
+    let result: RealtimeResult<void>;
+    try {
+      result = this.input.captureRepository!.abort(captureId);
+    } catch {
+      result = failure(this.input.clock, "PERSISTENCE_FAILED", "capture cleanup");
+    }
+    if (!result.ok) this.retainCaptureFailure(p, captureId, result.error, "RUNNING");
+    return result;
+  }
+  private retainCaptureFailure(
+    p: ProviderState,
+    captureId: string,
+    error: RealtimeError,
+    lastKnownManifestState: "RUNNING" | "UNKNOWN",
+  ): void {
+    p.captureRecovery = immutable({
+      captureId,
+      lastKnownManifestState,
+      cleanupConfirmed: false,
+      recoveryRequired: true,
+      error,
+    });
+    this.failed = true;
+    this.bump("captureFailures");
+    this.record(error);
+    this.control(p, "CAPTURE", "RECOVERY_REQUIRED");
+  }
+  private captureCleanupFailure(): RealtimeError | undefined {
+    for (const p of this.providers.values()) if (p.captureRecovery) return p.captureRecovery.error;
+    return undefined;
   }
   public finishCapture(sourceId: string): RealtimeResult<MaterializationHandoff> {
     const p = this.providers.get(sourceId);
@@ -1157,6 +1213,7 @@ export class RealtimeDataService {
             : this.started
               ? "STOPPED"
               : "CREATED",
+      recoveryRequired: this.captureCleanupFailure() !== undefined,
       metrics: { ...this.metrics },
       errors: [...this.errors],
       gaps: [...this.gapHistory],
@@ -1180,6 +1237,8 @@ export class RealtimeDataService {
           identityCacheSize: s.seen.size,
         })),
         captureRunning: p.captureId !== undefined,
+        captureCreationPending: p.captureCreating,
+        captureRecovery: p.captureRecovery,
       })),
       consumers: [...this.consumers.values()].map((c) => ({
         consumerId: c.consumerId,
@@ -1195,6 +1254,7 @@ export class RealtimeDataService {
   public readiness(): boolean {
     return (
       this.running &&
+      !this.failed &&
       !this.stopping &&
       (this.input.requiredSources ?? []).every((id) => {
         const p = this.providers.get(id);
@@ -1213,7 +1273,10 @@ export class RealtimeDataService {
     );
   }
   public async stop(): Promise<RealtimeResult<void>> {
-    if (!this.running) return { ok: true, value: undefined };
+    if (!this.running) {
+      const unresolved = this.captureCleanupFailure();
+      return unresolved ? { ok: false, error: unresolved } : { ok: true, value: undefined };
+    }
     if (this.stopping) return failure(this.input.clock, "SHUTDOWN_IN_PROGRESS", "service");
     this.stopping = true;
     const failures: RealtimeError[] = [];
@@ -1225,7 +1288,7 @@ export class RealtimeDataService {
       this.bump("overflow", p.queue.clear());
       if (p.state !== "DISCONNECTED") this.transition(p, "DISCONNECTING");
       if (p.captureId) {
-        const result = this.input.captureRepository!.abort(p.captureId);
+        const result = this.cleanupCapture(p, p.captureId);
         if (!result.ok) failures.push(result.error);
         this.control(p, "CAPTURE", result.ok ? "ABORTED" : "FAILED");
         delete p.captureId;
@@ -1262,6 +1325,13 @@ export class RealtimeDataService {
     this.running = false;
     this.stopping = false;
     for (const error of failures) this.record(error);
-    return failures.length ? { ok: false, error: failures[0]! } : { ok: true, value: undefined };
+    // Synchronous creation compensation finishes before the first awaited stop continuation.
+    // Read shared obligations here so reentrant failures cannot escape the shutdown result.
+    const unresolved = this.captureCleanupFailure();
+    return unresolved
+      ? { ok: false, error: unresolved }
+      : failures.length
+        ? { ok: false, error: failures[0]! }
+        : { ok: true, value: undefined };
   }
 }
