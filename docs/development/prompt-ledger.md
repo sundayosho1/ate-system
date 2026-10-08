@@ -22,11 +22,102 @@ implementation and verification.
 | 15     | Data Quality Engine                                                   | Completed | `0.15.0-data-quality.1`          | 2026-09-25      | `npm run verify` | ADR-0061 through ADR-0066 | None       | Historical dataset quality assessment and immutable reports only; no catalogue, live ingestion, aggregation, replay, instrument registry, MOSE, strategy, risk or execution    |
 | 16     | Dataset Catalogue and Lineage                                         | Completed | `0.16.0-dataset-catalogue.1`     | 2026-09-25      | `npm run verify` | ADR-0067 through ADR-0072 | None       | Dataset identity, lineage and metadata governance only; no real-time ingestion, aggregation, replay, instrument registry, MOSE, strategy, risk, execution or trading           |
 
-| 17 | Real-Time Market Data Ingestion | Completed | `0.17.0-realtime-data.1` | 2026-10-08 |
-`npm run verify` | ADR-0073 through ADR-0078 | None | Deterministic adapter and bounded
-ingestion/capture only; no commercial provider, automatic dataset materialization, aggregation,
-replay, registry or trading. Independent acceptance pending. | | 18 | Multi-Timeframe Aggregation |
-NOT STARTED | None | None | Not run | None | None | Requires independent Prompt 17 acceptance and
-explicit authorization. |
+| Prompt | Title                           | Status                 | Version/Checkpoint       | Completion Date | Test Baseline                                                  | Important ADRs            | Migrations | Known Limitations                                                                                                                                                                                                                                                               |
+| ------ | ------------------------------- | ---------------------- | ------------------------ | --------------- | -------------------------------------------------------------- | ------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 17     | Real-Time Market Data Ingestion | CONDITIONALLY ACCEPTED | `0.17.0-realtime-data.1` | 2026-10-08      | `npm run verify`; 292 tests across 19 files at accepted commit | ADR-0073 through ADR-0078 | None       | Implementation completed; conditional acceptance covers the bounded offline research foundation only; F05/F06 qualification outstanding; T01 trusted repository/certificate compliance, single writer and trusted root mandatory. No production deployment or trading approval. |
+| 18     | Multi-Timeframe Aggregation     | NOT STARTED            | None                     | None            | Not run                                                        | None                      | None       | Accepted Prompt 17 baseline released; requires a separate explicitly authorized implementation assignment under the baseline and boundary rules below.                                                                                                                          |
 
 Future prompts remain unimplemented until explicitly received.
+
+## Prompt 17 external conditional acceptance — CODEX-002H
+
+The external acceptance decision supplied in CODEX-002H is recorded on 2026-10-08. This entry
+records that decision; implementation and re-audit delivery reports do not themselves grant
+acceptance. Implementation completion and external acceptance are separate facts: Prompt 17
+implementation is completed, while its acceptance is conditional.
+
+- Accepted source commit:
+  [`6632caed6558017690f98e6f3ee1e2cbb7435658`](https://github.com/sundayosho1/ate-system/commit/6632caed6558017690f98e6f3ee1e2cbb7435658).
+- Accepted source branch: `codex/prompt-17-creation-remediation`.
+- Accepted version: `0.17.0-realtime-data.1`.
+- Status: **CONDITIONALLY ACCEPTED**.
+- Accepted scope: **bounded offline research foundation** with deterministic scripted adapters and
+  bounded ingestion/capture. No commercial-provider qualification, automatic dataset
+  materialization, aggregation, replay, instrument registry, production deployment or trading
+  approval is conferred.
+- Acceptance evidence:
+  [CODEX-002G independent re-audit report](audits/CODEX-002G-prompt-17-re-audit.md), with its
+  original conditional recommendation and verification evidence preserved as a historical snapshot.
+  Its then-pending acceptance statements are historical; this external decision is the subsequent
+  governance record.
+
+### Mandatory finding closure
+
+| Finding | Accepted disposition | Scope                                                                              |
+| ------- | -------------------- | ---------------------------------------------------------------------------------- |
+| F01     | CLOSED               | Scheduled reconnect timeout and deterministic scheduler progress                   |
+| F02     | CLOSED               | Immediate freshness/readiness for stale, duplicate, future or invalid observations |
+| F03     | CLOSED               | Safe native-envelope rejection at the callback boundary                            |
+| F04-R1  | CLOSED               | Failed creation compensation and truthful parent/repeated shutdown                 |
+| F04-R2  | CLOSED               | Unknown creation commitment, retained recovery obligations and truthful shutdown   |
+| F07     | CLOSED               | Adapter registry-wrapper immutability                                              |
+
+Closures apply within the accepted bounded offline contract and do not remove the conditions below.
+
+### Mandatory conditions and operational limitations
+
+- **F05:** Windows execution, open-handle behavior and filesystem durability qualification remain
+  outstanding. No Windows production approval may be inferred.
+- **F06:** Synchronous production capture throughput, latency and power-loss durability
+  qualification remain outstanding. Passing bounded tests does not establish a production SLA or
+  durability claim.
+- **T01:** Capture repositories must be trusted implementations that comply with the certificate
+  contract. `NOT_CREATED` certifies no attempted storage mutation by that creation attempt; it does
+  not prove artifact nonexistence, ownership or independent filesystem verification. Untrusted or
+  falsely certifying implementations are outside acceptance.
+- One writer per managed capture root and trusted-root operation remain mandatory. Protect the root
+  against concurrent untrusted writers; incomplete/corrupt roots follow existing fail-closed
+  recovery.
+- This decision grants **no production deployment or trading approval**. Unsupported operational,
+  provider, aggregation or trading claims remain prohibited.
+
+### Historical audit and remediation references
+
+| Record                            | Source checkpoint                                                                                                                       | Historical outcome/reference                                                                                    |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Original Prompt 17 implementation | [`1a55f1dde294eee1f5a6a3d2cd3e681ed0a3f809`](https://github.com/sundayosho1/ate-system/commit/1a55f1dde294eee1f5a6a3d2cd3e681ed0a3f809) | `ATE-PROMPT-17-DELIVERY-REPORT.md`; original ingestion/capture foundation                                       |
+| CODEX-002A                        | `1a55f1dde294eee1f5a6a3d2cd3e681ed0a3f809`                                                                                              | `ATE-CODEX-002A-PROMPT-17-AUDIT-REPORT.md`; mandatory remediation findings                                      |
+| CODEX-002B                        | [`eb1a593a85570fd9615b410b4210b77fdd59c61a`](https://github.com/sundayosho1/ate-system/commit/eb1a593a85570fd9615b410b4210b77fdd59c61a) | `ATE-CODEX-002B-PROMPT-17-REMEDIATION-REPORT.md`; first remediation checkpoint                                  |
+| CODEX-002C                        | `eb1a593a85570fd9615b410b4210b77fdd59c61a`                                                                                              | `ATE-CODEX-002C-PROMPT-17-REAUDIT-REPORT.md`; F04-R1 remained open                                              |
+| CODEX-002D                        | [`f09b068e6642e0094f6c19fafe836d8370287cb1`](https://github.com/sundayosho1/ate-system/commit/f09b068e6642e0094f6c19fafe836d8370287cb1) | `ATE-CODEX-002D-F04-R1-REMEDIATION-REPORT.md`; capture compensation remediation                                 |
+| CODEX-002E                        | `f09b068e6642e0094f6c19fafe836d8370287cb1`                                                                                              | `ATE-CODEX-002E-PROMPT-17-FINAL-REAUDIT-REPORT.md`; F04-R1 corrected, F04-R2 identified                         |
+| CODEX-002F                        | `6632caed6558017690f98e6f3ee1e2cbb7435658`                                                                                              | `ATE-CODEX-002F-F04-R2-REMEDIATION-DELIVERY-REPORT.md`; creation outcome remediation                            |
+| CODEX-002G                        | `6632caed6558017690f98e6f3ee1e2cbb7435658`                                                                                              | [Archived independent re-audit](audits/CODEX-002G-prompt-17-re-audit.md); conditional acceptance recommendation |
+| CODEX-002H                        | Accepted source above; governance successor identified by this record's commit                                                          | External conditional acceptance recorded; Prompt 18 baseline released, implementation not started               |
+
+Earlier named delivery/audit artifacts remain historical external reports; the commit links identify
+immutable source checkpoints. CODEX-002G is additionally archived here for durable acceptance
+evidence. Dependency security remediation
+[`4311e58eed5bbcba3d8967570bd4775ac2ec1da3`](https://github.com/sundayosho1/ate-system/commit/4311e58eed5bbcba3d8967570bd4775ac2ec1da3)
+remains in accepted ancestry and must be preserved.
+
+## Prompt 18 authoritative development baseline
+
+Prompt 18 may proceed only from accepted source commit `6632caed6558017690f98e6f3ee1e2cbb7435658` or
+a **verified direct successor** whose only changes are this CODEX-002H governance update. The
+successor's Git commit identifies the released baseline; verify its parent against the accepted SHA
+and verify that Prompt 17 source, tests, dependencies, version and capability manifest are
+unchanged. The README-only `main` is not the application baseline.
+
+Prompt 18 remains **NOT STARTED** and requires a separate implementation assignment. Its
+specification must preserve:
+
+- Prompt 6 clock, scheduler and deterministic time authority.
+- Prompt 13 canonical market-data authority and contract validation.
+- Prompt 14–16 historical dataset, quality assessment, catalogue and lineage boundaries.
+- Prompt 17 ingestion, capture, recovery, source isolation and certificate contracts.
+- Deterministic aggregation and point-in-time correctness, with **no look-ahead**.
+- All conditional acceptance restrictions, with no unsupported production or trading claims.
+
+This baseline release does not implement aggregation, change application capability availability,
+change the application version or authorize Prompt 19.
