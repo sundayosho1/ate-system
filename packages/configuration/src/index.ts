@@ -43,3 +43,5 @@ export * from "./version-service.js";
 export * from "./version-types.js";
 
 export * from "./realtime-definitions.js";
+
+export * from "./multitimeframe-definitions.js";

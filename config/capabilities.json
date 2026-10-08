@@ -1,11 +1,11 @@
 {
   "$schema": "./capabilities.schema.json",
-  "project": "ATE \u2014 Autonomous Trading Engine",
+  "project": "ATE — Autonomous Trading Engine",
   "manifest_version": 1,
   "updated_at": "2026-10-08",
-  "development_phase": "Phase III \u2014 Universal Data Platform",
-  "completed_prompt": 17,
-  "pre_production_version": "0.17.0-realtime-data.1",
+  "development_phase": "Phase III — Universal Data Platform",
+  "completed_prompt": 18,
+  "pre_production_version": "0.18.0-multitimeframe.1",
   "capabilities": {
     "repository_foundation": true,
     "engineering_constitution": true,
@@ -287,7 +287,14 @@
     "commercial_market_data_provider_configured": false,
     "market_data_provider_currently_connected": false,
     "market_data_stream_currently_healthy": false,
-    "capture_dataset_materialization": false
+    "capture_dataset_materialization": false,
+    "multitimeframe_aggregation": true,
+    "deterministic_aggregation_windows": true,
+    "aggregation_calendar_policy_foundation": true,
+    "immutable_aggregate_revisions": true,
+    "bitemporal_aggregate_snapshots": true,
+    "aggregation_checkpoint_recovery": true,
+    "aggregation_quality_propagation": true
   },
-  "truth_statement": "Prompts 1-17 establish the existing domain, runtime, event, persistence, time, configuration governance, market-data contracts, historical data, quality and catalogue foundations plus provider-neutral bounded real-time ingestion and capture. A deterministic scripted adapter is implemented; no commercial provider is configured. Connection, stream health and capture status are runtime observations, not build guarantees. Capture requires separate historical materialization, authoritative quality assessment and catalogue registration. ATE cannot trade, connect to MT5, submit orders, execute strategies, calculate risk, allocate accounts, aggregate bars, run market-data replay, use a universal instrument registry or perform paper/live trading. Data availability and capture completion never authorize research or trading."
+  "truth_statement": "Prompts 1–18 implement bounded offline research foundations, including deterministic multi-timeframe aggregation with explicit calendar policies, immutable revisions, quality pointers and point-in-time snapshots. Prompt 17 remains conditionally accepted; Prompt 18 implementation awaits independent acceptance. No universal instrument/calendar intelligence, replay engine, automatic dataset registration, research qualification, production qualification, broker connectivity or trading is authorized. Windows, production throughput and power-loss durability remain unqualified; trusted repository, single-writer and trusted-root restrictions remain mandatory. ATE cannot trade, connect to MT5, submit orders or perform paper/live trading."
 }

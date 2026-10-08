@@ -1,8 +1,8 @@
 {
   "name": "ate-system",
-  "version": "0.17.0-realtime-data.1",
+  "version": "0.18.0-multitimeframe.1",
   "private": true,
-  "description": "ATE foundations through provider-neutral real-time data ingestion and bounded capture.",
+  "description": "ATE offline research foundations through deterministic multi-timeframe aggregation.",
   "license": "UNLICENSED",
   "type": "module",
   "engines": {

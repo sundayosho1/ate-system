@@ -1470,3 +1470,30 @@ Successful reconnect never silently restores continuity.
 ### DATA-176
 
 Capture completion never automatically grants research eligibility.
+
+## Prompt 18 — bounded multi-timeframe aggregation
+
+- **DATA-177**: Reuse canonical market-data contracts.
+- **DATA-178**: Clock authority remains Prompt 6.
+- **DATA-179**: Half-open window ownership is unique.
+- **DATA-180**: Calendar and anchors are versioned and fingerprinted.
+- **DATA-181**: Source/instrument/channel/basis identities cannot mix.
+- **DATA-182**: Decimal arithmetic never converts prices to floats.
+- **DATA-183**: Volume units and unknown availability remain explicit.
+- **DATA-184**: Direct and hierarchical construction do not overlap.
+- **DATA-185**: Empty windows cannot fabricate prices.
+- **DATA-186**: Max event time cannot establish watermark.
+- **DATA-187**: Reconnection and startup fence continuity.
+- **DATA-188**: Finality, coverage and quality remain independent.
+- **DATA-189**: Late corrections append immutable parented revisions.
+- **DATA-190**: Propagation affects actual dependents only.
+- **DATA-191**: Snapshot cutoff uses actual publication knowledge.
+- **DATA-192**: Historical unknown availability cannot become verified point-in-time.
+- **DATA-193**: Recovery cannot backdate publication.
+- **DATA-194**: Commit uncertainty retains operation obligations.
+- **DATA-195**: Repeated stop cannot conceal failed commitment.
+- **DATA-196**: Lineage and revision history never silently truncate.
+- **DATA-197**: Bounded notifications expose overflow and permit history reconciliation.
+- **DATA-198**: Quality qualification stays with existing authorities.
+- **DATA-199**: No research or trading approval is inferred.
+- **DATA-200**: Material configuration changes require governed restart.

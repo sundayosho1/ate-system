@@ -8,13 +8,14 @@ ATE is **not** currently a trading bot, MetaTrader Expert Advisor, or live execu
 ## Current development status
 
 - Phase: III — Universal Data Platform
-- Prompt: 17 of 84
+- Prompt: 18 of 84 — implementation pending independent acceptance
 - Status: foundation, domain contracts, runtime lifecycle, internal event architecture,
   persistence/state authority, temporal integrity, hierarchical configuration, and configuration
   schema validation, immutable configuration version-history, feature-flag/capability-control, and
   maker-checker approval governance, controlled configuration promotion/rollback foundation,
   universal market-data contract authority, historical data laboratory foundations, data quality
-  engine foundations, and dataset catalogue/lineage and real-time ingestion foundations
+  engine foundations, and dataset catalogue/lineage and real-time ingestion and bounded
+  multi-timeframe aggregation foundations
 - Market-data ingestion: **implemented through provider-neutral ports and a scripted adapter**
 - Commercial provider configured: **no**
 - Capture dataset materialization: **not implemented**
@@ -42,7 +43,7 @@ ATE must always be able to return `NO_ACTION` when conditions do not justify cap
 
 ## Currently implemented functionality
 
-Prompts 1-17 implement only:
+Prompts 1–18 implement only:
 
 - repository foundation and documentation hierarchy;
 - engineering constitution and safety invariants;
@@ -98,15 +99,17 @@ Prompts 1-17 implement only:
 - real-time ingestion with session/subscription fencing, governed configuration, bounded raw and
   consumer queues, canonical validation, temporal/sequence/dedup evidence, virtual-time heartbeat
   and reconnect scheduling, capture integrity/recovery, and explicit quality/catalogue handoff;
+- bounded deterministic aggregation, explicit calendars, immutable corrections and point-in-time
+  snapshots;
 - architecture decision records;
 - development, testing, security, configuration, help, and contribution standards;
 - capability manifest and prompt ledger;
 - minimal npm/TypeScript quality tooling and foundation tests.
 
-No source module currently performs trading, commercial-provider connectivity, replay, aggregation,
-strategy evaluation, risk calculation, portfolio management, account allocation, broker order
-submission, or MT5 execution. Data-quality reports and catalogue active/eligible status are
-diagnostics/governance metadata only and do not authorize trading.
+No source module currently performs trading, commercial-provider connectivity, replay, strategy
+evaluation, risk calculation, portfolio management, account allocation, broker order submission, or
+MT5 execution. Data-quality reports and catalogue active/eligible status are diagnostics/governance
+metadata only and do not authorize trading.
 
 ## Repository structure
 
@@ -224,3 +227,10 @@ See [`docs/development/contribution-workflow.md`](docs/development/contribution-
 The production target must remain compatible with Windows VPS operation because MetaTrader 5
 terminals are expected to run there initially. The local path `C:\wamp64\www\ate-system` is a
 development clone location, not an application runtime dependency.
+
+## Multi-timeframe research aggregation
+
+See the [operating guide](docs/help/multi-timeframe-aggregation.md) for explicit calendars,
+watermark evidence, immutable corrections, point-in-time snapshots and recovery. Prompt 17 remains
+conditionally accepted; Prompt 18 requires independent acceptance. No production or trading approval
+is conferred. Windows and production throughput/power-loss durability remain unqualified.
