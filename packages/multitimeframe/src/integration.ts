@@ -8,7 +8,7 @@ import type { DataQualityReport } from "@ate/data-quality";
 import { z } from "zod";
 import type { EventFactory, InternalEventBus, EventTypeRegistration } from "@ate/events";
 import type { AggregationEngine } from "./engine.js";
-import { failure, type Result } from "./primitives.js";
+import { failure, hash, type Result } from "./primitives.js";
 import type { Input, QualityEvidence } from "./types.js";
 export const qualityEvidence = (report: DataQualityReport): QualityEvidence => ({
   reportId: report.reportId,
@@ -43,6 +43,7 @@ export const realtimeInput = (
     : {}),
   warnings: accepted.warnings,
 });
+const seenChannels = new WeakMap<AggregationEngine, WeakSet<ConsumerChannel>>();
 export async function consumeRealtime(
   engine: AggregationEngine,
   consumer: ConsumerChannel,
@@ -52,14 +53,42 @@ export async function consumeRealtime(
   limit: number,
 ): Promise<Result<number>> {
   if (!Number.isSafeInteger(limit) || limit < 1 || limit > 1000) throw Error("CONSUMER_LIMIT");
+  const seen = seenChannels.get(engine) ?? new WeakSet<ConsumerChannel>();
+  seenChannels.set(engine, seen);
+  const observeLoss = () => {
+    const discarded = consumer.queue.enqueued - consumer.queue.dequeued - consumer.queue.depth;
+    // Healthy reads need no extra checkpoint clone; all loss/closure paths still
+    // go through the durable authority before consuming retained observations.
+    if (consumer.queue.rejected === 0 && !consumer.degraded && !consumer.closed && discarded === 0)
+      return { ok: true as const, value: undefined };
+    const result = engine.observeConsumerLoss({
+      contextFingerprint: hash({ sourceFingerprint, artifactId }),
+      newChannel: !seen.has(consumer),
+      consumerId: consumer.consumerId,
+      rejected: consumer.queue.rejected,
+      degraded: consumer.degraded,
+      closed: consumer.closed,
+      // Prompt 17 does not expose loss scope/time. Closed-channel clearing can
+      // discard queued accepted observations without incrementing rejection count.
+      discarded,
+    });
+    if (result.ok) seen.add(consumer);
+    return result;
+  };
   let count = 0;
   for (let i = 0; i < limit; i++) {
+    const before = observeLoss();
+    if (!before.ok) return before;
     const accepted = await consumer.read();
+    const after = observeLoss();
+    if (!after.ok) return after;
     if (!accepted) break;
     const r = engine.ingest(streamId, realtimeInput(accepted, sourceFingerprint, artifactId));
     if (!r.ok) return r;
     count++;
   }
+  const last = observeLoss();
+  if (!last.ok) return last;
   return { ok: true, value: count };
 }
 export async function consumeHistorical(

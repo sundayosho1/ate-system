@@ -1497,3 +1497,21 @@ Capture completion never automatically grants research eligibility.
 - **DATA-198**: Quality qualification stays with existing authorities.
 - **DATA-199**: No research or trading approval is inferred.
 - **DATA-200**: Material configuration changes require governed restart.
+
+## Prompt 18 CODEX-003B remediation invariants
+
+- Equivalent eligible input permutations cannot change OHLC/content/lineage solely through arrival
+  order. Constructed tie-breaks preserve ordering uncertainty and existing source-integrity
+  warnings.
+- Canonical aggregate handoff preserves adverse quality, report references and suppression
+  membership; missing/corrupt evidence is a structured rejection, never silent unassessment or zero
+  suppression.
+- A filesystem operation slot reserves content, publication and temporary paths consistently across
+  admission/recovery. Capacity rejection cannot certify a write already attempted or erase evidence.
+- Finalized history retains its correction anchor across invalidation, propagation, reconciliation
+  and recovery. Initial construction of an old window is not an expired correction.
+- Known channel loss cannot support new complete finality for potentially affected streams. Loss
+  observation/persistence failure makes readiness fail closed; draining cannot remove a source
+  fence.
+- Snapshot successor warnings are diagnostics, not permission to mix incompatible lineage or expose
+  future knowledge. Registry membership is current context, not a bitemporal authority.

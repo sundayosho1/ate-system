@@ -1,6 +1,7 @@
 import type { MarketObservation, UtcTimestamp } from "@ate/domain";
 import type { Timeframe } from "./calendar.js";
 import type { DataQualityFinding } from "@ate/data-quality";
+import type { InheritedQuality } from "./quality-handoff.js";
 export type Basis = "LAST_TRADE" | "BID" | "ASK" | "MIDPOINT";
 export type EvidenceClass = "VERIFIED_POINT_IN_TIME" | "EVENT_TIME_RECONSTRUCTION";
 export type QualityEvidence = Readonly<{
@@ -66,6 +67,8 @@ export type Contribution = Readonly<{
   artifactId: string;
   quality: readonly string[];
   suppressed: number;
+  suppressionEvidence?: Readonly<Record<string, number>>;
+  inheritedQuality?: Readonly<{ fingerprint: string; manifest: InheritedQuality }>;
   final: boolean;
   complete: boolean;
   start: UtcTimestamp;
@@ -110,6 +113,7 @@ export type Revision = Readonly<{
   constituents: readonly Contribution[];
   quality: readonly string[];
   suppressedEvidence: number;
+  suppressionEvidence?: Readonly<Record<string, number>>;
   contentFingerprint: string;
   lineageFingerprint: string;
   researchQualified: false;
@@ -141,6 +145,21 @@ export type Checkpoint = {
   windows: WindowState[];
   revisions: Revision[];
   publishedOperationIds: string[];
+  consumerLosses?: Record<
+    string,
+    Readonly<{
+      consumerId: string;
+      rejected: number;
+      observations: number;
+      contextFingerprint: string;
+      degraded: boolean;
+      discarded: number;
+      closed: boolean;
+      observedAt: UtcTimestamp;
+      scope: "UNKNOWN_CHANNEL_SCOPE";
+      affectedStreams: readonly string[];
+    }>
+  >;
   fingerprint: string;
 };
 export type SnapshotRequest = Readonly<{
@@ -169,6 +188,7 @@ export type Snapshot = Readonly<{
   missing: Readonly<Record<string, string>>;
   staleness: Readonly<Record<string, number>>;
   consistency: "CONSISTENT" | "INCOMPLETE";
+  warnings?: Readonly<Record<string, string>>;
   configurationFingerprint: string;
   policyFingerprint: string;
   contentFingerprint: string;

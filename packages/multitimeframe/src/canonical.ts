@@ -1,5 +1,6 @@
 import { barObservationSchema, schemas } from "@ate/domain";
 import { freeze, hash } from "./primitives.js";
+import { qualityHandoff } from "./quality-handoff.js";
 import type { Revision } from "./types.js";
 export const canonicalRevisionId = (hash: string) =>
   schemas.observationId.parse(
@@ -71,6 +72,7 @@ export function canonicalBar(revision: Revision) {
         "aggregation.configuration": revision.configurationFingerprint,
         "aggregation.qualityfingerprint": hash(revision.quality),
         "aggregation.evidencecount": String(revision.quality.length),
+        ...qualityHandoff(revision),
       },
     }),
   );

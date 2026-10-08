@@ -128,3 +128,20 @@ Dedicated development branch: `codex/prompt-18-multitimeframe`. Source baseline:
 `a2212cbbac82ba691d2d673536646236c482c650`. Implementation completion does not constitute
 independent acceptance. All Prompt 17 conditions remain mandatory. Prompt 19: NOT STARTED; separate
 specification and authorization required.
+
+## Prompt 18 mandatory remediation — CODEX-003B
+
+Dedicated successor branch: `codex/prompt-18-remediation`, from audited commit
+`58050965dfbe7e90d530e74d822fd6cd0fff854d` (parent `a2212cbbac82ba691d2d673536646236c482c650`).
+CODEX-003A found five HIGH defects; its failed audit remains historical evidence and is not
+superseded by implementation claims.
+
+CODEX-003B implements permanent corrections for A18-H01 ordering, A18-H02 inherited quality, A18-H03
+filesystem capacity, A18-H04 correction horizons and A18-H05 upstream consumer loss. M01/M02 policy
+qualifications and L01 early volume validation are documented and tested. Application version
+remains `0.18.0-multitimeframe.1`. Independent re-audit is required; Prompt 18 remains
+**IMPLEMENTATION COMPLETE — INDEPENDENT ACCEPTANCE PENDING**, not accepted. Prompt 17 acceptance,
+findings closures, F05/F06/T01, trusted-root/single-writer and research-only restrictions remain
+unchanged. Prompt 19 remains **NOT STARTED / BLOCKED** pending acceptance and a separate explicit
+implementation authorization. The immutable commit containing this entry identifies the remediation
+checkpoint; exact verification/publication evidence accompanies CODEX-003B.

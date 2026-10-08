@@ -118,6 +118,24 @@ export class FilesystemAggregationRepository implements AggregationRepository {
     }
     renameSync(temp, path);
   }
+  private inventory(): string[] {
+    const entries = readdirSync(this.root);
+    // Capacity unit is one immutable operation ID, reserving its content, marker
+    // and both temporary paths. Marker creation never consumes another slot.
+    const ids = new Set<string>(),
+      names = new Set(entries);
+    for (const name of entries) {
+      if (!/^[a-f0-9]{64}\.(json|visible)(\.tmp)?$/u.test(name)) throw Error("UNKNOWN_ARTIFACT");
+      const id = name.slice(0, 64);
+      const path = this.file(id, name.slice(64));
+      if (statSync(path).size > (name.includes(".visible") ? 1024 : this.maxBytes))
+        throw Error("ARTIFACT_BOUNDS");
+      ids.add(id);
+      if (!names.has(id + ".json")) throw Error("UNCOMMITTED_CONTENT");
+    }
+    if (ids.size > this.maxOperations) throw Error("REPOSITORY_CAPACITY");
+    return [...ids];
+  }
   private read(id: string): {
     operationId: string;
     checkpoint: Checkpoint;
@@ -145,6 +163,7 @@ export class FilesystemAggregationRepository implements AggregationRepository {
     let attempted = false;
     try {
       const p = this.file(id, ".json");
+      const operations = this.inventory();
       if (existsSync(p)) {
         const prior = this.read(id);
         if (
@@ -154,8 +173,14 @@ export class FilesystemAggregationRepository implements AggregationRepository {
           throw Error("OPERATION_CONFLICT");
         return ok({ committedAt: prior.committedAt });
       }
-      if (readdirSync(this.root).length >= this.maxOperations * 3)
-        throw Error("REPOSITORY_CAPACITY");
+      if (operations.length >= this.maxOperations) throw Error("REPOSITORY_CAPACITY");
+      const { fingerprint: stateFingerprint, ...stateBody } = checkpoint;
+      if (
+        hash(stateBody) !== stateFingerprint ||
+        checkpoint.generation !== operations.length + 1 ||
+        id !== hash({ generation: checkpoint.generation, fingerprint: stateFingerprint })
+      )
+        throw Error("OPERATION_IDENTITY");
       const body = { operationId: id, checkpoint, newRevisionIds, committedAt: this.clock.now() };
       const content = JSON.stringify({ ...body, fingerprint: hash(body) });
       if (Buffer.byteLength(content) > this.maxBytes) throw Error("CHECKPOINT_BOUNDS");
@@ -169,6 +194,7 @@ export class FilesystemAggregationRepository implements AggregationRepository {
   }
   public publish(id: string): Result<{ publishedAt: UtcTimestamp }> {
     try {
+      this.inventory();
       const committed = this.read(id),
         p = this.file(id, ".visible");
       if (existsSync(p)) {
@@ -191,13 +217,7 @@ export class FilesystemAggregationRepository implements AggregationRepository {
   ): Result<Stored | null> {
     try {
       const entries = readdirSync(this.root);
-      if (entries.length > this.maxOperations * 3) throw Error("REPOSITORY_CAPACITY");
-      // A temp artifact without a committed record is uncertain evidence, not something to erase.
-      for (const name of entries) {
-        if (!/^[a-f0-9]{64}\.(json|visible)(\.tmp)?$/u.test(name)) throw Error("UNKNOWN_ARTIFACT");
-        if (name.endsWith(".json.tmp") && !entries.includes(name.slice(0, -4)))
-          throw Error("UNCOMMITTED_CONTENT");
-      }
+      this.inventory();
       const records: Stored[] = [];
       const raw = entries
         .filter((n) => n.endsWith(".json"))

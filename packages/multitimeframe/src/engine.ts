@@ -33,6 +33,7 @@ import type {
   Stream,
   WindowState,
 } from "./types.js";
+import { inheritedQuality, validateQualityReference } from "./quality-handoff.js";
 const D = Decimal.clone({ precision: 128, rounding: Decimal.ROUND_HALF_UP });
 const decimal = (s: string): string => {
   schemas.decimal.parse(s);
@@ -240,6 +241,26 @@ export class AggregationEngine {
     if (hash(body) !== fingerprint || !Number.isSafeInteger(c.generation) || c.generation < 1)
       throw Error("CHECKPOINT_INTEGRITY");
     this.bounds(c);
+    for (const [key, loss] of Object.entries(c.consumerLosses ?? {})) {
+      if (
+        key !==
+          hash({ consumerId: loss.consumerId, contextFingerprint: loss.contextFingerprint }) ||
+        !Number.isSafeInteger(loss.rejected) ||
+        loss.rejected < 0 ||
+        !Number.isSafeInteger(loss.discarded) ||
+        loss.discarded < 0 ||
+        !Number.isSafeInteger(loss.observations) ||
+        loss.observations < 1 ||
+        typeof loss.degraded !== "boolean" ||
+        typeof loss.closed !== "boolean" ||
+        loss.scope !== "UNKNOWN_CHANNEL_SCOPE" ||
+        loss.affectedStreams.length > this.options.maxStreams ||
+        new Set(loss.affectedStreams).size !== loss.affectedStreams.length ||
+        loss.affectedStreams.some((id) => !c.streams[id]) ||
+        instant(loss.observedAt) > this.input.clock.now()
+      )
+        throw Error("CONSUMER_LOSS_INTEGRITY");
+    }
     const byId = new Map(c.revisions.map((r) => [r.revisionId, r]));
     if (byId.size !== c.revisions.length) throw Error("REVISION_DUPLICATE");
     for (const [key, s] of Object.entries(c.streams))
@@ -250,6 +271,13 @@ export class AggregationEngine {
         hash(w.window)
       )
         throw Error("WINDOW_CONTEXT");
+      for (const x of w.contributions) {
+        if (x.inheritedQuality) validateQualityReference(x.inheritedQuality);
+        else if (
+          x.provenance?.transformation?.transformationId === "@ate/multitimeframe/aggregation-v1"
+        )
+          throw Error("INHERITED_QUALITY_INTEGRITY");
+      }
       if (
         !c.streams[w.streamId] ||
         w.contributions.length > this.options.maxContributions ||
@@ -258,6 +286,13 @@ export class AggregationEngine {
         throw Error("WINDOW_INTEGRITY");
     }
     for (const r of c.revisions) {
+      for (const x of r.constituents) {
+        if (x.inheritedQuality) validateQualityReference(x.inheritedQuality);
+        else if (
+          x.provenance?.transformation?.transformationId === "@ate/multitimeframe/aggregation-v1"
+        )
+          throw Error("INHERITED_QUALITY_INTEGRITY");
+      }
       if (
         hash(r.stream) !== r.streamId ||
         r.timeframeDefinition.fingerprint !== r.window.timeframeFingerprint ||
@@ -311,6 +346,7 @@ export class AggregationEngine {
       Object.keys(c.streams).length > this.options.maxStreams ||
       new Set(Object.values(c.streams).map((s) => s.instrumentId)).size >
         this.options.maxInstruments ||
+      Object.keys(c.consumerLosses ?? {}).length > this.options.maxEvidence ||
       c.windows.length > this.options.maxWindows ||
       c.revisions.length > this.options.maxRevisions ||
       c.windows.some((w) => w.contributions.length > this.options.maxContributions)
@@ -363,6 +399,7 @@ export class AggregationEngine {
       if (!committed.ok) {
         if (!("commitment" in committed && committed.commitment === "CONFIRMED_NOT_COMMITTED"))
           this.retain(operationId, "UNKNOWN_COMMITMENT", committed.error.code);
+        else this.error(committed.error.code);
         this.bump("checkpointFailures");
         return committed;
       }
@@ -511,7 +548,10 @@ export class AggregationEngine {
   private contribution(stream: Stream, raw: Input): Contribution {
     const safe = evidenceSchema.parse(safeClone(raw)),
       o = marketObservationSchema.parse(safe.observation),
-      now = this.input.clock.now();
+      now = this.input.clock.now(),
+      inherited = inheritedQuality(o);
+    if (inherited && inherited.sourceFingerprint !== stream.sourceFingerprint)
+      throw Error("INHERITED_QUALITY_INTEGRITY");
     if (
       o.source.sourceId !== stream.sourceId ||
       o.instrumentId !== stream.instrumentId ||
@@ -541,6 +581,7 @@ export class AggregationEngine {
       low = o.low.value;
       close = o.close.value;
       const v = o.volumes.find((v) => v.volumeType === stream.volumeType);
+      if (stream.volumeType !== "NOT_AVAILABLE" && !v?.quantity) throw Error("VOLUME_MISSING");
       if (v?.quantity) {
         volume = v.quantity.value;
         volumeUnit = v.quantity.unit;
@@ -598,6 +639,10 @@ export class AggregationEngine {
     if (volumeUnit !== stream.volumeUnit) throw Error("VOLUME_UNIT");
     if (volume !== undefined && new D(decimal(volume)).lt(0)) throw Error("VOLUME_NEGATIVE");
     const quality = [
+      ...(inherited?.quality ?? []),
+      ...(safe.quality
+        ? [`QUALITY_REPORT:${safe.quality.reportId}:${safe.quality.reportFingerprint}`]
+        : []),
       ...o.qualityAnnotations,
       ...safe.warnings,
       ...(safe.quality?.findings.map(
@@ -605,12 +650,27 @@ export class AggregationEngine {
           `${safe.quality!.reportId}:${safe.quality!.reportFingerprint}:${f.findingId}:${f.category}:${f.severity}`,
       ) ?? []),
     ];
-    if (!safe.quality) quality.push("QUALITY_UNASSESSED");
+    if (!safe.quality && !inherited) quality.push("QUALITY_UNASSESSED");
     if (
       safe.availability === "UNKNOWN" ||
       (safe.origin === "HISTORICAL" && !safe.sourcePublishedAt)
     )
       quality.push("UNVERIFIED_AVAILABILITY");
+    const suppressionEvidence = { ...inherited?.suppressionEvidence };
+    if (safe.quality) {
+      const key = hash({
+        reportId: safe.quality.reportId,
+        reportFingerprint: safe.quality.reportFingerprint,
+      });
+      if (
+        suppressionEvidence[key] !== undefined &&
+        suppressionEvidence[key] !== safe.quality.suppressed
+      )
+        throw Error("SUPPRESSION_CONFLICT");
+      suppressionEvidence[key] = safe.quality.suppressed;
+    }
+    const suppressed = Object.values(suppressionEvidence).reduce((sum, count) => sum + count, 0);
+    if (!Number.isSafeInteger(suppressed)) throw Error("SUPPRESSION_BOUNDS");
     return freeze({
       key: safe.identity,
       identity: safe.identity,
@@ -623,7 +683,10 @@ export class AggregationEngine {
       processedAt: now,
       availableAt: now,
       availability:
-        safe.origin === "HISTORICAL" && !safe.sourcePublishedAt ? "UNKNOWN" : safe.availability,
+        inherited?.availability === "UNKNOWN" ||
+        (safe.origin === "HISTORICAL" && !safe.sourcePublishedAt)
+          ? "UNKNOWN"
+          : safe.availability,
       ...(safe.sourcePublishedAt ? { sourcePublishedAt: safe.sourcePublishedAt } : {}),
       ...(safe.orderingSequence ? { sequence: safe.orderingSequence } : {}),
       open: decimal(open),
@@ -635,8 +698,12 @@ export class AggregationEngine {
       volumeType: stream.volumeType,
       sourceFingerprint: safe.sourceFingerprint,
       artifactId: safe.artifactId,
-      quality,
-      suppressed: safe.quality?.suppressed ?? 0,
+      quality: [...new Set(quality)].sort(),
+      suppressed,
+      ...(Object.keys(suppressionEvidence).length ? { suppressionEvidence } : {}),
+      ...(inherited
+        ? { inheritedQuality: { fingerprint: hash(inherited), manifest: inherited } }
+        : {}),
       final: o.observationKind === "BAR",
       complete:
         o.observationKind === "BAR" && o.metadata["aggregation.coverage"] === "COMPLETE_COVERAGE",
@@ -700,6 +767,34 @@ export class AggregationEngine {
         if (duplicate) {
           if (duplicate.contentFingerprint !== x.contentFingerprint)
             throw Error("IDENTITY_CONFLICT");
+          // Canonical duplicates with different transport aliases are equivalent
+          // only when their material evidence agrees. Choose a stable alias owner,
+          // retaining the original knowledge time, rather than first arrival.
+          const evidence = (v: Contribution) => ({
+            sequence: v.sequence,
+            artifactId: v.artifactId,
+            availability: v.availability,
+            sourcePublishedAt: v.sourcePublishedAt,
+            quality: v.quality,
+            suppressed: v.suppressed,
+            suppressionEvidence: v.suppressionEvidence,
+          });
+          if (hash(evidence(duplicate)) !== hash(evidence(x)))
+            throw Error("DUPLICATE_EVIDENCE_CONFLICT");
+          if (x.key < duplicate.key) {
+            this.correctionEligibility(c, w);
+            const i = w.contributions.indexOf(duplicate);
+            w.contributions[i] = freeze({
+              ...x,
+              processedAt: duplicate.processedAt,
+              availableAt: duplicate.availableAt,
+            });
+            if (this.finalized(c, w.barId)) {
+              this.revise(c, w, wm.status === "CONTINUOUS", "CORRECTION");
+              this.propagate(c, w.barId, new Set());
+              this.bump("corrections");
+            }
+          }
           this.bump("duplicates");
           continue;
         }
@@ -723,16 +818,11 @@ export class AggregationEngine {
             throw Error("INPUT_OVERLAP");
         }
         const latest = this.latest(c, w.barId);
-        if (
-          latest?.final &&
-          Date.parse(this.input.clock.now()) - Date.parse(w.window.end) >
-            this.options.correctionHorizonMs
-        )
-          throw Error("CORRECTION_HORIZON");
+        this.correctionEligibility(c, w);
         w.contributions.push(x);
         if (w.contributions.length > this.options.maxContributions)
           throw Error("CONTRIBUTION_LIMIT");
-        if (latest?.final) {
+        if (latest && this.finalized(c, w.barId)) {
           this.revise(c, w, wm.status === "CONTINUOUS", "CORRECTION");
           this.propagate(c, w.barId, new Set());
           this.bump("corrections");
@@ -740,8 +830,18 @@ export class AggregationEngine {
       }
     });
     if (result.ok) this.bump("accepted");
-    if (!result.ok && this.state === "READY" && !this.recovery && this.checkpoint.streams[streamId])
-      this.fence(streamId, "REJECTED_INPUT");
+    if (
+      !result.ok &&
+      this.state === "READY" &&
+      !this.recovery &&
+      this.checkpoint.streams[streamId]
+    ) {
+      const fenced = this.fence(streamId, "REJECTED_INPUT");
+      if (!fenced.ok && this.state === "READY") {
+        this.state = "FAILED";
+        this.error("CONTINUITY_PERSISTENCE_FAILED");
+      }
+    }
     return result;
   }
   public fence(streamId: string, reason: string): Result<void> {
@@ -753,6 +853,73 @@ export class AggregationEngine {
       this.error(reason);
       this.bump("gaps");
     });
+  }
+  public observeConsumerLoss(
+    evidence: Readonly<{
+      consumerId: string;
+      rejected: number;
+      degraded: boolean;
+      discarded: number;
+      closed: boolean;
+      contextFingerprint: string;
+      newChannel: boolean;
+    }>,
+  ): Result<void> {
+    const result = this.transact((c) => {
+      const loss = z
+        .object({
+          consumerId: idSchema,
+          contextFingerprint: z.string().regex(/^[a-f0-9]{64}$/u),
+          newChannel: z.boolean(),
+          rejected: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER),
+          degraded: z.boolean(),
+          closed: z.boolean(),
+          discarded: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER),
+        })
+        .strict()
+        .parse(safeClone(evidence));
+      if (!loss.rejected && !loss.degraded && !loss.discarded && !loss.closed) return;
+      const key = hash({
+          consumerId: loss.consumerId,
+          contextFingerprint: loss.contextFingerprint,
+        }),
+        old = c.consumerLosses?.[key];
+      const affectedStreams = Object.keys(c.streams).sort();
+      if (
+        !loss.newChannel &&
+        old &&
+        old.rejected === loss.rejected &&
+        old.degraded === loss.degraded &&
+        old.discarded === loss.discarded &&
+        old.closed === loss.closed &&
+        hash(old.affectedStreams) === hash(affectedStreams)
+      )
+        return;
+      c.consumerLosses ??= {};
+      if (!old && Object.keys(c.consumerLosses).length >= this.options.maxEvidence)
+        throw Error("CONSUMER_LOSS_LIMIT");
+      const { newChannel: _newChannel, ...record } = loss;
+      c.consumerLosses[key] = {
+        ...record,
+        observations: Math.min(Number.MAX_SAFE_INTEGER, (old?.observations ?? 0) + 1),
+        observedAt: this.input.clock.now(),
+        scope: "UNKNOWN_CHANNEL_SCOPE",
+        affectedStreams,
+      };
+      for (const id of affectedStreams) {
+        c.watermarks[id]!.status = "FENCED";
+        c.watermarks[id]!.coverage = "UNKNOWN";
+      }
+      this.error("UPSTREAM_CONSUMER_LOSS");
+      this.bump("gaps");
+    });
+    // Even a certified capacity rejection must not leave this runtime claiming
+    // healthy continuity. Startup fences the persisted predecessor before reuse.
+    if (!result.ok && this.state === "READY") {
+      this.state = "FAILED";
+      this.error("CONTINUITY_PERSISTENCE_FAILED");
+    }
+    return result;
   }
   public watermark(
     streamId: string,
@@ -800,6 +967,17 @@ export class AggregationEngine {
   private latest(c: Checkpoint, barId: string): Revision | undefined {
     return c.revisions.filter((r) => r.barId === barId).at(-1);
   }
+  private finalized(c: Checkpoint, barId: string): boolean {
+    return c.revisions.some((r) => r.barId === barId && r.final);
+  }
+  private correctionEligibility(c: Checkpoint, w: WindowState): void {
+    if (
+      this.finalized(c, w.barId) &&
+      Date.parse(this.input.clock.now()) - Date.parse(w.window.end) >
+        this.options.correctionHorizonMs
+    )
+      throw Error("CORRECTION_HORIZON");
+  }
   private content(
     r: Pick<
       Revision,
@@ -819,6 +997,7 @@ export class AggregationEngine {
       | "final"
       | "quality"
       | "suppressedEvidence"
+      | "suppressionEvidence"
       | "availability"
     >,
   ) {
@@ -839,6 +1018,7 @@ export class AggregationEngine {
       final: r.final,
       quality: r.quality,
       suppressedEvidence: r.suppressedEvidence,
+      ...(r.suppressionEvidence ? { suppressionEvidence: r.suppressionEvidence } : {}),
       availability: r.availability,
     };
   }
@@ -848,6 +1028,7 @@ export class AggregationEngine {
     final: boolean,
     reason: Revision["reason"],
   ): Revision {
+    this.correctionEligibility(c, w);
     if (w.contributions.length === 0) throw Error("EMPTY_WINDOW");
     const stream = c.streams[w.streamId]!,
       wm = c.watermarks[w.streamId]!;
@@ -858,22 +1039,31 @@ export class AggregationEngine {
       (!wm.through || wm.through < w.window.end || wm.status !== "CONTINUOUS" || now < w.window.end)
     )
       throw Error("FINALITY_EVIDENCE");
-    const a = [...w.contributions].sort(
-      (a, b) =>
-        Date.parse(a.eventAt) - Date.parse(b.eventAt) ||
-        (a.sequence && b.sequence
-          ? BigInt(a.sequence) < BigInt(b.sequence)
-            ? -1
-            : BigInt(a.sequence) > BigInt(b.sequence)
-              ? 1
-              : 0
-          : a.identity.localeCompare(b.identity, "en")),
-    );
+    const compare = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+    const a = [...w.contributions].sort((a, b) => {
+      const time = Date.parse(a.eventAt) - Date.parse(b.eventAt);
+      if (time) return time;
+      // Presence is a fixed rank, never a pair-dependent comparison: mixed inputs
+      // must remain transitive. This deterministic rank is not market chronology.
+      if (Boolean(a.sequence) !== Boolean(b.sequence)) return a.sequence ? -1 : 1;
+      if (a.sequence && b.sequence) {
+        const x = BigInt(a.sequence),
+          y = BigInt(b.sequence);
+        if (x !== y) return x < y ? -1 : 1;
+      }
+      return (
+        compare(a.sourceFingerprint, b.sourceFingerprint) ||
+        compare(a.observationId ?? a.identity, b.observationId ?? b.identity) ||
+        compare(a.contentFingerprint, b.contentFingerprint)
+      );
+    });
     let ordering: "VERIFIED" | "UNCERTAIN" = "VERIFIED";
     for (let i = 1; i < a.length; i++)
       if (
         a[i]!.eventAt === a[i - 1]!.eventAt &&
-        (!a[i]!.sequence || !a[i - 1]!.sequence || a[i]!.sequence === a[i - 1]!.sequence)
+        (!a[i]!.sequence ||
+          !a[i - 1]!.sequence ||
+          BigInt(a[i]!.sequence!) === BigInt(a[i - 1]!.sequence!))
       )
         ordering = "UNCERTAIN";
     const hierarchical = a.some((x) => x.revisionId !== undefined),
@@ -914,6 +1104,24 @@ export class AggregationEngine {
             }, new D(0))
             .toFixed();
     if (volume !== undefined) decimal(volume);
+    const suppressionEvidence: Record<string, number> = {};
+    for (const x of a) {
+      const refs =
+        x.suppressionEvidence ??
+        (x.suppressed
+          ? { [hash({ legacyContribution: x.contentFingerprint })]: x.suppressed }
+          : {});
+      for (const [key, count] of Object.entries(refs)) {
+        if (suppressionEvidence[key] !== undefined && suppressionEvidence[key] !== count)
+          throw Error("SUPPRESSION_CONFLICT");
+        suppressionEvidence[key] = count;
+      }
+    }
+    const suppressedEvidence = Object.values(suppressionEvidence).reduce(
+      (sum, count) => sum + count,
+      0,
+    );
+    if (!Number.isSafeInteger(suppressedEvidence)) throw Error("SUPPRESSION_BOUNDS");
     const core = {
       streamId: w.streamId,
       stream,
@@ -932,7 +1140,8 @@ export class AggregationEngine {
       ordering,
       final,
       quality: qualities,
-      suppressedEvidence: a.reduce((s, x) => s + x.suppressed, 0),
+      suppressedEvidence,
+      ...(Object.keys(suppressionEvidence).length ? { suppressionEvidence } : {}),
       availability: a.every((x) => x.availability === "VERIFIED")
         ? ("VERIFIED" as const)
         : ("UNKNOWN" as const),
@@ -944,13 +1153,14 @@ export class AggregationEngine {
       latest.lineageFingerprint === lineageFingerprint
     )
       return latest;
+    this.correctionEligibility(c, w);
     const generation = (latest?.generation ?? 0) + 1,
       revisionId = hash({ barId: w.barId, generation, contentFingerprint, lineageFingerprint });
     const state: Revision["state"] = final
       ? reason === "CORRECTION"
         ? "CORRECTED"
         : "FINALIZED"
-      : reason === "CORRECTION" && latest?.final
+      : reason === "CORRECTION" && this.finalized(c, w.barId)
         ? "INVALIDATED"
         : now >= w.window.end
           ? "WINDOW_ELAPSED"
@@ -1038,6 +1248,7 @@ export class AggregationEngine {
         ...(r.constituents[0]?.source ? { source: r.constituents[0].source } : {}),
         quality: r.quality,
         suppressed: r.suppressedEvidence,
+        ...(r.suppressionEvidence ? { suppressionEvidence: r.suppressionEvidence } : {}),
         final: r.final,
         complete: r.coverage === "COMPLETE_COVERAGE",
         start: r.window.start,
@@ -1046,11 +1257,12 @@ export class AggregationEngine {
         barId: r.barId,
         contentFingerprint: r.contentFingerprint,
       });
+      this.correctionEligibility(c, parent);
       const i = parent.contributions.findIndex((v) => v.key === r.barId);
       if (i < 0) parent.contributions.push(x);
       else parent.contributions[i] = x;
       const old = this.latest(c, parent.barId);
-      if (old?.final) {
+      if (old && this.finalized(c, parent.barId)) {
         this.revise(c, parent, c.watermarks[r.streamId]!.status === "CONTINUOUS", "CORRECTION");
         this.propagate(c, parent.barId, new Set(visited));
       }
@@ -1062,11 +1274,7 @@ export class AggregationEngine {
       const w = this.getWindow(c, streamId, timeframe, event),
         latest = this.latest(c, w.barId);
       if (!latest) throw Error("REVISION_MISSING");
-      if (
-        Date.parse(this.input.clock.now()) - Date.parse(w.window.end) >
-        this.options.correctionHorizonMs
-      )
-        throw Error("CORRECTION_HORIZON");
+      this.correctionEligibility(c, w);
       const r = this.revise(c, w, latest.final, "CORRECTION");
       this.propagate(c, w.barId, new Set());
       return r.revisionId;
@@ -1103,7 +1311,8 @@ export class AggregationEngine {
       const evidenceClass = request.evidenceClass ?? "VERIFIED_POINT_IN_TIME",
         selected: Record<string, Revision> = {},
         missing: Record<string, string> = {},
-        staleness: Record<string, number> = {};
+        staleness: Record<string, number> = {},
+        warnings: Record<string, string> = {};
       if (!["VERIFIED_POINT_IN_TIME", "EVENT_TIME_RECONSTRUCTION"].includes(evidenceClass))
         throw Error("EVIDENCE_CLASS");
       const byId = new Map(this.checkpoint.revisions.map((r) => [r.revisionId, r]));
@@ -1163,6 +1372,13 @@ export class AggregationEngine {
           continue;
         }
         selected[tf] = r;
+        const newer = knownLatest.get(r.barId);
+        if (
+          (request.correctionPolicy ?? "AS_KNOWN") === "AS_KNOWN" &&
+          newer &&
+          newer.generation > r.generation
+        )
+          warnings[tf] = "KNOWN_INELIGIBLE_SUCCESSOR";
         staleness[tf] = Math.max(0, age);
       }
       for (const [tf, r] of Object.entries(selected))
@@ -1198,6 +1414,7 @@ export class AggregationEngine {
           : ("CONSISTENT" as const),
         configurationFingerprint: this.input.configurationFingerprint,
         policyFingerprint: this.policy,
+        ...(Object.keys(warnings).length ? { warnings } : {}),
       };
       const fingerprint = hash(body);
       return ok(freeze({ ...body, snapshotId: fingerprint, contentFingerprint: fingerprint }));
@@ -1243,6 +1460,7 @@ export class AggregationEngine {
       errors: [...this.errors],
       streams: structuredClone(this.checkpoint.streams),
       watermarks: structuredClone(this.checkpoint.watermarks),
+      consumerLosses: structuredClone(this.checkpoint.consumerLosses ?? {}),
       windowCount: this.checkpoint.windows.length,
       revisionCount: this.checkpoint.revisions.length,
       deliveryDepth: this.delivery.length,

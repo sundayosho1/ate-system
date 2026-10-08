@@ -177,3 +177,122 @@ append INVALIDATED provisional revisions and exclude superseded final bars at ne
 explicit finality reconciliation. Earlier knowledge-cutoff queries retain their prior result.
 Calendar fingerprints include Node timezone data version; recover with matching governed runtime and
 calendar authority.
+
+## CODEX-003B corrected research contracts
+
+These corrections retain version `0.18.0-multitimeframe.1`. They await independent re-audit;
+implementation and passing tests do not grant acceptance or permit Prompt 19.
+
+### Ordering and market chronology
+
+Within a stream, sort by event timestamp, then a fixed sequence-presence rank (sequenced first),
+then numeric sequence, canonical observation identity and content identity using ordinal string
+comparison. Equal valid sequences use identity as the deterministic tie-break. Missing, mixed or
+numerically equal sequences at an equal timestamp retain `ORDERING_UNCERTAIN`. These rules construct
+reproducible OHLC and lineage; they do not certify historical provider chronology. Conflicting
+canonical duplicates still reject and fence their source; source scopes never mix.
+
+### Canonical quality handoff
+
+`canonicalBar` carries an immutable self-contained quality manifest in
+`aggregation.qualitymanifest`, with its `aggregation.qualitymanifestfingerprint`. The payload binds
+the source revision, source fingerprint, lineage, coverage, availability, report/finding references
+and suppressed counts. Canonical schema limits govern the representation: at most 16 chunks of 256
+characters, 4,096 encoded bytes, 128 quality strings and 128 suppression references. No evidence is
+truncated. An oversized projection raises `QUALITY_HANDOFF_BOUNDS`; retain the original full
+revision and resolve the workload within these supported bounds. This implementation does not
+provide an external evidence-manifest resolver.
+
+Ingestion verifies manifest integrity and binding, retains the complete inherited manifest in the
+checkpoint and propagates adverse findings and unknowns. Missing/corrupt required payloads return
+`INHERITED_QUALITY_INTEGRITY`, admit no contribution and fence the affected source. Suppressed
+findings are counted once per immutable report identity (report ID plus fingerprint), including
+references repeated through different child bars. Conflicting counts for the same reference reject
+with `SUPPRESSION_CONFLICT`; arithmetic overflow rejects rather than coercing. Zero-finding
+assessments still retain their report references. Legacy revisions without typed suppression
+membership use an explicitly identified legacy aggregate/contribution reference; this preserves
+their recorded count without inventing missing assessment membership.
+
+Source checkpoints remain readable without a new application or checkpoint version. A legacy
+aggregate-to-aggregate checkpoint that already lost its inherited manifest cannot certify that
+missing evidence: startup fails closed. Reproject from the original verified immutable source
+revision into an explicitly governed fresh downstream run; do not erase or silently rewrite the old
+history. A legacy canonical BAR carrying only hashes cannot be ingested as complete evidence. Prompt
+15 remains the assessment authority; aggregation does not assign quality scores.
+
+### Filesystem operation capacity
+
+`FilesystemAggregationRepository.maxOperations` counts distinct operation IDs, not files.
+Registration consumes one slot. Each slot reserves `.json`, `.visible` and their two temporary
+paths; publishing an admitted operation requires no second slot. Admission, publication and recovery
+apply the same inventory contract. Unknown artifacts, orphan markers/content temps, unsafe paths and
+oversized artifacts fail closed, without deleting evidence. Temporary artifacts associated with a
+committed operation remain accounted to that operation.
+
+At capacity, new work rejects before mutation with `CONFIRMED_NOT_COMMITTED`. This certifies only
+that attempt, not absence of prior artifacts. Existing acknowledgments remain recoverable with
+unchanged limits. Lowering capacity below existing operation count fails recovery; a verified larger
+limit is compatible. Leave room for ingestion, watermarks, publication, corrections and shutdown
+checkpoints. Capacity rejection can prevent a shutdown checkpoint; shutdown must report failure. If
+a rejected input/loss fence cannot persist, health fails closed until fresh recovery. No automatic
+artifact deletion or history compaction is provided. Single-writer/trusted-root, Windows and
+power-loss durability restrictions still apply.
+
+### Correction horizon and finalized history
+
+The horizon remains anchored to `window.end` and immutable evidence that the window was ever
+finalized. Invalidation and restart do not reset it. Direct late ingestion, canonical replacement,
+recomputation, dependent-parent changes and re-finalization enforce the same eligibility.
+Reconciliation repairs source continuity only; it does not extend correction eligibility. An expired
+finalized window cannot be republished/recomputed through the public revision path; read its
+existing immutable history instead. Initial construction of an old historical window without
+finalized history remains possible, with truthful availability/coverage classification.
+
+### Realtime consumer loss and reconciliation
+
+`consumeRealtime` observes rejection counts, degradation and counter-derived discarded backlog
+before and after each awaited read. Prompt 17 exposes no rejected observation's source/subscription
+or actual loss timestamp, so such channel-level loss/closure has `UNKNOWN_CHANNEL_SCOPE`. Every
+registered source/instrument/subscription scope in this engine is potentially affected and is
+conservatively fenced. Retained sequence-less observations cannot restore complete finality. Scoped
+observation warnings still affect their own stream; healthy source progression does not clear other
+fences. Loss diagnostics record the clock's observation time, not an invented loss time.
+
+Bounded `consumerLosses` checkpoint evidence is keyed by consumer ID and consumption context (source
+fingerprint and artifact identity). Actual new channel instances, including reused names and
+counters, trigger a fresh conservative observation. Evidence histories remain in immutable operation
+records; new observations never clear existing source fences. Repeated drains do not clear
+continuity. After justified reconciliation through existing watermark authority, replaying
+already-observed counters does not fence again; new loss or a newly observed channel does. Fresh
+startup always fences recovered sources. New potentially affected registered scopes are included on
+the next channel observation. Closed channels require explicit justified post-closure reconciliation
+before finality, even when an exact discarded count is zero.
+
+Loss-record count is bounded by `maxEvidence`; checkpoint size by `maxCheckpointBytes`. Exhaustion
+or failed persistence makes the engine not ready rather than dropping evidence and continuing with
+complete coverage. Loss scope is intentionally conservative; a future richer source-scoped contract
+would require a separately reviewed change to Prompt 17.
+
+### AS_KNOWN and historical registry context
+
+Default `AS_KNOWN` selects the latest eligible verified revision, not necessarily the newest known
+revision. If a known same-window successor is ineligible, retain compatible selection and expose
+`warnings[timeframe] = KNOWN_INELIGIBLE_SUCCESSOR`. An explicit event-time reconstruction may select
+unverified data, labeled accordingly. `INITIAL_ONLY` intentionally selects eligible original history
+and does not add this AS_KNOWN warning. Hierarchical lineage conflicts still produce
+`REVISION_CONFLICT`; a warning cannot authorize inconsistent parent/child generations.
+
+The verified point-in-time guarantee applies to revision knowledge within the current governed
+stream registry, calendar and configuration context. The registry is not bitemporal: registering a
+stream later can change a past-cutoff unknown-scope error into an empty scoped response. This never
+makes future revisions eligible and is not historical registration-availability certification.
+Consumers needing bitemporal registry membership need a separately authorized authority.
+
+### Native correction and volume boundaries
+
+Native Prompt 13 `MarketDataCorrection` records are separate from `MarketObservation` and are not
+accepted by this ingestion API. Do not claim trade cancellation/replacement support. Canonical
+`BAR.revisionOf` replacement and ordinary late observation corrections are supported within their
+horizon and integrity contracts. No new native correction subsystem was introduced. Required
+canonical volume class/quantity/unit is checked before contribution admission. A missing matching
+measure returns `VOLUME_MISSING`; no fabricated zero-volume aggregate is published.
