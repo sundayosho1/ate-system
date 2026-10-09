@@ -378,3 +378,42 @@ The run-to-time and bounded-reconstruction wrappers also reject terminal failure
 returning an already-reached target. This prevents an unchanged checkpoint from being reported as a
 successful operation by a failed owner. Stable completed/stopped idempotent reuse remains governed
 by the existing contract; the new guard does not write or clear any obligation.
+
+## Control-publication recovery — CODEX-004J
+
+Inspect runtime diagnostics.controlPublications for original session/checkpoint/generation,
+configurationFingerprint, phase and uncertainty. No acknowledgement means no entry. PENDING denotes
+retained acknowledged work; PREPARING and PUBLISHING are active attempts; FAILED retains known
+unsuccessful preparation/publication; UNCERTAIN retains possible dispatch effects. A successful
+DELIVERED/ACCEPTED/DUPLICATE acknowledgement removes the entry. These are existing runtime
+publication obligations, not a new durable storage authority.
+
+The descriptor is retained immediately after acknowledgement before configuration/envelope work.
+Original governed specification limits qualify capacity before new checkpoint work; the minimum
+registered-owner maxEvidenceRecords bounds the queue. At capacity, shutdown defers other owners
+without advancing their checkpoints. Later summaries cannot overtake the unresolved first entry.
+Admission and new commands reject while publication is pending. A callback that rejects after real
+owner advancement still leaves its actual last checkpoint pending; do not infer rollback from a
+rejected Promise or unsuccessful command result.
+
+Restore the original valid governed configuration/owner service and call retryControlEvents(). Retry
+is serialized, FIFO, and stops on the first failure; inspect remaining identities after partial
+success. Another reader/preparation failure retains the same descriptor. Current configuration must
+validate against the original specification; a later valid but different revision is not a
+substitute. Cached envelopes keep their original identity/timestamp/provenance. Ambiguous dispatch
+may have reached subscribers; supported duplicate acknowledgement can settle retry, but universal
+exactly-once subscriber delivery is not promised. Retry does not write or recover checkpoint
+storage.
+
+Readiness is NOT_READY and health DEGRADED for pending/active publication. Outside these guards,
+configuration/clock observation errors remain observable. Repeated shutdown fails while a prior
+summary is pending; retry must genuinely discharge it before normal stop can complete. Retry does
+not reset a STOPPING runtime to READY. Busy shutdown requests controller cancellation without a
+second checkpoint write; a settled acknowledged owner follows normal stop/recovery. Genuine
+UNKNOWN_COMMITMENT and pending source/read work require their existing trusted recovery contracts.
+
+In-process summaries remain volatile; fresh trusted startup re-announces recovered state rather than
+claiming durable delivery of every intermediate summary. F05 Windows and F06 throughput/power loss
+remain unqualified. T01 trusted honest ports/root/single-writer and M02 current-registry context
+remain mandatory. Fifth remediation is pending independent re-audit/acceptance. No production,
+trading, broker, live feed, financial or Prompt20 authorization is granted.

@@ -210,3 +210,31 @@ after rejection and legitimate later persistence. No failed history is rewritten
 This is implementation remediation only, pending independent re-audit and acceptance.
 F05/F06/T01/M02, current-registry and bounded quality/correction/source-loss constraints,
 trusted-root/single-writer, offline scope and Prompt 20 restrictions remain mandatory.
+
+## Fifth control-publication remediation — CODEX-004I/004J
+
+CODEX-004I audited `8d70bef74418551216b4c0f16a88055a5348a17d`: original R3 matrix15/15 and all694
+permanent tests passed, but HIGH A19-H01-R4 exposed lost in-process publication work after real
+acknowledgement. Its four failing assertions, three confirmation phases/healthy controls, report and
+complete independent appendix remain unchanged outside checkout.
+
+CODEX-004J retains the original checkpoint/specification before fallible publication preparation,
+checks immutable bounded capacity before new acknowledgement, validates current configuration on
+publication/retry, preserves cached identity and ambiguous dispatch, serializes FIFO retry and
+prevents repeated stop superseding pending summaries. A callback's unsuccessful exit after real
+advancement retains its last acknowledgement. Busy shutdown requests cancellation without another
+checkpoint through the existing controller state/flag authority; no repository/branch/comparison
+refactor or second owner is introduced.
+
+The new publication-obligation-remediation permanent suite covers R4-01–20 plus preparation/report
+inspection faults, actual storage certificates, queued stop interleaving and pre/post-ack callback
+exceptions. Tests use real governed runtime owners, typed actual event-context payload observations
+and filesystem evidence; the accepted694 tests remain unchanged. The external delivery report
+records actual final counts, before/after four exact failures, historical/regression/security gates,
+source/evidence hashes and published commit. Original C38/40 failures remain separately visible;
+approved phase-corrected2/2 is not a rewrite of historical assertions.
+
+Current status: FIFTH PUBLICATION-OBLIGATION REMEDIATION — PENDING INDEPENDENT RE-AUDIT AND
+ACCEPTANCE. Version stays0.19.0-market-replay.1. F05/F06/T01/M02, bounded quality, explicit loss,
+trusted-root/single-writer and offline restrictions remain. No Prompt20 implementation or authority
+is created; independent technical review and separate external governance acceptance are required.

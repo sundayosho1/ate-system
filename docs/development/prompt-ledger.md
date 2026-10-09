@@ -325,3 +325,26 @@ actual tests/security/publication results. No unrelated prompt status or accepte
 governance is changed. No acceptance successor, main merge, financial capability or Prompt 20 work
 is performed. F05/F06/T01/M02, trusted-root/single-writer, offline scope and all inherited
 restrictions remain.
+
+## Prompt 19 fifth publication-obligation remediation — CODEX-004I/004J
+
+CODEX-004I authenticated `8d70bef74418551216b4c0f16a88055a5348a17d`, technically closed R3, and
+returned technical re-audit FAILED for HIGH A19-H01-R4: configuration preparation could precede
+pending control-summary retention after genuine acknowledgement, causing false availability and
+concealed repeated-stop publication work. Its original failed source/results/report remain
+preserved.
+
+| Prompt | Current status                                                          | Version                  | Independent acceptance      |
+| ------ | ----------------------------------------------------------------------- | ------------------------ | --------------------------- |
+| 19     | FIFTH PUBLICATION-OBLIGATION REMEDIATION — PENDING INDEPENDENT RE-AUDIT | `0.19.0-market-replay.1` | PENDING — not self-accepted |
+| 20     | NOT STARTED — NOT AUTHORIZED                                            | None                     | None                        |
+
+Implementation branch: codex/prompt-19-publication-obligation-remediation, based only on the exact
+CODEX-004I audited SHA. Existing runtime owns bounded retained original summaries, serialized FIFO
+retry, configuration qualification, ambiguity and truthful stop/availability. Controller
+cancellation uses its existing flags/state without a second checkpoint. Source/storage/R3 and all
+accepted upstream boundaries remain preserved. See completion evidence and external delivery report
+for actual tests/security/publication identity. No earlier failed history or unrelated prompt status
+is replaced; accepted Prompt17/18 records remain intact. Independent re-audit and separate
+governance acceptance remain mandatory. F05/F06/T01/M02 and offline/no-financial/no-Prompt20
+restrictions remain.

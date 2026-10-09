@@ -69,13 +69,19 @@ export type ReplayRuntimePorts = Readonly<{
   eventFactory: EventFactory;
   eventBus: InternalEventBus;
 }>;
+type ControlPublication = {
+  readonly checkpoint: ReplayCheckpoint;
+  readonly specification: ReplaySessionSpecification;
+  phase: "PENDING" | "PREPARING" | "PUBLISHING" | "FAILED" | "UNCERTAIN";
+  uncertain: boolean;
+  envelope?: ATEEvent;
+};
 export class ReplayRuntimeService {
   public readonly managedService: RuntimeManagedService;
   private lifecycle: "CREATED" | "READY" | "STOPPING" | "STOPPED" | "FAILED" = "CREATED";
   private busy = false;
   private readonly sessions = new Map<string, ReplayController>();
-  private readonly pendingEvents = new Map<string, ReplayCheckpoint>();
-  private readonly pendingEnvelopes = new Map<string, ATEEvent>();
+  private readonly pendingEvents = new Map<string, ControlPublication>();
   private readonly disposedAdmissions: Readonly<{
     sessionId: string;
     specificationFingerprint: string;
@@ -142,6 +148,14 @@ export class ReplayRuntimeService {
       lifecycle: this.lifecycle,
       sessions: this.sessions.size,
       pendingControlEvents: this.pendingEvents.size,
+      controlPublications: [...this.pendingEvents.values()].map((p) => ({
+        sessionId: p.checkpoint.sessionId,
+        checkpointId: p.checkpoint.checkpointId,
+        generation: p.checkpoint.generation,
+        configurationFingerprint: p.specification.configurationFingerprint,
+        phase: p.phase,
+        uncertain: p.uncertain,
+      })),
       busy: this.busy,
       researchOnly: true,
       tradingAuthorized: false,
@@ -152,6 +166,8 @@ export class ReplayRuntimeService {
     });
   }
   private ready(): boolean {
+    // An unresolved operation is unavailable without invoking another fallible reader.
+    if (this.lifecycle !== "READY" || this.busy || this.pendingEvents.size) return false;
     const effective = this.ports.configuration();
     return (
       this.lifecycle === "READY" &&
@@ -177,7 +193,9 @@ export class ReplayRuntimeService {
     if (
       !controller.canDisposeProvisionalAdmission() ||
       this.sessions.get(specification.sessionId) !== controller ||
-      [...this.pendingEvents.values()].some((cp) => cp.sessionId === specification.sessionId)
+      [...this.pendingEvents.values()].some(
+        (p) => p.checkpoint.sessionId === specification.sessionId,
+      )
     )
       return;
     // Exact-owner disposal is complete before optional sampling, under the lock.
@@ -217,13 +235,15 @@ export class ReplayRuntimeService {
     repository: ReplayCheckpointRepository,
   ): Promise<ReplayController> {
     if (this.lifecycle !== "READY" || this.busy) throw Error("REPLAY_ADMISSION_NOT_READY");
-    if (this.pendingEvents.size) throw Error("CONTROL_PUBLICATION_REQUIRED");
-    const specification = createGovernedReplaySpecification(raw, this.ports.configuration());
-    if (this.sessions.has(specification.sessionId)) throw Error("SESSION_IDENTITY_CONFLICT");
-    if (this.sessions.size >= specification.resourceLimits.maxSessions)
-      throw Error("SESSION_CAPACITY");
     this.busy = true;
     try {
+      const specification = createGovernedReplaySpecification(raw, this.ports.configuration());
+      if (this.lifecycle !== "READY") throw Error("REPLAY_ADMISSION_NOT_READY");
+      if (this.sessions.has(specification.sessionId)) throw Error("SESSION_IDENTITY_CONFLICT");
+      if (this.pendingEvents.size) throw Error("CONTROL_PUBLICATION_REQUIRED");
+      if (this.sessions.size >= specification.resourceLimits.maxSessions)
+        throw Error("SESSION_CAPACITY");
+      this.requirePublicationCapacity(specification);
       // Construction is pure, but can reject incompatible immutable inputs.
       // Every operation after acquiring the lock must share its cleanup guard.
       const controller = new ReplayController(specification, inputs, repository);
@@ -237,11 +257,15 @@ export class ReplayRuntimeService {
         initialized = controller.containInitializationException(error);
       }
       if (!initialized.ok) {
+        const acknowledged = controller.currentCheckpoint();
+        if (acknowledged) this.retainPublication(acknowledged, specification);
         this.disposeProvisionalAdmission(controller, initialized.code);
         throw Error(initialized.code);
       }
+      const publication = this.retainPublication(initialized.checkpoint, specification);
       if (this.lifecycle !== "READY") throw Error("SHUTDOWN_DURING_ADMISSION");
-      await this.emit(initialized.checkpoint);
+      await this.emit(publication);
+      if (this.lifecycle !== "READY") throw Error("SHUTDOWN_DURING_ADMISSION");
       return controller;
     } finally {
       this.busy = false;
@@ -250,23 +274,25 @@ export class ReplayRuntimeService {
   public async adoptVerifiedBranch(controller: ReplayController): Promise<void> {
     if (this.lifecycle !== "READY" || this.busy) throw Error("REPLAY_ADMISSION_NOT_READY");
     if (this.pendingEvents.size) throw Error("CONTROL_PUBLICATION_REQUIRED");
-    const { fingerprint: _fp, ...raw } = controller.specification;
-    createGovernedReplaySpecification(raw, this.ports.configuration());
-    const cp = controller.currentCheckpoint();
-    if (
-      !cp?.branch ||
-      controller.diagnostics().busy ||
-      controller.diagnostics().obligation ||
-      controller.diagnostics().pendingConsumerReads
-    )
-      throw Error("UNVERIFIED_BRANCH_ADMISSION");
-    if (this.sessions.has(cp.sessionId)) throw Error("SESSION_IDENTITY_CONFLICT");
-    if (this.sessions.size >= replayFromEffective(this.ports.configuration()).limits.maxSessions)
-      throw Error("SESSION_CAPACITY");
     this.busy = true;
-    this.sessions.set(cp.sessionId, controller);
     try {
-      await this.emit(cp);
+      const { fingerprint: _fp, ...raw } = controller.specification;
+      const specification = createGovernedReplaySpecification(raw, this.ports.configuration());
+      if (this.lifecycle !== "READY") throw Error("REPLAY_ADMISSION_NOT_READY");
+      const cp = controller.currentCheckpoint();
+      if (
+        !cp?.branch ||
+        controller.diagnostics().busy ||
+        controller.diagnostics().obligation ||
+        controller.diagnostics().pendingConsumerReads
+      )
+        throw Error("UNVERIFIED_BRANCH_ADMISSION");
+      if (this.sessions.has(cp.sessionId)) throw Error("SESSION_IDENTITY_CONFLICT");
+      if (this.sessions.size >= specification.resourceLimits.maxSessions)
+        throw Error("SESSION_CAPACITY");
+      this.requirePublicationCapacity(specification);
+      this.sessions.set(cp.sessionId, controller);
+      await this.emit(this.retainPublication(cp, specification));
     } finally {
       this.busy = false;
     }
@@ -279,83 +305,162 @@ export class ReplayRuntimeService {
     if (this.pendingEvents.size) throw Error("CONTROL_PUBLICATION_REQUIRED");
     const c = this.sessions.get(sessionId);
     if (!c) throw Error("SESSION_NOT_FOUND");
-    if (c.specification.configurationFingerprint !== this.ports.configuration().fingerprint)
-      throw Error("CONFIGURATION_DRIFT");
     this.busy = true;
+    const previous = c.currentCheckpoint();
     try {
+      if (c.specification.configurationFingerprint !== this.ports.configuration().fingerprint)
+        throw Error("CONFIGURATION_DRIFT");
+      if (this.lifecycle !== "READY") throw Error("REPLAY_RUNTIME_NOT_READY");
+      this.requirePublicationCapacity(c.specification);
       const result = await operation(c);
-      if (result.ok) await this.emit(result.checkpoint);
+      if (result.ok) await this.emit(this.retainPublication(result.checkpoint, c.specification));
+      else this.retainAdvancedCheckpoint(c, previous);
       return result;
+    } catch (error) {
+      // A caller can reject after its owner acknowledged real work. Do not infer
+      // noncommitment from that rejection or lose the last actual acknowledgement.
+      this.retainAdvancedCheckpoint(c, previous);
+      throw error;
     } finally {
       this.busy = false;
     }
   }
-  private async emit(cp: ReplayCheckpoint): Promise<void> {
-    // Bound unacknowledged checkpoint summaries; never overwrite an earlier publication obligation.
-    const key = hash({
-      session: cp.sessionId,
-      generation: cp.generation,
-      fingerprint: cp.fingerprint,
-    });
-    const limit = replayFromEffective(this.ports.configuration()).limits.maxEvidenceRecords;
-    if (!this.pendingEvents.has(key) && this.pendingEvents.size >= limit)
+  private retainAdvancedCheckpoint(
+    controller: ReplayController,
+    previous: ReplayCheckpoint | undefined,
+  ): void {
+    const acknowledged = controller.currentCheckpoint();
+    if (acknowledged && acknowledged.checkpointId !== previous?.checkpointId)
+      this.retainPublication(acknowledged, controller.specification);
+  }
+  private publicationCapacity(specification: ReplaySessionSpecification): number {
+    return Math.min(
+      specification.resourceLimits.maxEvidenceRecords,
+      ...[...this.sessions.values()].map((c) => c.specification.resourceLimits.maxEvidenceRecords),
+    );
+  }
+  private requirePublicationCapacity(specification: ReplaySessionSpecification): void {
+    // Check the authenticated immutable limit before requesting a new acknowledgement.
+    if (this.pendingEvents.size >= this.publicationCapacity(specification))
       throw Error("CONTROL_EVENT_CAPACITY");
-    this.pendingEvents.set(key, cp);
-    const cached = this.pendingEnvelopes.get(key);
-    const event = cached
-      ? { ok: true as const, value: cached }
-      : this.ports.eventFactory.createRootEvent({
-          eventType: replayControlEvent.eventType,
-          eventId: schemas.eventId.parse(
-            canonicalRevisionId(
-              hash({
-                session: cp.sessionId,
-                generation: cp.generation,
-                fingerprint: cp.fingerprint,
-              }),
+  }
+  private retainPublication(
+    checkpoint: ReplayCheckpoint,
+    specification: ReplaySessionSpecification,
+  ): ControlPublication {
+    // Linearization point: under the runtime lock, immediately after acknowledgement,
+    // before configuration, hashing, envelope preparation or any external callback.
+    const key = checkpoint.checkpointId;
+    const existing = this.pendingEvents.get(key);
+    if (existing) return existing;
+    const publication: ControlPublication = {
+      checkpoint,
+      specification,
+      phase: "PENDING",
+      uncertain: false,
+    };
+    this.pendingEvents.set(key, publication);
+    return publication;
+  }
+  private async emit(publication: ControlPublication): Promise<void> {
+    if (this.pendingEvents.values().next().value !== publication)
+      throw Error("CONTROL_PUBLICATION_ORDER");
+    const cp = publication.checkpoint;
+    let dispatchStarted = false;
+    let dispatchSettled = false;
+    publication.phase = "PREPARING";
+    try {
+      const { fingerprint: _fp, ...raw } = publication.specification;
+      createGovernedReplaySpecification(raw, this.ports.configuration());
+      const cached = publication.envelope;
+      const event = cached
+        ? { ok: true as const, value: cached }
+        : this.ports.eventFactory.createRootEvent({
+            eventType: replayControlEvent.eventType,
+            eventId: schemas.eventId.parse(
+              canonicalRevisionId(
+                hash({
+                  session: cp.sessionId,
+                  generation: cp.generation,
+                  fingerprint: cp.fingerprint,
+                }),
+              ),
             ),
-          ),
-          payload: {
-            sessionId: cp.sessionId,
-            checkpointId: cp.checkpointId,
-            state: cp.state,
-            logicalTime: cp.logicalTime,
-            cursor: cp.cursor,
-            researchOnly: true,
-          },
-        });
-    if (!event.ok) throw Error(event.error.code);
-    if (!["DEVELOPMENT", "RESEARCH", "SIMULATION"].includes(event.value.envelope.runtimeMode))
-      throw Error("REPLAY_EVENT_MODE");
-    this.pendingEnvelopes.set(key, event.value);
-    const published = await this.ports.eventBus.publish(event.value);
-    if (!["DELIVERED", "ACCEPTED", "DUPLICATE"].includes(published.status))
-      throw Error("REPLAY_CONTROL_PUBLICATION_FAILED");
-    this.pendingEvents.delete(key);
-    this.pendingEnvelopes.delete(key);
+            payload: {
+              sessionId: cp.sessionId,
+              checkpointId: cp.checkpointId,
+              state: cp.state,
+              logicalTime: cp.logicalTime,
+              cursor: cp.cursor,
+              researchOnly: true,
+            },
+          });
+      if (!event.ok) throw Error(event.error.code);
+      if (!["DEVELOPMENT", "RESEARCH", "SIMULATION"].includes(event.value.envelope.runtimeMode))
+        throw Error("REPLAY_EVENT_MODE");
+      publication.envelope = event.value;
+      publication.phase = "PUBLISHING";
+      dispatchStarted = true;
+      const published = await this.ports.eventBus.publish(event.value);
+      const status = published.status;
+      if (["REJECTED", "DEAD_LETTERED"].includes(status)) dispatchSettled = true;
+      if (!["DELIVERED", "ACCEPTED", "DUPLICATE"].includes(status))
+        throw Error("REPLAY_CONTROL_PUBLICATION_FAILED");
+      dispatchSettled = true;
+      this.pendingEvents.delete(cp.checkpointId);
+    } catch (error) {
+      // Rejected dispatch may have delivered before reporting failed. Preparation
+      // failures cannot erase that prior uncertainty, or the original envelope.
+      publication.uncertain ||= dispatchStarted && !dispatchSettled;
+      publication.phase = publication.uncertain ? "UNCERTAIN" : "FAILED";
+      throw error;
+    }
   }
   public async retryControlEvents(): Promise<void> {
-    for (const cp of [...this.pendingEvents.values()]) await this.emit(cp);
+    if (this.busy) throw Error("REPLAY_RUNTIME_NOT_READY");
+    this.busy = true;
+    try {
+      // Insertion order; first failure preserves the failed suffix and stops retry.
+      for (const publication of [...this.pendingEvents.values()]) await this.emit(publication);
+    } finally {
+      this.busy = false;
+    }
   }
   public async shutdown(): Promise<void> {
     if (this.lifecycle === "STOPPED") return;
     this.lifecycle = "STOPPING";
-    let failed = this.busy;
-    for (const c of this.sessions.values()) {
-      if (c.diagnostics().state === "COMPLETED" && !c.diagnostics().obligation) continue;
-      const stopped = await c.stop();
-      if (!stopped.ok) failed = true;
-      else {
-        try {
-          await this.emit(stopped.checkpoint);
-        } catch {
+    if (this.busy) {
+      // Signal active owner cancellation, but never start a second checkpoint write.
+      for (const c of this.sessions.values()) c.requestStop();
+      throw Error("REPLAY_SHUTDOWN_OBLIGATION");
+    }
+    if (this.pendingEvents.size) throw Error("REPLAY_SHUTDOWN_OBLIGATION");
+    this.busy = true;
+    try {
+      let failed = false;
+      for (const c of this.sessions.values()) {
+        if (c.diagnostics().state === "COMPLETED" && !c.diagnostics().obligation) continue;
+        // At capacity, defer untouched owners instead of acknowledging an unretainable summary.
+        if (this.pendingEvents.size >= this.publicationCapacity(c.specification)) {
           failed = true;
+          break;
+        }
+        const stopped = await c.stop();
+        if (!stopped.ok) failed = true;
+        else {
+          try {
+            await this.emit(this.retainPublication(stopped.checkpoint, c.specification));
+          } catch {
+            failed = true;
+          }
         }
       }
+      if (this.pendingEvents.size) failed = true;
+      if (failed) throw Error("REPLAY_SHUTDOWN_OBLIGATION");
+      this.lifecycle = "STOPPED";
+    } finally {
+      this.busy = false;
     }
-    if (this.pendingEvents.size) failed = true;
-    if (failed) throw Error("REPLAY_SHUTDOWN_OBLIGATION");
-    this.lifecycle = "STOPPED";
   }
   public sessionSpecifications(): readonly ReplaySessionSpecification[] {
     return freeze([...this.sessions.values()].map((c) => c.specification));

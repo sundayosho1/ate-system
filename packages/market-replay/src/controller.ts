@@ -395,10 +395,16 @@ export class ReplayController {
     if (this.state !== "PAUSED") return this.fail("INVALID_LIFECYCLE");
     return this.control("RUNNING");
   }
+  /** Request cancellation without acknowledging or writing another checkpoint.
+   * Runtime shutdown uses this while its own command/publication is still active. */
+  public requestStop(): void {
+    this.stopRequested = true;
+    if (this.busy || ["CREATED", "VALIDATING", "READY", "RUNNING", "PAUSED"].includes(this.state))
+      this.state = "STOPPING";
+  }
   public async stop(): Promise<ReplayCommandResult> {
     if (this.busy) {
-      this.stopRequested = true;
-      this.state = "STOPPING";
+      this.requestStop();
       return this.fail("SHUTDOWN_IN_PROGRESS");
     }
     if (this.obligation || this.state === "RECOVERY_REQUIRED")

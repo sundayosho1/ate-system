@@ -195,3 +195,45 @@ The run-to-time and bounded-reconstruction wrappers also reject terminal failure
 returning an already-reached target. This prevents an unchanged checkpoint from being reported as a
 successful operation by a failed owner. Stable completed/stopped idempotent reuse remains governed
 by the existing contract; the new guard does not write or clear any obligation.
+
+## Control-publication obligations — CODEX-004J
+
+CODEX-004I authenticated `8d70bef74418551216b4c0f16a88055a5348a17d`, closed the R3 controller
+correction technically, and failed HIGH A19-H01-R4. Configuration lookup preceded pending-summary
+retention after a real acknowledgement; admission/event preparation could reject with false healthy
+availability, and repeated stop could conceal the missed summary. Checkpoint bytes were valid.
+
+The existing replay runtime retains a descriptor keyed by validated checkpointId immediately after
+acknowledgement under its operation lock, before configuration/hashing/envelope/dispatch callbacks.
+It holds the original immutable checkpoint and governed specification. The lock reserves a bounded
+slot while owner work settles; if a command callback rejects or reports unsuccessful after actual
+owner advancement, that last acknowledged checkpoint is retained before unlock. No acknowledgement
+creates no entry. Storage UNKNOWN/COMMITTED outcomes remain controller/repository authority.
+
+Capacity is qualified before requesting a new acknowledgement, using the minimum authenticated
+maxEvidenceRecords of registered owners and the candidate specification. Normal admission/commands
+exclude pending work. Shutdown may queue several bounded summaries, but defers untouched owners at
+capacity. FIFO prevents later summaries overtaking an unresolved predecessor; none is evicted.
+
+PENDING becomes PREPARING then PUBLISHING. Preparation or known publication rejection leaves FAILED.
+A dispatch exception or unreadable outcome leaves UNCERTAIN, retaining any original cached envelope;
+subsequent preparation failure cannot erase uncertainty. DELIVERED, ACCEPTED or DUPLICATE from the
+existing bus discharges the descriptor. Event identity retains its original session/generation/
+fingerprint formula; retry never replaces the checkpoint or cached envelope with later state.
+
+Configuration capacity/identity is frozen from the authenticated specification, but publication and
+retry still validate the current effective owner configuration against that specification. Transient
+reader errors remain observable; invalid/drifted configuration retains the original obligation.
+Readiness/health fail closed for pending/active work before another reader invocation. Retry holds
+the runtime lock, follows insertion order and stops on first failure; diagnostics expose the
+discharged prefix and remaining identities. Successful retries do not reset STOPPING to READY.
+
+Shutdown refuses unresolved prior summaries; repeated stop cannot supersede them. Busy shutdown
+requests cancellation through the existing controller authority without a second checkpoint write.
+The narrowly added requestStop uses existing state/flags and is reused by busy controller stop. Only
+actual discharge permits successful stop; legitimate fully discharged stop stays idempotent.
+
+Control summaries remain volatile in-process evidence, not durable delivery of every intermediate
+checkpoint or exactly-once subscriber delivery. Checkpoint history, configuration, clock, bus and
+state authorities remain unchanged. This is fifth remediation pending independent re-audit and
+acceptance; F05/F06/T01/M02, offline restrictions and no Prompt20 authorization remain.

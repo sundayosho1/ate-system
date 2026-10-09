@@ -1640,3 +1640,23 @@ remain.
 CODEX-004G's failed audit is preserved; this correction is not acceptance. All earlier invariants,
 F05/F06/T01/M02, owner boundaries, security controls, offline scope and Prompt 20 restrictions
 remain.
+
+## Prompt 19 control-publication retention — CODEX-004J
+
+- **DATA-239**: An acknowledged runtime checkpoint gains its bounded publication descriptor under
+  the operation lock before fallible configuration, identity, envelope or dispatch preparation. A
+  callback's later rejection cannot certify noncommitment or erase its last real acknowledgement.
+- **DATA-240**: Pending capacity derives from authenticated immutable specification limits and is
+  checked before new checkpoint work. At capacity, shutdown defers untouched owners; retained
+  summaries are neither evicted nor replaced. FIFO prohibits overtaking unresolved predecessors.
+- **DATA-241**: Retry preserves checkpoint/configuration/event identity and any cached envelope.
+  Known failure and uncertain dispatch remain distinct; only supported bus acknowledgement
+  discharges. Reader/preparation failures cannot erase earlier delivery uncertainty.
+- **DATA-242**: Pending or active publications are unavailable. Repeated stop cannot conceal an
+  earlier obligation; busy shutdown cancels through the controller without another checkpoint.
+  Storage certificates, source/read obligations and accepted R3 finalization remain authoritative.
+
+Historical CODEX-004A/C/E/G/I failed audits remain preserved. Fifth remediation is pending
+independent re-audit/acceptance, not Prompt19 acceptance. DATA-201–238, F05/F06/T01/M02, single
+writer, trusted root, bounded quality/source-loss and offline/no-financial/no-Prompt20 constraints
+remain mandatory.
