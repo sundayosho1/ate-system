@@ -417,3 +417,26 @@ claiming durable delivery of every intermediate summary. F05 Windows and F06 thr
 remain unqualified. T01 trusted honest ports/root/single-writer and M02 current-registry context
 remain mandatory. Fifth remediation is pending independent re-audit/acceptance. No production,
 trading, broker, live feed, financial or Prompt20 authorization is granted.
+
+## Failed callback after a state-only acknowledgement — CODEX-004L
+
+Pause, resume and stop can advance the acknowledged generation and full checkpoint fingerprint
+without changing semantic checkpointId. A failed runtime command callback does not roll back that
+real checkpoint. Inspect controlPublications.generation as well as checkpointId; the runtime retains
+its last newly acknowledged generation before releasing the command lock even when the callback
+throws or returns unsuccessful. The original error/result is preserved.
+
+While its summary is pending, readiness is NOT_READY and health DEGRADED. Restore original valid
+governance/owner service and retryControlEvents(); retry publishes the original state/cursor/event
+identity without writing checkpoint history. Repeated shutdown cannot substitute a later STOPPED
+summary. A STOPPING runtime stays unavailable after discharge until normal shutdown completes; a
+qualified READY runtime may recover availability. Reobserving an unchanged acknowledged generation
+does not invent another pending summary. A genuine no-ACK failure or UNKNOWN storage commitment
+continues through its existing owner contract.
+
+Supported pause/resume cycles discharge publication between runtime operations. Pending fences and
+capacity bounds remain unchanged; do not bypass runtime orchestration by issuing competing direct
+owner commands. Event summaries remain volatile in-process evidence, not a durable outbox or an
+exactly-once guarantee. F05/F06/T01/M02 and offline/no-production/no-trading/no-Prompt20
+restrictions remain. Sixth remediation is pending independent technical re-audit and governance
+acceptance.

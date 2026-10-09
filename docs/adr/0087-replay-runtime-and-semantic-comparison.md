@@ -237,3 +237,32 @@ Control summaries remain volatile in-process evidence, not durable delivery of e
 checkpoint or exactly-once subscriber delivery. Checkpoint history, configuration, clock, bus and
 state authorities remain unchanged. This is fifth remediation pending independent re-audit and
 acceptance; F05/F06/T01/M02, offline restrictions and no Prompt20 authorization remain.
+
+## Full acknowledged-generation discovery — CODEX-004L
+
+CODEX-004K failed the fifth remediation for HIGH A19-H01-R4-R1: a callback could fail after a real
+pause/resume/stop acknowledgement while runtime discovery compared checkpointId alone. The
+checkpoint contract intentionally excludes generation/state from this semantic ID; its full
+fingerprint and existing storage operation identity distinguish acknowledged control generations.
+
+The runtime now compares the same immutable owner's prior/current generation and full fingerprint.
+Either change identifies a new actual acknowledgement without hashing, configuration, clock or
+diagnostic callbacks before retention. Callback throw/unsuccessful outcomes are preserved; error
+text cannot erase a real ACK or certify a new one. The controller alone installs currentCheckpoint
+after actual acknowledgement. Genuine no-ACK, repeated same-ACK and honest unresolved storage
+commitment do not create a new publication descriptor. Controller/checkpoint contracts are
+unchanged.
+
+The existing semantic pending-map key remains safe under runtime ownership: busy serialization
+excludes reentrant work, pending publication rejects later admission/command before owner entry,
+retry never advances the owner, and shutdown refuses prior pending summaries. Several shutdown
+owners have distinct session-bearing semantic IDs. Reobserving one ACK after preparation failure
+reuses its existing descriptor; supported consecutive same-ID control generations require discharge
+between runtime operations and retain distinct existing event identities. No intermediate-summary
+durable history or direct-owner bypass guarantee is added.
+
+Permanent regressions use real governed ports/filesystem recovery and actual event payloads for
+pause/resume/stop callback failures, same-ID cycles, capacity one, configuration/dispatch faults,
+non-Error/getter/malformed outcomes, cancellation and honest UNKNOWN recovery. Prior R3/R4, FIFO,
+cached envelope and uncertainty behavior remain. This is sixth implementation remediation pending
+independent re-audit and separate acceptance; F05/F06/T01/M02 and no Prompt20 restrictions remain.

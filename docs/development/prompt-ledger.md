@@ -348,3 +348,23 @@ for actual tests/security/publication identity. No earlier failed history or unr
 is replaced; accepted Prompt17/18 records remain intact. Independent re-audit and separate
 governance acceptance remain mandatory. F05/F06/T01/M02 and offline/no-financial/no-Prompt20
 restrictions remain.
+
+## Prompt 19 sixth acknowledged-generation remediation — CODEX-004K/004L
+
+CODEX-004K's audit of b5c7714c205e4bc1fb6231d2ca2d92e49814e899 failed for HIGH A19-H01-R4-R1.
+Semantic checkpointId alone could miss a real state-only acknowledged generation after callback
+failure. All historical failed sources/results/reports remain preserved.
+
+| Prompt | Current status                                                                 | Version                | Independent acceptance |
+| ------ | ------------------------------------------------------------------------------ | ---------------------- | ---------------------- |
+| 19     | SIXTH FULL-ACKNOWLEDGEMENT-IDENTITY REMEDIATION — PENDING INDEPENDENT RE-AUDIT | 0.19.0-market-replay.1 | PENDING — not accepted |
+| 20     | NOT STARTED — NOT AUTHORIZED                                                   | None                   | None                   |
+
+Implementation branch: codex/prompt-19-full-acknowledgement-identity-remediation, from the exact
+CODEX-004K target. Runtime uses existing authoritative generation/full fingerprint for failed-
+callback discovery; no checkpoint/semantic ID/event authority redesign. Bounded retention, FIFO,
+current governance, honest uncertainty, cancellation and accepted upstream contracts remain intact.
+See completion evidence/external delivery for actual verification, historical probe qualification
+and publication state. No unrelated prompt status, earlier failure or accepted17/18 record is
+replaced. Separate independent technical and governance review remain required. F05/F06/T01/M02,
+trusted-root/single-writer, offline/no-financial/no-Prompt20 restrictions remain.

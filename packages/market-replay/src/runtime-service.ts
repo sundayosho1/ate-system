@@ -330,7 +330,14 @@ export class ReplayRuntimeService {
     previous: ReplayCheckpoint | undefined,
   ): void {
     const acknowledged = controller.currentCheckpoint();
-    if (acknowledged && acknowledged.checkpointId !== previous?.checkpointId)
+    // Semantic checkpointId excludes generation/state. For this same immutable
+    // owner, generation and full fingerprint identify the existing storage ACK
+    // without another fallible hash/configuration/diagnostic call before retention.
+    if (
+      acknowledged &&
+      (acknowledged.generation !== previous?.generation ||
+        acknowledged.fingerprint !== previous?.fingerprint)
+    )
       this.retainPublication(acknowledged, controller.specification);
   }
   private publicationCapacity(specification: ReplaySessionSpecification): number {

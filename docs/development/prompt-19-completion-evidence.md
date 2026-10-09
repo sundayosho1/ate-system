@@ -238,3 +238,32 @@ Current status: FIFTH PUBLICATION-OBLIGATION REMEDIATION — PENDING INDEPENDENT
 ACCEPTANCE. Version stays0.19.0-market-replay.1. F05/F06/T01/M02, bounded quality, explicit loss,
 trusted-root/single-writer and offline restrictions remain. No Prompt20 implementation or authority
 is created; independent technical review and separate external governance acceptance are required.
+
+## Sixth full-acknowledgement remediation — CODEX-004K/004L
+
+CODEX-004K audited b5c7714c205e4bc1fb6231d2ca2d92e49814e899 with733 tests/53 files passing and
+confirmed HIGH A19-H01-R4-R1. State-only control generations can share semantic checkpointId;
+failed-callback discovery therefore omitted real ACKs, false healthy availability and retry
+evidence. Its original sources, nine failed results, durable artifacts and failed report remain
+unchanged.
+
+CODEX-004L compares the same authoritative owner's generation/full fingerprint before retaining the
+last real ACK. It performs no hash, governance/clock or diagnostic callback before retention. The
+semantic ID/storage operation/event algorithms, controller, eleven upstream packages, dependencies,
+version and capabilities remain unchanged. Existing locks/pending fences prevent competing
+same-session generations; reobserved one-ACK preparation failures retain one descriptor.
+
+The focused permanent suite covers state-only pause/resume/stop throws and unsuccessful results,
+full event/operation identity, real recovery, no-ACK/source/prewrite cancellation controls, honest
+UNKNOWN, capacity one, same-ID cycles, drift, reader/dispatch ambiguity and
+malformed/getter/non-Error callback outcomes. Existing733 tests are preserved; actual counts and
+security/historical results are recorded in the external delivery report. Original K confirmation
+probes contain contradictory fault-observation assertions. The user authorized preserving their
+unchanged historical failures separately, requiring the six original K01 positive-invariant probes
+unchanged and all distinct new acceptance probes to pass. Original sources/reports remain untouched;
+no failed harness is reported as passed. This clarification changes test accounting only, not
+runtime or governance requirements.
+
+SIXTH FULL-ACKNOWLEDGEMENT-IDENTITY REMEDIATION — PENDING INDEPENDENT RE-AUDIT AND ACCEPTANCE.
+Version0.19.0-market-replay.1 remains unchanged. F05/F06/T01/M02, offline/no-financial and Prompt20
+restrictions remain mandatory. This record does not independently close the finding or accept19.

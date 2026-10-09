@@ -1660,3 +1660,19 @@ Historical CODEX-004A/C/E/G/I failed audits remain preserved. Fifth remediation 
 independent re-audit/acceptance, not Prompt19 acceptance. DATA-201–238, F05/F06/T01/M02, single
 writer, trusted root, bounded quality/source-loss and offline/no-financial/no-Prompt20 constraints
 remain mandatory.
+
+## Prompt 19 full acknowledgement identity — CODEX-004L
+
+- **DATA-243**: Semantic checkpointId equality does not prove absence of an acknowledged control
+  transition. The same owner's existing generation/full fingerprint identify its new ACK; no new
+  generation counter, storage certificate, semantic-ID algorithm or checkpoint authority is added.
+- **DATA-244**: A throwing or unsuccessful runtime callback after a real state-only ACK retains the
+  exact required publication before unlock or fallible preparation/diagnostics. Callback error text
+  cannot establish rollback; no-ACK and honest UNKNOWN remain distinct.
+- **DATA-245**: Existing runtime serialization/pending fences exclude simultaneous required
+  same-session generations. Reobserving one ACK reuses its descriptor; discharged pause/resume
+  cycles preserve distinct event identities while semantic checkpointId can remain unchanged.
+
+CODEX-004K's failed audit remains historical. Sixth remediation is not acceptance. Existing733
+permanent tests, DATA-239–242, controller/storage/event/clock/configuration authority, bounded FIFO,
+uncertainty, F05/F06/T01/M02, offline scope and no Prompt20 restrictions remain.
