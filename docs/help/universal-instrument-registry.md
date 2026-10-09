@@ -235,3 +235,40 @@ retain UNKNOWN commitment, even when actual backing storage contains recoverable
 canonicalizes category/kind ordering and binds category meanings, parents and deprecation. Exported
 defaultPolicy/defaultTaxonomy templates are frozen; use structuredClone before proposing changes
 through the existing governed configuration workflow. Registered versions cannot be mutated.
+
+## Final normalization and recovery integrity — CODEX-005B
+
+Every publishing API (register, revise, importRecords, importJson) validates the final normalized
+record before calling the repository. The effective maxRecordBytes bounds both native traversal and
+the UTF-8 canonical JSON definition, including claims, evidence, relationships and optional
+metadata. Normalization expansion does not increase the governed budget. Supported transformations
+finish in NFC after case/PAIR notation conversion; invalid oversized or empty output is rejected,
+never truncated. A pre-entry INVALID_INPUT/NONE leaves the acknowledged history intact and permits
+valid retry. Genuine repository uncertainty remains UNKNOWN and requires recovery.
+
+Retained N1 traces describe displayName, identifier/alias values and applicable strike/coupon
+normalization; fields never traced by the contract do not gain invented historical originals. New
+entries include canonical paths (for example displayName, identity.coupon, aliases.0.value) whose
+indices refer to the sorted final claims. Entries use ascending existing fingerprint order. Recovery
+checks each original transformation, rule, status, final value and one-to-one field association.
+Older entirely pathless traces are qualified by the same rule/value matching and original checks;
+identical legacy entries may describe distinct equal-valued fields. Mixed pathful/pathless entries,
+missing/extra/conflicting associations or contradictory traces fail recovery without repairing or
+deleting files. Metadata remains bounded by maxSnapshotBytes and field cardinality. Trace paths and
+originals do not affect I1 economic IDs or semantic revision IDs.
+
+A trace consistency check detects logical contradictions; self-hashed storage cannot prove that a
+self-consistent historical original was authentic. Legacy pathless evidence cannot distinguish
+original attribution among equal-valued fields with the same rule. Trusted evidence owners, honest
+certificates, trusted root and a single writer remain necessary; no cryptographic source attestation
+or historical exchange truth is implied.
+
+Resolution.evidence contains general candidate evidence plus the certificates of claims actually
+matched by the scoped query, sorted and deduplicated by full fingerprint. Unmatched identifier/alias
+certificates are omitted. canonicalId queries retain general evidence only. Evidence inclusion does
+not promote unverified claims or alter exact/qualified/ambiguous selection semantics.
+
+This is implementation remediation, not independent acceptance. The failed CODEX-005A report and
+results remain historical evidence. F05 Windows and F06 production throughput/power-loss durability
+remain unqualified; T01/M02 and all inherited restrictions remain. No broker, execution, production
+deployment or Prompt21 authorization is granted.

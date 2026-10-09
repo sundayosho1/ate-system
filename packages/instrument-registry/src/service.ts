@@ -28,6 +28,7 @@ import {
 } from "./policy.js";
 import {
   prepare,
+  validateNormalizationTrace,
   identityId,
   definitionFingerprint,
   normalize,
@@ -49,6 +50,7 @@ const revisionSchema = z
           value: z.string(),
           rule: z.string(),
           version: z.literal("N1"),
+          path: z.string().min(1).max(128).optional(),
         })
         .strict(),
     ),
@@ -270,6 +272,7 @@ export class InstrumentRegistry {
     const ids = new Set<string>();
     for (const row of s.revisions) {
       const prepared = prepare(row.definition, this.policy);
+      validateNormalizationTrace(prepared.definition, row.normalization, this.policy);
       if (fingerprint(prepared.definition) !== fingerprint(row.definition))
         throw Error("NONCANONICAL_DEFINITION");
       if (
@@ -844,6 +847,7 @@ export class InstrumentRegistry {
         .safeParse(safeClone(raw));
       const boundary =
         this.state?.fingerprint ?? fingerprint({ registryId: this.registryId, empty: true });
+      let matchedEvidence: Evidence[] = [];
       const result = (
         status: Resolution["status"],
         candidates: Revision[] = [],
@@ -852,7 +856,15 @@ export class InstrumentRegistry {
       ): Resolution => ({
         status,
         candidates,
-        evidence: candidates.flatMap((r) => r.definition.evidence),
+        evidence: [
+          ...new Map(
+            [...candidates.flatMap((r) => r.definition.evidence), ...matchedEvidence].map(
+              (e) => [fingerprint(e), e] as const,
+            ),
+          ).entries(),
+        ]
+          .sort(([a], [b]) => compare(a, b))
+          .map(([, e]) => e),
         normalization,
         reason,
         snapshotFingerprint: boundary,
@@ -927,6 +939,28 @@ export class InstrumentRegistry {
       if (!found.length) return result("NOT_FOUND", [], "NOT_FOUND", n);
       if (found.length > this.policy.maxCandidates)
         return result("AMBIGUOUS", [], "CANDIDATE_CAPACITY", n);
+      if (!v.canonicalId)
+        matchedEvidence = found.flatMap((r) =>
+          v.scheme
+            ? r.definition.identifiers
+                .filter(
+                  (i) =>
+                    i.scheme === v.scheme &&
+                    i.scope === v.scope &&
+                    i.value === n?.value &&
+                    (!v.authority || i.authority === v.authority),
+                )
+                .map((i) => i.evidence)
+            : r.definition.aliases
+                .filter(
+                  (a) =>
+                    a.kind === v.aliasKind &&
+                    a.scope === v.scope &&
+                    a.rule === v.rule &&
+                    a.value === n?.value,
+                )
+                .map((a) => a.evidence),
+        );
       if (found.length > 1) return result("AMBIGUOUS", found, "SCOPED_EVIDENCE_REQUIRED", n);
       return result(
         exact ? "EXACT_MATCH" : "QUALIFIED_MATCH",

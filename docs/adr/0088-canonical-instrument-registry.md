@@ -73,3 +73,24 @@ economic identities. Explicit associateLegacyInstrument validation/reference lin
 record to a caller-selected immutable registry revision, preserving the old UUID/hash. No automatic
 economic identity proof, provider mapping, old lifecycle authorization or retrospective data rewrite
 occurs. This resolves the schema ownership overlap through an opt-in public-contract adapter.
+
+## CODEX-005B corrective invariant
+
+Admission and recovery share the final normalized-definition contract: strict schema, bounded
+traversal and UTF-8 canonical stored JSON bytes under the unchanged governed maxRecordBytes.
+Normalization completes NFC after case conversion and PAIR delimiter removal. Invalid expansion
+rejects before repository entry; post-entry uncertainty and exact acknowledgement rules are
+unchanged. No new clock, configuration, fingerprint or repository authority is introduced.
+
+An additive optional Normalization.path binds new N1 traces to sorted final definition fields.
+Recovery validates complete, ordered, one-to-one trace transformations; valid legacy pathless traces
+use rule/value matching and remain immutable. Exact originals and paths are snapshot metadata,
+excluded from economic/semantic revision identity. Traces retain their existing snapshot budget;
+this is not a new record-policy knob or a relaxation of definition bounds. Hashes establish internal
+consistency, not authenticity of self-consistent source originals, and legacy equal-valued fields
+remain indistinguishable without paths.
+
+Resolution summaries include matching scoped claim evidence alongside general definition evidence,
+with deterministic deduplication and unchanged selection/verification classifications. The original
+failed CODEX-005A evidence is preserved separately. This decision records targeted corrective
+implementation only; technical re-audit and governance acceptance remain pending.

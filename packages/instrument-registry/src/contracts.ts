@@ -251,6 +251,8 @@ export const fail = (code: string, commitment: "NONE" | "UNKNOWN" = "NONE"): Res
   error: { code, commitment },
 });
 export type Normalization = {
+  /** Canonical field path in new traces; absent in legacy N1 evidence. */
+  readonly path?: string;
   readonly status: "NORMALIZED" | "UNCHANGED" | "AMBIGUOUS" | "UNSUPPORTED" | "INVALID";
   readonly original: string;
   readonly value: string;
