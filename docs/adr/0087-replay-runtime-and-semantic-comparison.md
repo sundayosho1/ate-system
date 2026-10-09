@@ -148,3 +148,50 @@ lock cleared. No second lifecycle, clock or persistence authority is introduced.
 
 This is targeted remediation pending independent re-audit, not acceptance. F05/F06/T01/M02,
 single-writer/trusted-root, offline scope and no Prompt 20/trading restrictions remain mandatory.
+
+## Post-admission boundary exception safety — CODEX-004H
+
+CODEX-004G audited `24d83df399a4cde76d668ddbd102d53dd46cd89a` and failed HIGH A19-H01-R3. After
+normal admission, a real source revalidation failure could escape unsafe diagnostic extraction
+before the replay boundary established FAILED. The acknowledged owner remained READY and was falsely
+reported healthy. All twelve hostile-value probes and the three ordinary-error controls remain
+preserved as historical evidence.
+
+Post-admission finalization uses the existing controller authority, separately from provisional
+initialization. It establishes FAILED, or retains RECOVERY_REQUIRED when controller state or a real
+obligation requires it, before optional diagnostics. The shared private normalizer reads a message
+at most once under a guard, accepts bounded string codes and performs no prototype inspection or
+coercion. Initialization retains UNCLASSIFIED_INITIALIZATION_FAILURE; post-admission diagnostics use
+UNCLASSIFIED_BOUNDARY_FAILURE. Neither fallback certifies storage outcomes. A reentrant getter's
+stop request cannot replace the selected terminal failure; real obligations remain authoritative
+after sampling. The existing finally paths release controller and runtime locks.
+
+Event/timestamp stepping, run-to-time and bounded reconstruction return REPLAY_BOUNDARY_FAILED.
+Snapshot source-verification failure retains SNAPSHOT_REJECTED but now finalizes the owner; ordinary
+invalid snapshot requests after successful verification remain nonfatal. Read reconciliation source
+failure returns structured SOURCE_VERIFICATION_FAILED instead of escaping its primary rejection,
+while preserving pending-read evidence. Control and consumer-read source failures already have
+structured terminal handling. Comparison validates immutable checkpoint evidence and does not own
+controller lifecycle; no unsupported adjacent comparison defect is inferred or refactored.
+
+An acknowledged session is never disposed as a provisional admission. Its previous checkpoint,
+cursor, scheduler state, immutable input origin, content and publication markers remain intact when
+source validation rejects before a new write. Real unknown/committed storage outcomes and runtime
+control publication remain protected through their existing recovery contracts. Readiness/health use
+the existing terminal state to fail closed, with no second lifecycle or configuration authority.
+
+Restoring source bytes alone does not reset FAILED to READY. The failed owner blocks new replay
+operations and retains its governed identity; repeated runtime stop reports unresolved failure.
+Fresh trusted recovery must revalidate the original inputs and recover the acknowledged repository
+state, then use normal governed operations. Pending reads still require actual recorded source
+reconciliation. An earlier checkpoint remains valid evidence; it is not a certificate that a later
+source check succeeded.
+
+Remediation is pending independent re-audit and acceptance. Version, dependencies, upstream owners,
+F05/F06/T01/M02, trusted-root/single-writer, offline research scope and Prompt 20 restrictions
+remain.
+
+The run-to-time and bounded-reconstruction wrappers also reject terminal failure/uncertainty before
+returning an already-reached target. This prevents an unchanged checkpoint from being reported as a
+successful operation by a failed owner. Stable completed/stopped idempotent reuse remains governed
+by the existing contract; the new guard does not write or clear any obligation.

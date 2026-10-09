@@ -339,3 +339,42 @@ CODEX-004E's failed audit remains historical; CODEX-004F is remediation pending 
 re-audit, not Prompt 19 acceptance. F05/F06/T01/M02, trusted-root/single-writer, bounded quality,
 explicit source-loss reconciliation, offline scope and no live/broker/trading/production/Prompt-20
 restrictions remain.
+
+## Post-admission source failure — CODEX-004H
+
+An admitted session owns durable evidence. If later source revalidation fails during replay, the
+controller enters FAILED (or retains a genuine RECOVERY_REQUIRED obligation) before examining the
+optional rejection message. stepEvent, stepTimestamp, runToTime and reconstructToTime return
+REPLAY_BOUNDARY_FAILED. Hostile getters, proxies and primitive messages cannot escape as diagnostic
+errors or leave the owner healthy. A single guarded read yields a bounded code or
+UNCLASSIFIED_BOUNDARY_FAILURE. Initialization retains its original diagnostic fallback and public
+INITIALIZATION_FAILED result.
+
+Snapshot source failure returns SNAPSHOT_REJECTED with terminal failure; an ordinary invalid
+snapshot request after successful source verification remains nonfatal. Read-reconciliation source
+failure returns SOURCE_VERIFICATION_FAILED and retains unresolved read evidence. These paths use the
+existing controller authority. A reentrant diagnostic shutdown cannot replace terminal failure with
+a healthy state; operation locks release through their existing finally paths.
+
+Readiness becomes NOT_READY and health DEGRADED. Previous acknowledged checkpoints, cursor/time,
+scheduler descriptors, immutable source lineage and durable content/markers remain preserved when
+validation rejects before any new repository operation. The registered identity is retained; it is
+not an empty provisional admission. Existing unknown/committed storage and runtime control
+publication obligations cannot be cleared by an error code, empty directory or null new
+acknowledgement.
+
+Restore the original immutable source and perform fresh trusted recovery through the existing owner
+contract. Restoring bytes does not reset a failed controller to READY. New commands remain rejected,
+and repeated shutdown cannot conceal failure. Fresh recovery validates existing acknowledged
+content; pending reads and undelivered control events still require their actual
+reconciliation/retry.
+
+CODEX-004G's failed audit and all earlier histories remain intact. CODEX-004H is remediation pending
+independent re-audit, not acceptance. F05/F06/T01/M02, bounded quality/correction/source-loss rules,
+trusted-root/single-writer, offline scope and no broker/trading/production/Prompt 20 approval
+remain.
+
+The run-to-time and bounded-reconstruction wrappers also reject terminal failure/uncertainty before
+returning an already-reached target. This prevents an unchanged checkpoint from being reported as a
+successful operation by a failed owner. Stable completed/stopped idempotent reuse remains governed
+by the existing contract; the new guard does not write or clear any obligation.

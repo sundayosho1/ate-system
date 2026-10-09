@@ -176,3 +176,37 @@ Current status: THIRD EXCEPTION-SAFETY REMEDIATION — PENDING INDEPENDENT RE-AU
 F05/F06/T01/M02, single-writer/trusted-root, bounded quality and explicit loss reconciliation
 remain. No Prompt 19 acceptance successor, production/trading approval or Prompt 20 authorization is
 created.
+
+## Fourth post-admission remediation — CODEX-004G/004H
+
+CODEX-004G audited `24d83df399a4cde76d668ddbd102d53dd46cd89a` and failed HIGH A19-H01-R3 despite 646
+passing tests / 51 files. Initializer-specific R2 was closed, but post-admission runBoundary
+diagnostics could throw before terminal failure classification, leaving false READY/HEALTHY. The
+original three passing controls and twelve failed probes, source/assertions/results and audit report
+remain historical evidence outside the checkout.
+
+CODEX-004H starts from that exact SHA on `codex/prompt-19-boundary-exception-remediation`.
+Controller post-admission finalization precedes the reused guarded diagnostic normalizer, retains
+acknowledged identity/checkpoint and genuine obligations, and restores its selected terminal state
+after reentrant diagnostics. Source-failure paths for snapshots and pending-read reconciliation use
+the same authority; valid-source snapshot-request rejection remains nonfatal. No runtime/upstream
+owner, version, dependency, capability or accepted Prompt 18 governance change is introduced.
+
+`tests/market-replay/boundary-exception-remediation.test.ts` covers the real-file 15-case audit
+matrix, five bounded-reconstruction variants, lifecycle-before-access observation, phase-A unchanged
+durable identity and phase-B unavailable commands/repeated failed stop/fresh trusted recovery.
+Additional cases cover proxy/primitive/coercion faults, concurrent/reentrant shutdown/commands,
+honest actual unknown/committed storage outcomes, recovered content, pending runtime events,
+configuration/origin mismatch, governed branch reconstruction and adjacent source-failure paths.
+Original permanent tests remain unchanged; assertions captured in getters are evaluated outside
+normalization catches.
+
+The external delivery report records actual final permanent counts/gates, original unchanged G/E/A/C
+results, separate 24-fault execution, approved phase-corrected accounting, protected-file/evidence
+hashes and exact local/remote publication identity. The two unchanged C cumulative-counter failures
+remain reported separately; their authorized phase-corrected probes verify zero effects immediately
+after rejection and legitimate later persistence. No failed history is rewritten or labeled passed.
+
+This is implementation remediation only, pending independent re-audit and acceptance.
+F05/F06/T01/M02, current-registry and bounded quality/correction/source-loss constraints,
+trusted-root/single-writer, offline scope and Prompt 20 restrictions remain mandatory.

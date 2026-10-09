@@ -20,7 +20,10 @@ import type {
 export type ReplayCommandResult =
   | Readonly<{ ok: true; checkpoint: ReplayCheckpoint }>
   | Readonly<{ ok: false; code: string; state: ReplayState }>;
-function initializationFailureCode(rejection: unknown): string {
+function rejectionFailureCode(
+  rejection: unknown,
+  fallback: "UNCLASSIFIED_INITIALIZATION_FAILURE" | "UNCLASSIFIED_BOUNDARY_FAILURE",
+): string {
   // Arbitrary verifier rejection values are not trusted diagnostic objects.
   // Read at most once; never coerce, inspect stacks or format the rejection.
   try {
@@ -36,7 +39,7 @@ function initializationFailureCode(rejection: unknown): string {
   } catch {
     // Diagnostic extraction cannot interrupt authoritative failure handling.
   }
-  return "UNCLASSIFIED_INITIALIZATION_FAILURE";
+  return fallback;
 }
 export class ReplayController {
   private readonly sequencer: DeterministicReplaySequencer;
@@ -110,7 +113,7 @@ export class ReplayController {
     // Complete lifecycle classification before optional diagnostic callbacks.
     if (this.sourceVerification === "IN_FLIGHT") this.sourceVerification = "FAILED";
     this.state = this.obligation ? "RECOVERY_REQUIRED" : "FAILED";
-    this.lastFailureCode = initializationFailureCode(rejection);
+    this.lastFailureCode = rejectionFailureCode(rejection, "UNCLASSIFIED_INITIALIZATION_FAILURE");
     return this.fail("INITIALIZATION_FAILED");
   }
   /** Runtime containment for an exceptional initialization exit. Active owner work
@@ -118,6 +121,20 @@ export class ReplayController {
   public containInitializationException(rejection: unknown): ReplayCommandResult {
     if (this.busy) return this.fail("INITIALIZATION_FAILED");
     return this.finishInitializationFailure(rejection);
+  }
+  private finishBoundaryFailure(
+    rejection: unknown,
+    code: "REPLAY_BOUNDARY_FAILED" | "SNAPSHOT_REJECTED" | "SOURCE_VERIFICATION_FAILED",
+  ): ReplayCommandResult {
+    // Unlike provisional admission, this owner retains its acknowledged session.
+    // Classify from authoritative state/obligations before optional callbacks.
+    const failedState =
+      this.obligation || this.state === "RECOVERY_REQUIRED" ? "RECOVERY_REQUIRED" : "FAILED";
+    this.state = failedState;
+    this.lastFailureCode = rejectionFailureCode(rejection, "UNCLASSIFIED_BOUNDARY_FAILURE");
+    // A getter may request stop while busy; STOPPING cannot replace this failure.
+    this.state = this.obligation ? "RECOVERY_REQUIRED" : failedState;
+    return this.fail(code);
   }
   private fail(code: string, state: ReplayState = this.state): ReplayCommandResult {
     return { ok: false, code, state };
@@ -317,12 +334,7 @@ export class ReplayController {
       this.pauseRequested = false;
       return result;
     } catch (error) {
-      this.lastFailureCode =
-        error instanceof Error && /^[A-Z][A-Z0-9_]{0,127}$/u.test(error.message)
-          ? error.message
-          : "UNCLASSIFIED_BOUNDARY_FAILURE";
-      if (this.state !== "RECOVERY_REQUIRED") this.state = "FAILED";
-      return this.fail("REPLAY_BOUNDARY_FAILED");
+      return this.finishBoundaryFailure(error, "REPLAY_BOUNDARY_FAILED");
     } finally {
       this.busy = false;
     }
@@ -343,6 +355,10 @@ export class ReplayController {
     if (this.busy) return this.fail("REENTRANT_OPERATION");
     if (!this.checkpoint || at < this.checkpoint.logicalTime || at > this.specification.endTime)
       return this.fail("REPLAY_TIME_RANGE");
+    // Even an already reached target cannot acknowledge a failed owner or
+    // unresolved operation as successful. Stable completed/stopped reuse stays.
+    if (this.obligation || ["FAILED", "RECOVERY_REQUIRED", "STOPPING"].includes(this.state))
+      return this.fail("INVALID_LIFECYCLE");
     if (this.state === "PAUSED") return this.fail("SESSION_PAUSED");
     let result: ReplayCommandResult = { ok: true, checkpoint: this.checkpoint };
     while (this.checkpoint.logicalTime < at || !this.checkpoint.timestampComplete) {
@@ -435,7 +451,11 @@ export class ReplayController {
       return this.fail("SNAPSHOT_CAPACITY");
     this.busy = true;
     try {
-      await this.inputs.verify();
+      try {
+        await this.inputs.verify();
+      } catch (error) {
+        return this.finishBoundaryFailure(error, "SNAPSHOT_REJECTED");
+      }
       const pipeline = new ReplayAggregationPipeline(this.specification, this.checkpoint);
       const snapshot = pipeline.snapshot(
         streamId,
@@ -612,7 +632,11 @@ export class ReplayController {
       return this.fail("EVIDENCE_CAPACITY");
     this.busy = true;
     try {
-      await this.inputs.verify();
+      try {
+        await this.inputs.verify();
+      } catch (error) {
+        return this.finishBoundaryFailure(error, "SOURCE_VERIFICATION_FAILED");
+      }
       return this.publish(
         createReplayCheckpoint({
           ...this.checkpoint,

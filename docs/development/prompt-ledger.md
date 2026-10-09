@@ -304,3 +304,24 @@ verification/probe/publication results are in its external delivery report; see
 Prompt 17/18 governance history changes. No acceptance successor, main merge, financial capability
 or Prompt 20 work is authorized. F05/F06/T01/M02, single-writer/trusted-root, offline scope and all
 inherited operational restrictions remain mandatory.
+
+## Prompt 19 fourth boundary exception-safety remediation — CODEX-004G/004H
+
+CODEX-004G audited `24d83df399a4cde76d668ddbd102d53dd46cd89a` and returned RE-AUDIT FAILED for HIGH
+A19-H01-R3: post-admission rejection diagnostics could interrupt replay-boundary terminal failure
+and leave false READY/HEALTHY. The original admission corrections remained closed; all historical
+failed audit/remediation references above and CODEX-004G's independent evidence remain preserved.
+
+| Prompt | Current status                                                              | Version                  | Independent acceptance      |
+| ------ | --------------------------------------------------------------------------- | ------------------------ | --------------------------- |
+| 19     | FOURTH BOUNDARY EXCEPTION-SAFETY REMEDIATION — PENDING INDEPENDENT RE-AUDIT | `0.19.0-market-replay.1` | PENDING — not self-accepted |
+| 20     | NOT STARTED — NOT AUTHORIZED                                                | None                     | None                        |
+
+CODEX-004H uses only `codex/prompt-19-boundary-exception-remediation` from the exact audited SHA.
+Post-admission lifecycle-first handling retains acknowledged identity/evidence, uses existing
+controller authority and a shared guarded normalizer, and returns stable phase-specific failures.
+See [completion evidence](prompt-19-completion-evidence.md) and the external delivery report for
+actual tests/security/publication results. No unrelated prompt status or accepted Prompt 18
+governance is changed. No acceptance successor, main merge, financial capability or Prompt 20 work
+is performed. F05/F06/T01/M02, trusted-root/single-writer, offline scope and all inherited
+restrictions remain.

@@ -1621,3 +1621,22 @@ invariants, F05/F06/T01/M02, owner boundaries and Prompt 20 restrictions remain 
 CODEX-004A/C/E failed audit history is preserved. Remediation remains pending independent re-audit
 and acceptance; DATA-201–230, F05/F06/T01/M02, existing owner boundaries and Prompt 20 restrictions
 remain.
+
+## Prompt 19 post-admission exception safety — CODEX-004H
+
+- **DATA-235**: Replay-boundary failure classification precedes diagnostic access. FAILED or a
+  genuine RECOVERY_REQUIRED state cannot be bypassed by hostile rejection values or replaced by
+  reentrant diagnostic stop requests. Optional codes never certify commitment outcomes.
+- **DATA-236**: Post-admission failure retains the acknowledged owner, checkpoint, cursor,
+  scheduler, source origin and durable artifacts. Provisional admission disposal cannot delete an
+  acknowledged session or erase unknown/committed/read/control-publication obligations.
+- **DATA-237**: Step/run/reconstruction failures return stable REPLAY_BOUNDARY_FAILED. Snapshot
+  source failure and read-reconciliation source failure finalize the same owner while retaining
+  their phase-specific public codes. A valid-source rejected snapshot request remains nonfatal.
+- **DATA-238**: Failed post-admission owners remain unavailable after both locks clear. Restored
+  source context alone cannot silently reset lifecycle; fresh trusted recovery and actual read/event
+  reconciliation remain required. Historical failed audit probes and results stay unchanged.
+
+CODEX-004G's failed audit is preserved; this correction is not acceptance. All earlier invariants,
+F05/F06/T01/M02, owner boundaries, security controls, offline scope and Prompt 20 restrictions
+remain.
