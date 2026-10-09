@@ -368,3 +368,24 @@ See completion evidence/external delivery for actual verification, historical pr
 and publication state. No unrelated prompt status, earlier failure or accepted17/18 record is
 replaced. Separate independent technical and governance review remain required. F05/F06/T01/M02,
 trusted-root/single-writer, offline/no-financial/no-Prompt20 restrictions remain.
+
+## CODEX-004N — Prompt 19 seventh targeted remediation record
+
+A19-H01-R4-R2 authoritative success-path acknowledgement remediation is implemented on
+`codex/prompt-19-authoritative-success-ack-remediation`, directly from
+`84587f10d0b4e4478463a0b46b9e4dee2944e55c`, version `0.19.0-market-replay.1`. The actual owner ACK
+is discovered/retained before any callback result property is inspected; valid stale success is
+reconciled to the actual checkpoint under the existing result union. Additive permanent regressions
+and unchanged historical probes provide implementation evidence.
+
+Original M failed audit/source/results and earlier historical audit/remediation records are
+preserved unchanged. Delivery verification and published identity are recorded in the external
+CODEX-004N report; no independent finding closure or governance acceptance is recorded here.
+
+**Prompt 19: acceptance PENDING; remediation awaiting independent re-audit.** **Prompt 20: NOT
+AUTHORIZED.**
+
+Accepted Prompt 17/18 records and unrelated prompt statuses are unchanged. F05/F06/T01/M02, trusted
+terminating owner/repository ports, trusted root/single writer, bounded quality/consumer-loss/source
+fences, legacy/native correction limits and offline research-only scope remain. No production,
+broker, trading, execution, durable outbox or new financial authority is introduced.

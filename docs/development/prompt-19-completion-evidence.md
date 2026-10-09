@@ -267,3 +267,29 @@ runtime or governance requirements.
 SIXTH FULL-ACKNOWLEDGEMENT-IDENTITY REMEDIATION — PENDING INDEPENDENT RE-AUDIT AND ACCEPTANCE.
 Version0.19.0-market-replay.1 remains unchanged. F05/F06/T01/M02, offline/no-financial and Prompt20
 restrictions remain mandatory. This record does not independently close the finding or accept19.
+
+## CODEX-004N authoritative success-path acknowledgement remediation
+
+Parent: `84587f10d0b4e4478463a0b46b9e4dee2944e55c`; dedicated branch:
+`codex/prompt-19-authoritative-success-ack-remediation`. Version remains `0.19.0-market-replay.1`.
+CODEX-004M's genuine stale-success fault is preserved outside the checkout with its original
+sources, results and reports. Before remediation its unchanged campaign is 17/18 (one genuine
+failure); post-remediation results are recorded in the external N delivery report.
+
+Runtime-only correction unifies actual owner ACK discovery before success/failure result inspection.
+Existing checkpoint validation follows retention; valid stale success reconciles to the actual ACK.
+No new storage/event/hash authority, controller redesign, dependency or capability change is made.
+The additive `authoritative-success-ack-remediation.test.ts` covers actual filesystem control and
+cursor-changing ACKs, generic command operations, report getters, no-op/no-ACK, preparation
+failures, uncertain delivery, exact retry, capacity/FIFO, reentrancy, shutdown and real fenced
+recovery.
+
+All starting 762 permanent tests are preserved byte-for-byte. Historical K contradictory
+confirmation assertions and C cumulative-counter measurement failures remain unchanged and are
+reported separately from positive-invariant acceptance alternatives; they are not claimed passed.
+The complete immutable before/after evidence, commands, gate outcomes and publication SHA are in
+`/workspace/ate-reports/ATE-CODEX-004N-PROMPT-19-AUTHORITATIVE-SUCCESS-PATH-ACKNOWLEDGEMENT-REMEDIATION-DELIVERY-REPORT.md`.
+
+Implementation completion is subject to recorded successful verification and does not close
+A19-H01-R4-R2 independently. Prompt 19 acceptance stays PENDING; Prompt 20 NOT AUTHORIZED.
+F05/F06/T01/M02 and all bounded offline research-only restrictions remain.

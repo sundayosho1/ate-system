@@ -1676,3 +1676,18 @@ remain mandatory.
 CODEX-004K's failed audit remains historical. Sixth remediation is not acceptance. Existing733
 permanent tests, DATA-239–242, controller/storage/event/clock/configuration authority, bounded FIFO,
 uncertainty, F05/F06/T01/M02, offline scope and no Prompt20 restrictions remain.
+
+### CODEX-004N authoritative command acknowledgement
+
+- **DATA246:** Runtime command callbacks report operations; only the same authenticated owner's
+  actual pre/post acknowledged checkpoint identifies advancement. Success and failure share
+  generation/full-fingerprint discovery and synchronous retention before callback property access.
+- **DATA247:** Valid stale success evidence is reconciled to the actual ACK after retention and
+  existing checkpoint validation. Missing/malformed success cannot erase that obligation, and
+  unchanged no-op success creates no new publication. Unknown commitment is not a success ACK.
+- **DATA248:** Preparation, dispatch, ambiguous reporting and repeated shutdown preserve the exact
+  original retained summary under existing bounded capacity/FIFO/uncertainty fences. Callback
+  reports cannot substitute old event identity for a genuinely new acknowledged generation.
+
+These are implementation guarantees pending independent re-audit. Existing F05/F06/T01/M02 and
+offline research-only restrictions are unchanged; no durable outbox or trading approval is added.

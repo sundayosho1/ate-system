@@ -440,3 +440,30 @@ owner commands. Event summaries remain volatile in-process evidence, not a durab
 exactly-once guarantee. F05/F06/T01/M02 and offline/no-production/no-trading/no-Prompt20
 restrictions remain. Sixth remediation is pending independent technical re-audit and governance
 acceptance.
+
+## CODEX-004N command report and acknowledgement policy
+
+Use `service.command(sessionId, owner => ...)` with the existing `ReplayCommandResult` union. The
+owner's actual checkpoint is authoritative. A callback may return a valid older success checkpoint
+after real work; the runtime returns `ok: true` with the actual ACK and publishes that ACK's exact
+summary. The old report cannot select an old event as a substitute. Read the returned checkpoint
+rather than assuming the callback's object identity survives reconciliation.
+
+Missing/malformed success evidence rejects after any real ACK has been retained. Throwing result
+getters and callback failures cannot erase a new ACK. Unsuccessful callback results and original
+rejections retain their semantics. A valid unchanged no-op success returns the current ACK without a
+new summary; it does not certify that a new write occurred. Differing evidence with no actual
+advancement rejects (`REPLAY_COMMAND_RESULT_MISMATCH`). Genuine storage uncertainty or an
+unsettled/failed owner rejects success (`REPLAY_COMMAND_ACKNOWLEDGEMENT_REQUIRED`); inspect owner
+diagnostics and follow existing fenced recovery, rather than interpreting callback text as proof.
+
+A failed command may still have acknowledged work: inspect pending control publications and use
+`retryControlEvents()` for the original retained envelope. Pending/failed/uncertain publication
+keeps readiness NOT_READY and health DEGRADED; further admission/commands and successful shutdown
+remain fenced. Repeated shutdown cannot conceal it. Restoring configuration and successful retry can
+restore availability only if every other readiness invariant holds; STOPPING stays unavailable.
+
+Pending summaries remain bounded and volatile. Fresh trusted recovery reannounces the recovered
+current ACK, not every historical missed summary. No exactly-once subscriber, Windows durability,
+production throughput, actual power-loss durability or trading qualification is claimed. F05/F06/
+T01/M02, current registry context, trusted root/single writer and offline research scope remain.

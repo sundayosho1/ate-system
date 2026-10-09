@@ -266,3 +266,31 @@ pause/resume/stop callback failures, same-ID cycles, capacity one, configuration
 non-Error/getter/malformed outcomes, cancellation and honest UNKNOWN recovery. Prior R3/R4, FIFO,
 cached envelope and uncertainty behavior remain. This is sixth implementation remediation pending
 independent re-audit and separate acceptance; F05/F06/T01/M02 and no Prompt20 restrictions remain.
+
+## CODEX-004N: authoritative acknowledgement across callback outcomes
+
+A callback result is an operation report, not independent authority over its replay owner's
+acknowledged checkpoint. Runtime commands capture the pre-operation ACK under the existing lock,
+then use the same owner and generation/full fingerprint to retain any newly acknowledged checkpoint
+before reading result properties. Success, unsuccessful reports and exceptions share this discovery.
+No callback success flag, checkpoint field or error message certifies storage.
+
+Successful report evidence is validated through the existing checkpoint validator after retention. A
+valid older checkpoint from the same immutable specification is reconciled to an `ok: true` result
+containing the actual current ACK. Only that ACK selects a new summary. Missing, malformed or
+inconsistent report evidence rejects while preserving the real pending summary. Unchanged valid
+no-op success returns the same ACK without a new summary; a differing report without actual
+advancement rejects with `REPLAY_COMMAND_RESULT_MISMATCH`. Busy, failed, stopping or
+storage-uncertain owners cannot supply a success certificate and reject with
+`REPLAY_COMMAND_ACKNOWLEDGEMENT_REQUIRED`. The public result union and API are unchanged.
+
+Retention precedes report validation, diagnostics, configuration, clock/factory access and dispatch.
+The bounded pending map, FIFO retry, original cached envelope, sticky uncertainty and shutdown
+fences remain intact. Callback rejection/unsuccessful semantics are preserved. Event identity and
+semantic checkpoint algorithms are unchanged. Intermediate controller acknowledgements within a
+composite callback are not promoted to a durable summary outbox; the runtime protects the actual
+final acknowledged checkpoint under the existing in-process contract.
+
+A19-H01-R4-R2 remediation is implementation evidence pending independent re-audit, not acceptance.
+F05/F06/T01/M02, trusted terminating owners/repositories, trusted root, single writer and offline
+research restrictions remain. No Prompt 20 or financial execution is authorized.

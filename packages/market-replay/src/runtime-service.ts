@@ -16,6 +16,7 @@ import type {
 import { canonicalRevisionId, hash, freeze } from "@ate/multitimeframe";
 import { createGovernedReplaySpecification } from "./specification.js";
 import { replayFromEffective } from "./configuration.js";
+import { validateReplayCheckpoint } from "./checkpoint.js";
 import { ReplayController } from "./controller.js";
 import type { ReplayCommandResult } from "./controller.js";
 import type { ReplayCheckpointRepository } from "./repository.js";
@@ -313,8 +314,33 @@ export class ReplayRuntimeService {
       if (this.lifecycle !== "READY") throw Error("REPLAY_RUNTIME_NOT_READY");
       this.requirePublicationCapacity(c.specification);
       const result = await operation(c);
-      if (result.ok) await this.emit(this.retainPublication(result.checkpoint, c.specification));
-      else this.retainAdvancedCheckpoint(c, previous);
+      // The callback reports an operation; only this owner certifies its ACK.
+      // Retain before inspecting even result.ok or any reported checkpoint getter.
+      const publication = this.retainAdvancedCheckpoint(c, previous);
+      const ok = result.ok;
+      if (ok === true) {
+        const acknowledged = publication?.checkpoint ?? c.currentCheckpoint();
+        const diagnostic = c.diagnostics();
+        if (
+          !acknowledged ||
+          diagnostic.busy ||
+          diagnostic.obligation ||
+          !["READY", "RUNNING", "PAUSED", "STOPPED", "COMPLETED"].includes(diagnostic.state)
+        )
+          throw Error("REPLAY_COMMAND_ACKNOWLEDGEMENT_REQUIRED");
+        // Validate the report after retention, then reconcile valid stale success
+        // to the actual ACK. A no-op cannot claim a different acknowledged identity.
+        const reported = validateReplayCheckpoint(result.checkpoint, c.specification);
+        if (
+          !publication &&
+          (reported.generation !== acknowledged.generation ||
+            reported.fingerprint !== acknowledged.fingerprint)
+        )
+          throw Error("REPLAY_COMMAND_RESULT_MISMATCH");
+        if (publication) await this.emit(publication);
+        return { ok: true, checkpoint: acknowledged };
+      }
+      if (ok !== false) throw Error("REPLAY_COMMAND_RESULT_INVALID");
       return result;
     } catch (error) {
       // A caller can reject after its owner acknowledged real work. Do not infer
@@ -328,7 +354,7 @@ export class ReplayRuntimeService {
   private retainAdvancedCheckpoint(
     controller: ReplayController,
     previous: ReplayCheckpoint | undefined,
-  ): void {
+  ): ControlPublication | undefined {
     const acknowledged = controller.currentCheckpoint();
     // Semantic checkpointId excludes generation/state. For this same immutable
     // owner, generation and full fingerprint identify the existing storage ACK
@@ -338,7 +364,8 @@ export class ReplayRuntimeService {
       (acknowledged.generation !== previous?.generation ||
         acknowledged.fingerprint !== previous?.fingerprint)
     )
-      this.retainPublication(acknowledged, controller.specification);
+      return this.retainPublication(acknowledged, controller.specification);
+    return undefined;
   }
   private publicationCapacity(specification: ReplaySessionSpecification): number {
     return Math.min(
