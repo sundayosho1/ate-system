@@ -446,3 +446,22 @@ and final raw evidence. The recorded approval preserves this distinction.
 
 This authorized appended decision supersedes Prompt 19 pending acceptance; no historical status row
 or unrelated prompt status is rewritten.
+
+## CODEX-005 — Prompt 20 implementation record
+
+Prompt20: IMPLEMENTED — PENDING INDEPENDENT TECHNICAL AUDIT AND GOVERNANCE ACCEPTANCE. Version:
+`0.20.0-instrument-registry.1`. Branch: `codex/prompt-20-universal-instrument-registry`, directly
+from released governance SHA `80ac4eac4becb24f52621b048364b0c137136081`. Explicit project
+instruction “PROCEED WITH PROMPT 20 IMPLEMENTATION” authorized CODEX-005 only. New
+@ate/instrument-registry owns bounded offline canonical identity, taxonomy, normalization, immutable
+revisions, relationships/provenance, import/query and recovery. Existing catalogue and accepted
+data/replay authorities remain unchanged. Help: universal-instrument-registry.md; ADR0088. External
+CODEX-005 delivery records actual verification, implementation SHA and remote publication.
+Implementation is not independent acceptance. Prompt21 NOT STARTED — NOT AUTHORIZED.
+
+Earlier Prompt17–19 conditional acceptance, full failed audit/remediation histories, five
+acknowledged C/K historical failures, O-C01/O-C02 interpretations and unrelated prompt statuses
+remain unchanged. F05/F06/T01/M02, trusted-root/single-writer, bounded quality/conservative
+source/consumer fences, legacy/native correction limitations and volatile summaries remain
+mandatory. No broker/discovery, trading, financial execution, deployment or future-prompt authority
+is granted.

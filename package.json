@@ -1,8 +1,8 @@
 {
   "name": "ate-system",
-  "version": "0.19.0-market-replay.1",
+  "version": "0.20.0-instrument-registry.1",
   "private": true,
-  "description": "ATE bounded offline research foundations through deterministic whole-system market-data replay.",
+  "description": "ATE bounded offline research foundations through canonical instrument registry.",
   "license": "UNLICENSED",
   "type": "module",
   "engines": {

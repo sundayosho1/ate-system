@@ -1,0 +1,19 @@
+{
+  "name": "@ate/instrument-registry",
+  "version": "0.20.0-instrument-registry.1",
+  "private": true,
+  "description": "Bounded offline canonical instrument identity and research registry.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@ate/domain": "0.13.0-market-data-contracts.1",
+    "@ate/time": "0.6.0-time.1",
+    "@ate/configuration": "0.12.0-config-promotion.1",
+    "@ate/multitimeframe": "0.18.0-multitimeframe.1",
+    "zod": "^4.1.13"
+  }
+}

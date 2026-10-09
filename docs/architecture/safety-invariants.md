@@ -1748,3 +1748,25 @@ and final raw evidence. The recorded approval preserves this distinction.
 
 Mandatory safety conditions persist through any governance-only successor; no source, permanent
 test, fixture, dependency, capability or version change is authorized here.
+
+## Prompt20 — Canonical instrument research invariants
+
+- IREG01: I1 economic identity is immutable; ticker/display metadata never substitutes identity.
+- IREG02: Taxonomy and N1 normalization are explicitly versioned policy evidence; no silent family
+  fallback.
+- IREG03: Ambiguous scoped aliases/identifier claims never select first candidate; conflicting batch
+  identities reject atomically.
+- IREG04: Revisions preserve previous immutable history and expected-revision checks; retirement
+  cannot erase evidence.
+- IREG05: Evidence/recording times use accepted clock contracts and never manufacture historic
+  availability.
+- IREG06: Bounded preparation precedes repository entry; actual exact ACK alone advances service
+  state.
+- IREG07: UNKNOWN commitment and corrupt/unfinished recovery fence readiness, reads, writes and
+  shutdown.
+- IREG08: Registry associations do not rewrite datasets/captures/aggregates/replay or replace
+  catalogue lineage.
+- IREG09: Administrative ACTIVE and canonical support are not availability/suitability/trading
+  authorization.
+- IREG10: F05/F06/T01/M02 and Prompt19 publication/exception restrictions survive registry
+  integration.

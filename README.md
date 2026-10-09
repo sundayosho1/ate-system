@@ -245,3 +245,17 @@ branches and validated semantic comparison. See
 remain conditionally accepted; Prompt 19 independent acceptance is pending. F05/F06/T01 and
 current-registry limitations remain mandatory. No production/trading approval or Prompt 20 work is
 implied.
+
+## Prompt 20 canonical instrument research registry
+
+CODEX-005 adds `@ate/instrument-registry`: bounded offline canonical identity, versioned taxonomy,
+scoped alias/identifier normalization and resolution, immutable revisions, relationships,
+provenance, import/query and recovery. See
+[registry help](docs/help/universal-instrument-registry.md) and
+[ADR0088](docs/adr/0088-canonical-instrument-registry.md).
+
+The latest authoritative ledger records Prompt19 conditional acceptance under CODEX-004P; earlier
+pending paragraphs above describe their historical delivery stages. Prompt20 implementation is
+pending independent technical audit and governance acceptance. SUPPORTED is distinct from AVAILABLE,
+SUITABLE and AUTHORIZED. F05/F06/T01/M02 and offline-only restrictions remain. No broker/trading,
+financial execution or production approval; Prompt21 is not authorized.

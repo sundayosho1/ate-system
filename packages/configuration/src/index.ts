@@ -47,3 +47,5 @@ export * from "./realtime-definitions.js";
 export * from "./multitimeframe-definitions.js";
 
 export * from "./replay-definitions.js";
+
+export * from "./instrument-registry-definitions.js";
