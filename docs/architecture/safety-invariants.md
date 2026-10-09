@@ -1691,3 +1691,60 @@ uncertainty, F05/F06/T01/M02, offline scope and no Prompt20 restrictions remain.
 
 These are implementation guarantees pending independent re-audit. Existing F05/F06/T01/M02 and
 offline research-only restrictions are unchanged; no durable outbox or trading approval is added.
+
+## CODEX-004P conditional governance acceptance record
+
+This append-only record accepts implementation `da70072222a22ca1564f307be9891c397496532e`, version
+`0.19.0-market-replay.1`, after CODEX-004O's conditional technical re-audit. **Authorized option A
+approval was explicitly supplied by the project decision-maker in this session.** Capacity supplied:
+Project Owner / Authorized Project Representative. Approval date supplied: 9 October 2026. The
+supplied name field was literally "[Insert your name]"; no personal name is inferred or invented.
+Authority is the session user's explicit project-owner declaration. The approval explicitly
+identifies the exact SHA, conditions, all five historical exceptions, O-C01/O-C02 and reviewer
+participation, and authorizes only these governance appendices. Verbatim external approval evidence:
+CODEX-004P-evidence/authorized-user-approval.txt; SHA256
+`a7ba4f4b17753a39aa185dc87bd6e757af49e6601c57ab9851e03fdb464fd999`. This is authorized governance
+approval, not organizationally independent technical certification. The technical reviewer
+participated in earlier implementation/audit/test work; the review is not organizationally
+independent. Earlier failed audits and remediation evidence remain intact.
+
+Authorized decision: Prompt 19 CONDITIONALLY ACCEPTED for bounded offline research infrastructure
+only. Prompt 20 remains NOT AUTHORIZED; unrelated prompt statuses and accepted upstream authorities
+remain unchanged. The technical baseline is the exact SHA above; its verified governance-only direct
+successor carries this acceptance record.
+
+F05: Windows filesystem/open-handle/locking/durability unqualified. F06: production throughput and
+actual power-loss durability unqualified. T01: trusted terminating owners/repositories, honest
+native certificates, trusted root and single-writer assumptions mandatory. M02: current
+registry/calendar governance context, not complete historical bitemporal membership. Pending
+summaries are volatile; no durable outbox or universal exactly-once subscriber delivery. Bounded
+quality evidence, explicit consumer-loss reconciliation, conservative source fences and unsupported
+legacy/native correction limits remain. Offline research only: no broker, trading, orders, financial
+execution, live execution or production deployment approval.
+
+O-C01: callback success certifies the actual acknowledged owner checkpoint, not every internal
+operation in a compound callback. A caller requiring aggregate failure must propagate the relevant
+rejected operation; no additional transaction-level atomicity is claimed.
+
+O-C02: a historical ACK does not certify current READY/HEALTHY or completed shutdown. Later
+cancellation may leave STOPPING while the genuine earlier ACK is published. Inspect current
+lifecycle, readiness, health, pending publication and storage/recovery obligations separately. An
+ACK neither authorizes more work nor invalidates an earlier real commitment after cancellation. This
+clarifies the phase of earlier stopping-owner wording without rewriting historical evidence.
+
+Historical exceptions explicitly acknowledged in the authorized approval: original C 38/40 (two
+cumulative-call measurement failures; phase-corrected 2/2), original K confirmation 1/4 (three
+contradictory pending=0/pending=1 defect-observation assertions). Those five failures remain
+failures and their source/results/exit codes remain preserved. Original K01 six positive invariants
+and separately identified corrected-behavior tests pass; no runtime invariant is waived.
+
+Technical evidence: original M 18/18 unchanged; O 50/50; permanent 820/820 across 55 files, zero
+skipped; format/lint/typecheck/secrets/full and production audits/dependency graph passed. These are
+authenticated CODEX-004O results; fresh governance-successor verification is recorded in the
+external CODEX-004P delivery report. Neither verification is production qualification. Finding
+closures are technical within tested supported scope, not proof of universal absence. External
+CODEX-004P finding and historical exception registers identify original failures, remediation SHAs
+and final raw evidence. The recorded approval preserves this distinction.
+
+Mandatory safety conditions persist through any governance-only successor; no source, permanent
+test, fixture, dependency, capability or version change is authorized here.
