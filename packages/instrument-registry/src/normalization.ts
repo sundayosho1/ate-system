@@ -13,6 +13,14 @@ export const compare = (a: string, b: string): number => (a < b ? -1 : a > b ? 1
 export const identityId = (identity: Identity): string =>
   "ins-" +
   fingerprint({ algorithm: "I1", identity: identitySchema.parse(safeClone(identity)) }).slice(7);
+function canonicalValue(value: string, rule: "EXACT" | "CASE" | "PAIR"): string {
+  let result = value.normalize("NFC").trim();
+  if (rule !== "EXACT") result = result.toUpperCase().normalize("NFC");
+  // Delimiter removal may expose boundary whitespace or a new combining sequence.
+  // Keep interior whitespace; PAIR is scoped notation, not economic identity.
+  if (rule === "PAIR") result = result.replace(/[-/]/g, "").normalize("NFC").trim();
+  return result;
+}
 export function normalize(value: unknown, rule: "EXACT" | "CASE" | "PAIR"): Normalization {
   if (
     typeof value !== "string" ||
@@ -29,10 +37,9 @@ export function normalize(value: unknown, rule: "EXACT" | "CASE" | "PAIR"): Norm
     });
   if (!["EXACT", "CASE", "PAIR"].includes(rule))
     return freeze({ status: "UNSUPPORTED", original: value, value, rule, version: "N1" });
-  let result = value.normalize("NFC").trim();
-  if (rule !== "EXACT") result = result.toUpperCase().normalize("NFC");
-  if (rule === "PAIR") result = result.replace(/[-/]/g, "").normalize("NFC");
-  if (!result || result.length > 256)
+  const result = canonicalValue(value, rule);
+  // One bounded check rejects an unstable rule result; it never iterates to repair it.
+  if (!result || result.length > 256 || canonicalValue(result, rule) !== result)
     return freeze({ status: "INVALID", original: value, value: "", rule, version: "N1" });
   return freeze({
     status: result === value ? "UNCHANGED" : "NORMALIZED",

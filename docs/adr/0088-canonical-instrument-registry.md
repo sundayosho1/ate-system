@@ -94,3 +94,21 @@ Resolution summaries include matching scoped claim evidence alongside general de
 with deterministic deduplication and unchanged selection/verification classifications. The original
 failed CODEX-005A evidence is preserved separately. This decision records targeted corrective
 implementation only; technical re-audit and governance acceptance remain pending.
+
+## CODEX-005D — finite canonical fixed-point correction
+
+A20-H03 exposed whitespace only after PAIR delimiter removal. Complete PAIR transformation now ends
+with NFC and boundary trimming while preserving interior spaces and existing source scopes. A single
+second transformation verifies a fixed point and rejects instability rather than iterating. Existing
+final field/UTF-8 budgets and trace/recovery validators remain authoritative. Successfully
+acknowledged canonical definitions recover under identical governance and honest intact storage. No
+upstream authority, dependency, economic identity, schema version or acceptance status changes.
+Stable N1 histories retain their evidence; pre-existing unstable roots remain fenced without repair.
+
+A20-Q01 is Q01-A. Existing schema decimal transforms, canonical identity and content hashing qualify
+parsed canonical definitions rather than every raw stored decimal lexeme. Raw filesystem snapshot
+and retained-byte bounds continue before parsing; canonical record and parsed-history limits remain
+separate. No raw tamper authentication is claimed. C072 remains unchanged historical evidence with
+its incompatible raw-record assertion; dedicated tests verify canonical lexical equivalence,
+noncanonical raw rehash rejection and physical snapshot bounds. T01 trusted roots and honest
+certificates remain required. Prompt 20 needs independent re-audit before governance acceptance.

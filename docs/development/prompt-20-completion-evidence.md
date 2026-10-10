@@ -48,3 +48,23 @@ sources, assertions, failed results and filesystem evidence are preserved. Imple
 remediation remains subject to a separate independent re-audit and governance decision. Prompt20
 acceptance PENDING; Prompt21 NOT AUTHORIZED. All inherited offline research-only and
 F05/F06/T01/M02/O-C01/O-C02 restrictions remain mandatory.
+
+## CODEX-005D targeted fixed-point remediation
+
+Starting implementation: `6d91b92c77376e2e2dfa0876e158b0b73d564a44`; dedicated branch
+`codex/prompt-20-canonical-fixed-point-remediation`. This is remediation, not Prompt 20 acceptance.
+
+A20-H03 correction completes PAIR boundary trimming after delimiter removal and NFC. A bounded
+fixed-point validation rejects unstable output. Interior whitespace, economic I1 identity,
+source-qualified ambiguity, all owner boundaries and UNKNOWN commitment fencing remain intact. The
+dedicated `tests/instrument-registry/fixed-point-remediation.test.ts` covers all four publishing
+APIs with exact and related aliases, honest filesystem ACK, repeated recovery, immutable earlier
+history, raw trace originals, final budgets, legacy evidence, corruption, lost ACK and policy drift.
+Existing tests and original audit assertions are preserved; replay artifacts and exact final gate
+results are recorded in the external CODEX-005D delivery report.
+
+Q01-A documents the existing canonical parsed decimal authority without changing its behavior.
+Focused tests distinguish canonical content hashes/budgets from raw physical snapshot limits and
+reject a hash of an unparsed changed decimal lexeme. The historical C072 assertion is not rewritten
+or claimed as passing. No raw text/source authentication or migration of invalid roots is promised.
+F05/F06/T01/M02/O-C01/O-C02 remain restrictions; Prompt 21 is unauthorized.

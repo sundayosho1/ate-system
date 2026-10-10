@@ -272,3 +272,41 @@ This is implementation remediation, not independent acceptance. The failed CODEX
 results remain historical evidence. F05 Windows and F06 production throughput/power-loss durability
 remain unqualified; T01/M02 and all inherited restrictions remain. No broker, execution, production
 deployment or Prompt21 authorization is granted.
+
+## Canonical fixed points and stored representation — CODEX-005D
+
+N1 uses a finite transformation: NFC then boundary trim; CASE and PAIR additionally use
+locale-independent uppercase then NFC. PAIR additionally removes only ASCII `-` and `/`, reapplies
+NFC for newly adjacent combining characters, and trims newly exposed boundary whitespace. Interior
+whitespace is retained: `eur usd` remains distinct notation from `eur/usd`. A second application of
+this complete transform is a bounded validation check; unstable output is rejected, never repeatedly
+stabilized. Empty and over-256-code-unit final values reject before repository entry. Final
+canonical UTF-8 definition bytes still obey the same governed record budget.
+
+For example `/ eur/usd /` becomes `EURUSD` with the exact submitted original retained in its trace.
+All publishing APIs share the same preparer and recovery validator. Stable existing pathful and
+pathless N1 histories retain their original evidence and identities. Previously admitted unstable
+PAIR generations remain invalid recovery evidence: startup fences the root without rewriting or
+migrating it. No recovery/migration authority is added here. Alias similarity does not merge
+economic identities, remove source qualification or change ambiguity rules.
+
+A20-Q01 disposition is Q01-A: existing decimal schema transforms intentionally qualify canonical
+parsed definitions. Coupon/strike decimal spellings such as `5.000000000000` parse to `5`; I1,
+semantic revision identity, definition budgets and snapshot content fingerprints use those parsed
+values. A stored decimal spelling changed without changing its canonical value can therefore pass
+canonical content validation with the original canonical hash. A hash of the unparsed changed lexeme
+is not that canonical content hash and fails recovery. Neither behavior authenticates raw persisted
+text or original-source evidence. The trusted-root restriction remains mandatory.
+
+Raw physical snapshot bytes and retained files are independently bounded by the filesystem
+repository before parsing. Native traversal is bounded, and canonical definitions, trace
+cardinality, trace/snapshot bytes and retained parsed history keep their existing independent
+limits. Raw decimal lexeme length is schema-bounded; no raw per-record lexical fingerprint authority
+is introduced. Full snapshot hashes qualify parsed canonical content and recorded metadata, not
+arbitrary file encoding/decimal spelling. Genuine contradictory trace evidence still rejects. The
+historical C072 raw-record expectation remains preserved as an incompatible expectation, with
+separate focused canonical-content and physical-snapshot-limit regressions.
+
+Prompt 20 acceptance remains pending. F05/F06/T01/M02 and O-C01/O-C02 remain in force; this
+correction qualifies no Windows production behavior, power-loss durability, live provider
+connectivity, broker mapping, trading or deployment.
