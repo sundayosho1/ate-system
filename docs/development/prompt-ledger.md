@@ -465,3 +465,55 @@ remain unchanged. F05/F06/T01/M02, trusted-root/single-writer, bounded quality/c
 source/consumer fences, legacy/native correction limitations and volatile summaries remain
 mandatory. No broker/discovery, trading, financial execution, deployment or future-prompt authority
 is granted.
+
+## CODEX-005F — Prompt 20 conditional governance acceptance
+
+This append-only record is effective only with the separately authorized acceptance record
+`prompt-20-conditional-acceptance.md` and verified governance publication. Approved implementation:
+`be2634b3e76d561fc2e3b8abcadddc5e7cd32c91`, direct parent
+`6d91b92c77376e2e2dfa0876e158b0b73d564a44`, version `0.20.0-instrument-registry.1`. Accepted Prompt
+19 governance ancestor remains `80ac4eac4becb24f52621b048364b0c137136081`.
+
+**Prompt 20: CONDITIONALLY ACCEPTED for bounded offline research infrastructure only.** Authorized
+signatory: `Sunday Osho`. Capacity/authority:
+`Project Owner and Authorized Governance Approver for the ATE (Autonomous Trading Engine) development program. Authority: I am acting in my capacity as the project owner responsible for approving development milestones, technical acceptance, governance decisions, and progression between development phases of the ATE project.`.
+Approval/effective date: `10 October 2026`. Explicit new approval evidence/reference:
+`CODEX-005F-StageB-evidence/authorized-user-approval.txt; SHA256 0bb91d75c603a9fb4ae84d0c8db2dc33b7775c91c7a7cb1993904459422bb3fc; completed by authorized-signatory-details.txt; SHA256 c3e92e128f4c926304976eda646f0665e674cc15d15d08a25326553eda5e91c8`.
+The signatory details and decision are supplied in the two explicit session instructions; no
+signature, date, role authorization or consent is inferred.
+
+CODEX-005E technically passed: 1,182 permanent tests across 76 files; 87 new adversarial acceptance
+probes; original A107/107; unchanged original C99/104 with exactly C013–C016 and C072 failed;
+separate phase-corrected C013–C016 4/4; eight journeys 8/8; verification/security/dependency gates
+passed with zero audited vulnerabilities. Overlapping campaigns are not an inflated unique count.
+The four C phase failures and C072 remain failures; their sources/results are unchanged. Original
+failed audits, D's outstanding accounting history, D-A corrections and E's initial harness failures
+remain preserved. The technical reviewer participated in implementation/remediation/earlier audits:
+separately reasoned review, not third-party certification or organizational independence. The
+project owner's explicit approval acknowledges that limitation.
+
+A20-H01/H02/L01/H03 CLOSED; A20-M01 CLOSED within consistency contract. A20-Q01 is QUALIFIED —
+Q01-A: `ACCEPT — explicitly approved by Sunday Osho`. Publication requires explicit ACCEPT of
+canonical parsed decimal content authentication, not authentication of every raw spelling; canonical
+record-byte limits remain distinct from separate physical snapshot/retained limits. C072 remains a
+historical incompatible raw-record assertion. Ordinary content hashes do not establish external
+source authenticity. No supported new blocking defect was identified within the audited contract.
+
+F05 Windows filesystem/locking/open-handle/durability and F06 production throughput/power-loss
+qualification remain outstanding. T01 trusted terminating repository/verifier/owner implementations,
+honest certificates, trusted root and single writer remain mandatory. M02 current governed context
+is not complete historical bitemporal membership authority. O-C01 actual owner ACK does not certify
+all compound callback operations; O-C02 historical ACK does not imply current readiness/health or
+completed shutdown. Preserve volatile publication summaries, bounded quality, explicit consumer-loss
+reconciliation, conservative source fencing, legacy/native correction limits, same-runtime Unicode
+qualification and no automatic migration of incompatible historical roots.
+
+Only the acceptance document and this append-only ledger record may change. Accepted application,
+permanent tests, dependencies/lockfile, version/capabilities and earlier prompt decisions remain
+unchanged. The governance successor is the direct child of the implementation containing these two
+records; its exact SHA/remote publication and fresh verification belong to the Stage B delivery. No
+deployment, broker/provider connectivity, trading, orders, financial execution or main merge is
+approved. **Prompt 21: NOT STARTED — NOT AUTHORIZED; separate owner instruction required.**
+
+This authorized append-only decision supersedes Prompt 20's pending acceptance only after actual
+Stage B approval/publication; historical status rows and unrelated prompt statuses are preserved.
