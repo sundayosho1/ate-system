@@ -2,10 +2,10 @@
   "$schema": "./capabilities.schema.json",
   "project": "ATE — Autonomous Trading Engine",
   "manifest_version": 1,
-  "updated_at": "2026-10-09",
+  "updated_at": "2026-10-10",
   "development_phase": "Phase III — Universal Data Platform",
-  "completed_prompt": 20,
-  "pre_production_version": "0.20.0-instrument-registry.1",
+  "completed_prompt": 21,
+  "pre_production_version": "0.21.0-broker-symbol-catalogue.1",
   "capabilities": {
     "repository_foundation": true,
     "engineering_constitution": true,
@@ -307,7 +307,12 @@
     "versioned_instrument_taxonomy": true,
     "scoped_instrument_resolution": true,
     "immutable_instrument_revisions": true,
-    "offline_instrument_registry_recovery": true
+    "offline_instrument_registry_recovery": true,
+    "offline_broker_symbol_catalogue": true,
+    "broker_symbol_normalization_laboratory": true,
+    "governed_research_instrument_mapping": true,
+    "immutable_broker_catalogue_reconciliation": true,
+    "offline_broker_catalogue_recovery": true
   },
-  "truth_statement": "Prompts 1–20 implement bounded offline research foundations. Prompts 17–19 are conditionally accepted; Prompt 20 implementation is pending independent technical audit and governance acceptance. F05 Windows, F06 production throughput/power-loss qualification remain outstanding; T01 trusted terminating owners/repositories and honest certificates, trusted root/single writer and M02 current context (not historical membership) remain mandatory. Registry identity does not establish provider availability, suitability or execution permission. Explicit new registry references do not rewrite accepted data/capture/aggregation/replay histories. In-process replay summaries remain volatile, without durable outbox or universal exactly-once delivery. No external discovery/mapping, broker, orders, financial execution, production/trading approval or Prompt 21 functionality is provided. ATE cannot trade, connect to MT5, submit orders or perform paper/live trading."
+  "truth_statement": "Prompts 1–21 implement bounded offline research foundations. Prompts 17–20 are conditionally accepted under their published governance records. Prompt 21 implementation is pending independent technical audit and governance acceptance. DISCOVERED ≠ CANONICALLY MATCHED ≠ AVAILABLE NOW ≠ SUITABLE ≠ AUTHORIZED TO TRADE. Imported offline broker declarations and checker-authorized research associations cannot establish current terminal availability or economic truth. F05 Windows and F06 production throughput/power-loss qualification remain outstanding. T01 trusted terminating owners/repositories/verifiers and honest certificates, trusted root/single writer, M02 current governed context, O-C01 compound callback and O-C02 historical acknowledgement qualifications remain mandatory. Q01-A canonical decimal qualification and historical audit failures remain preserved. New opt-in associations do not rewrite accepted data/capture/aggregation/replay histories. Volatile replay summaries do not provide a durable outbox or universal exactly-once delivery. No live MT5, terminal login, network discovery, broker authentication, orders, financial execution, trading or production approval. Prompt 22 is not authorized. ATE cannot trade, connect to MT5, submit orders or perform paper/live trading."
 }

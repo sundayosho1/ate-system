@@ -259,3 +259,12 @@ pending paragraphs above describe their historical delivery stages. Prompt20 imp
 pending independent technical audit and governance acceptance. SUPPORTED is distinct from AVAILABLE,
 SUITABLE and AUTHORIZED. F05/F06/T01/M02 and offline-only restrictions remain. No broker/trading,
 financial execution or production approval; Prompt21 is not authorized.
+
+## Prompt 21 offline broker symbol catalogue
+
+The new [offline catalogue laboratory help](docs/help/broker-symbol-catalogue.md) covers governed
+fixture imports, non-destructive comparison keys, Prompt 20 candidate evidence, maker-checker
+research associations, immutable reconciliation and fail-closed recovery. See
+[ADR 0089](docs/adr/0089-offline-broker-symbol-catalogue.md). Implementation awaits independent
+technical audit and governance acceptance. No live MT5/broker connection or financial execution;
+Prompt 22 is not authorized.

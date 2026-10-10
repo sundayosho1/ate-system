@@ -517,3 +517,27 @@ approved. **Prompt 21: NOT STARTED — NOT AUTHORIZED; separate owner instructio
 
 This authorized append-only decision supersedes Prompt 20's pending acceptance only after actual
 Stage B approval/publication; historical status rows and unrelated prompt statuses are preserved.
+
+## CODEX-006 — Prompt 21 implementation record
+
+Prompt 21: **IMPLEMENTED — PENDING INDEPENDENT TECHNICAL AUDIT AND GOVERNANCE ACCEPTANCE**. Version
+`0.21.0-broker-symbol-catalogue.1`, branch `codex/prompt-21-offline-broker-symbol-catalogue`. Exact
+released governance baseline `8d8f29ae7c69943f7d9542e29bde9323ed96b266`, direct successor of
+conditionally accepted Prompt 20 implementation `be2634b3e76d561fc2e3b8abcadddc5e7cd32c91`. The
+explicit owner instruction “PROCEED WITH CODEX-006 — PROMPT 21 IMPLEMENTATION” authorized offline
+catalogue imports, normalization, provenance, canonical mapping proposals, immutable reconciliation,
+tests, documentation and research-only integration. This supersedes only historical Prompt 21
+not-authorized statements; no earlier implementation or acceptance history is rewritten.
+
+New `@ate/broker-symbol-catalogue` owns derived offline observations and review decisions; Prompt 20
+remains the canonical economic identity owner. Existing configuration, state authority and clock
+owners qualify operation. Help: `../help/broker-symbol-catalogue.md`; ADR 0089. The external
+CODEX-006 delivery records actual test/security results, exact commit and publication. This record
+declares implementation status, not independent acceptance.
+
+All historical audits, failed assertions and separately authorized phase corrections remain
+unchanged. Q01-A, F05, F06, T01, M02, O-C01 and O-C02, trusted root and single writer, bounded
+quality, explicit consumer-loss reconciliation, conservative source fences, legacy/native correction
+limitations and volatile replay summaries remain mandatory. No live MT5 connection, terminal login,
+network discovery, broker authentication, financial orders/execution, autonomous trading, production
+deployment or main merge is authorized. **Prompt 22: NOT STARTED — NOT AUTHORIZED.**
