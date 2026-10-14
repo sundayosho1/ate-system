@@ -43,3 +43,22 @@ invented. Historical presence, visibility and trade mode do not establish availa
 
 No network imports, live discovery, broker login/account, orders or trading are supported. No
 production or financial deployment approval. Prompt 22 requires separate authorization.
+
+## CODEX-006B corrective successor
+
+A21-M01 applies the existing declared-family/raw/key catalogue inspection semantics consistently
+across all query kinds before pagination. Historical predicates use each root's retained catalogues,
+never later membership. Mapping predicates inspect the exact source observation; canonical economic
+classification remains the Prompt 20 owner's separate authority. No immutable history is rewritten.
+
+A21-M02 qualifies the owner's checkedAt between observations bracketing synchronous resolution, with
+stable validated clock provenance. That actual checkedAt remains decidedAt, preserving stored
+schema/recovery compatibility without a tolerance window. The accepted evidence type has no expiry
+interval, issuance timestamp, signature or caller-selected evaluation time. Strict shape, actor,
+checker authority, authorization, maker separation, chronology and current context remain required.
+Clock/proposal/registry eligibility is checked again after the callback; exact ACK/UNKNOWN fencing
+is unchanged. Trusted honest owners are required; no new historical membership authority or stronger
+source-authenticity claim is introduced. See the help appendix and new deterministic regressions.
+
+This is corrective implementation, not conditional acceptance. All prior operational qualifications
+and CODEX-006A historical failed assertions remain preserved outside the checkout.

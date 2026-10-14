@@ -6,8 +6,8 @@ import {
   type ApprovalAuthorityResolver,
 } from "@ate/configuration";
 import { freeze } from "@ate/multitimeframe";
-import type { Clock } from "@ate/time";
-import type { InstrumentRegistry, Resolution } from "@ate/instrument-registry";
+import { mustParseUtc, type Clock } from "@ate/time";
+import { families, type InstrumentRegistry, type Resolution } from "@ate/instrument-registry";
 import {
   stateDomain,
   stateOwner,
@@ -701,6 +701,10 @@ export class BrokerSymbolCatalogue {
         this.current!,
         true,
       );
+      // The owner certifies authority at checkedAt; the enclosing clock observations
+      // qualify that instant without requiring a later clock read to be identical.
+      const provenance = clockSchema.parse(safeClone(this.ports.clock.provenance)),
+        before = mustParseUtc(this.ports.clock.now());
       const authority = this.ports.authorityResolver.resolve(r.checker, {
         classification: "STANDARD",
         requiredAuthority: "CONFIGURATION_CHECKER",
@@ -708,12 +712,29 @@ export class BrokerSymbolCatalogue {
         policyId: configurationApprovalPolicyId(p.approvalPolicyId),
       });
       if (!authority.ok) return fail("APPROVAL_AUTHORITY_REQUIRED");
-      const at = this.ports.clock.now(),
+      const after = mustParseUtc(this.ports.clock.now()),
         evidence = decisionSchema.shape.authorityEvidence.parse(
           safeClone(authority.value, p.maxRecordBytes),
         );
-      if (evidence.actorId !== r.checker.actorId || evidence.checkedAt !== at)
+      if (
+        evidence.actorId !== r.checker.actorId ||
+        evidence.checkedAt < before ||
+        evidence.checkedAt > after ||
+        fingerprint(provenance) !==
+          fingerprint(clockSchema.parse(safeClone(this.ports.clock.provenance)))
+      )
         return fail("APPROVAL_CERTIFICATE_MISMATCH");
+      const at = evidence.checkedAt;
+      // Recheck current source/registry context after the resolver callback.
+      this.transition(
+        proposal,
+        prior.at(-1)?.state ?? proposal.initialState,
+        r.state,
+        r.selectedCandidate ?? null,
+        r.supersededBy ?? null,
+        this.current!,
+        true,
+      );
       const content = {
         proposalId,
         sequence: prior.length + 1,
@@ -727,7 +748,7 @@ export class BrokerSymbolCatalogue {
         policyFingerprint: policyFingerprint(p),
         configurationFingerprint: this.configurationFingerprint,
         decidedAt: at,
-        clockProvenance: clockSchema.parse(safeClone(this.ports.clock.provenance)),
+        clockProvenance: provenance,
       };
       const decision = freeze(
         decisionSchema.parse({ ...content, decisionId: fingerprint(content) }),
@@ -821,58 +842,67 @@ export class BrokerSymbolCatalogue {
           namespaceKey: digest.optional(),
           rawSymbol: text.optional(),
           normalizedKey: text.optional(),
-          family: text.optional(),
+          family: z.enum([...families, "UNKNOWN"]).optional(),
           version: z.number().int().positive().optional(),
           offset: z.number().int().min(0),
           limit: z.number().int().min(1).max(p.maxQueryResults),
         })
         .strict()
         .parse(safeClone(raw, p.maxRecordBytes));
-      let cats = this.current?.catalogues ?? [];
-      if (q.catalogueFingerprint !== undefined) {
-        cats = cats.filter((c) => c.fingerprint === q.catalogueFingerprint);
-        if (!cats.length) return fail("CATALOGUE_NOT_FOUND");
-      }
-      if (q.namespaceKey) cats = cats.filter((c) => c.namespaceKey === q.namespaceKey);
-      if (q.version !== undefined) cats = cats.filter((c) => c.version === q.version);
+      const observationMatches = (o: Catalogue["observations"][number]): boolean =>
+        (q.rawSymbol === undefined || o.raw.rawSymbol === q.rawSymbol) &&
+        (q.normalizedKey === undefined || o.keys.some((k) => k.value === q.normalizedKey)) &&
+        (q.family === undefined || o.classification.family === q.family);
+      const hasObservationFilter =
+        q.rawSymbol !== undefined || q.normalizedKey !== undefined || q.family !== undefined;
+      const catalogueMatches = (c: Catalogue): boolean =>
+        (q.catalogueFingerprint === undefined || c.fingerprint === q.catalogueFingerprint) &&
+        (q.namespaceKey === undefined || c.namespaceKey === q.namespaceKey) &&
+        (q.version === undefined || c.version === q.version) &&
+        (!hasObservationFilter || c.observations.some(observationMatches));
+      if (
+        q.catalogueFingerprint !== undefined &&
+        !this.current?.catalogues.some((c) => c.fingerprint === q.catalogueFingerprint)
+      )
+        return fail("CATALOGUE_NOT_FOUND");
+      const cats = (this.current?.catalogues ?? []).filter(catalogueMatches);
       let records: readonly unknown[];
       if (q.kind === "NAMESPACES")
         records = [...new Map(cats.map((c) => [c.namespaceKey, c.namespace])).values()];
       else if (q.kind === "CATALOGUES") records = cats;
-      else if (q.kind === "HISTORY") records = this.history;
+      else if (q.kind === "HISTORY")
+        records = this.history.filter(
+          (s) =>
+            (q.catalogueFingerprint === undefined &&
+              q.namespaceKey === undefined &&
+              q.version === undefined &&
+              !hasObservationFilter) ||
+            s.catalogues.some(catalogueMatches),
+        );
       else if (q.kind === "OBSERVATIONS")
         records = cats.flatMap((c) =>
-          c.observations
-            .filter(
-              (o) =>
-                (q.rawSymbol === undefined || o.raw.rawSymbol === q.rawSymbol) &&
-                (q.normalizedKey === undefined ||
-                  o.keys.some((k) => k.value === q.normalizedKey)) &&
-                (q.family === undefined || o.classification.family === q.family),
-            )
-            .map((o) => ({
-              catalogueFingerprint: c.fingerprint,
-              namespaceKey: c.namespaceKey,
-              observation: o,
-              discoveryStates: discoveryStates(o),
-              freshness: freshness(c, o, this.ports.clock.now(), p),
-              availabilityNow: "NOT_ESTABLISHED",
-            })),
+          c.observations.filter(observationMatches).map((o) => ({
+            catalogueFingerprint: c.fingerprint,
+            namespaceKey: c.namespaceKey,
+            observation: o,
+            discoveryStates: discoveryStates(o),
+            freshness: freshness(c, o, this.ports.clock.now(), p),
+            availabilityNow: "NOT_ESTABLISHED",
+          })),
         );
-      else
-        records = (this.current?.proposals ?? [])
-          .filter(
-            (v) =>
-              cats.some((c) => c.fingerprint === v.catalogueFingerprint) &&
-              (q.rawSymbol === undefined || v.rawSymbol === q.rawSymbol),
-          )
-          .flatMap((v) => {
-            const result = this.mapping(v.proposalId);
-            return result.ok &&
-              (q.kind === "MAPPINGS" || result.value.state !== "APPROVED_FOR_RESEARCH_ASSOCIATION")
-              ? [result.value]
-              : [];
-          });
+      else {
+        const mappings = [];
+        for (const v of this.current?.proposals ?? []) {
+          const c = cats.find((c) => c.fingerprint === v.catalogueFingerprint);
+          const o = c?.observations.find((o) => o.fingerprint === v.observationFingerprint);
+          if (!o || !observationMatches(o)) continue;
+          const result = this.mapping(v.proposalId);
+          if (!result.ok) return result;
+          if (q.kind === "MAPPINGS" || result.value.state !== "APPROVED_FOR_RESEARCH_ASSOCIATION")
+            mappings.push(result.value);
+        }
+        records = mappings;
+      }
       const page = records.slice(q.offset, q.offset + q.limit);
       return ok(
         freeze({

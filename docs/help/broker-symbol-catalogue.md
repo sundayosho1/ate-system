@@ -239,3 +239,63 @@ recovery instead of fabricating certification. `unresolvedPublication` exposes t
 attempted generation and full fingerprint after write uncertainty; the recovery-required pending
 count stays one until a fresh service authenticates the intact root. No later operation overwrites
 that obligation.
+
+## CODEX-006B query and checker-time clarification
+
+This corrective successor preserves the version and all earlier records. Prompt 21 acceptance
+remains pending independent re-audit; no Prompt 22 or production permission follows.
+
+All six query kinds accept the same optional filters: `catalogueFingerprint`, `namespaceKey`,
+`version`, `rawSymbol`, `normalizedKey`, and `family`. `kind`, `offset` and `limit` are required.
+Filters combine with AND before pagination. Unknown valid namespace/key/raw-symbol combinations
+return an empty page; an unknown exact catalogue fingerprint returns `CATALOGUE_NOT_FOUND`.
+Malformed requests, unsupported fields and unknown family values return structured NONE rejection.
+`family` is the observation's **source-declared family** (`UNKNOWN` included), as in the original
+inspection contract. It does not replace or certify the selected canonical economic classification.
+
+| Kind         | Catalogue identity / namespace / version                                    | Raw symbol / normalized key / declared family                               |
+| ------------ | --------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| NAMESPACES   | Existential matching retained catalogue; unique namespace in retained order | One observation in that same catalogue must satisfy all observation filters |
+| CATALOGUES   | Exact catalogue fields                                                      | One observation must satisfy all observation filters                        |
+| OBSERVATIONS | Containing catalogue fields                                                 | The returned observation must satisfy all filters                           |
+| MAPPINGS     | Proposal's exact containing catalogue                                       | Proposal's immutable observation must satisfy all filters                   |
+| UNRESOLVED   | Same as MAPPINGS, excluding current research-approved state                 | Same immutable observation filter                                           |
+| HISTORY      | Each historical generation's own catalogues                                 | One observation within one matching catalogue in that generation            |
+
+Unfiltered HISTORY includes every retained generation. Other unfiltered kinds retain their previous
+ordering. Catalogue, observation, proposal and history order follows immutable append order;
+namespace deduplication preserves first occurrence. `total` describes the filtered result,
+`nextOffset` is null after the last page, and an offset at or beyond the end returns an empty page.
+`version` is catalogue version, never registry generation. Query does not select or substitute a
+historical root: use `snapshot(fullFingerprint)` for exact root selection, with no latest fallback.
+Mappings carry immutable proposal/decision evidence and current derived state; HISTORY carries
+historical roots without rewriting them. Filters establish research selection, not authorization.
+
+The accepted configuration owner's `ApprovalAuthorityEvidence` contains actor, required authority,
+authorized result, `checkedAt` and evidence. It has no issuance/expiry interval, caller-supplied
+time, clock provenance or signature field. Configuration approval _decisions_ elsewhere have
+optional expiry; that separate type is not this resolver certificate. No new TTL or tolerance is
+invented. Trusted owner implementations and honest certificates remain required (T01).
+
+A review captures and validates its clock provenance and UTC instant before resolving the owner,
+then captures another UTC instant afterwards. `checkedAt` must be within that inclusive interval;
+the actor must match, authority must be CONFIGURATION_CHECKER, authorization true, and clock
+provenance unchanged. Older/replayed or future certificates outside the actual operation reject.
+Unsupported validity fields reject under the existing strict schema. A malformed/unavailable clock,
+backwards/conflicting context, self review or revoked owner result cannot establish a new decision.
+The service rechecks current source/registry transition eligibility after the callback.
+
+`decidedAt` remains the owner's actual authority-evaluation time (`checkedAt`), not a fabricated
+later read. Publication uses a separate accepted-clock observation and must not precede that
+decision; repository ACK certifies exact snapshot identity, not an independently timestamped
+durability event. The owner exposes no separate certificate issuance time or ACK time. Existing
+stored equality `checkedAt === decidedAt` and all historical hashes remain intact. Fresh recovery
+validates original decision ordering and current owner authorization separately. Under Q-HIST, a
+historically valid approval can be unavailable to a fresh service after checker revocation; this is
+a current-context fence, not retrospective proof of fraud. No historical role-membership authority
+is added.
+
+Q-TICK (incomplete tick/grid semantics), Q-SELECTOR (selector-specific rather than whole-record
+agreement), Q-T01 (unsigned trusted-root authenticity), F05/F06, T01, M02, O-C01/O-C02 and Q01-A
+remain qualified. Nothing here certifies live terminal state, contract execution suitability,
+power-loss or Windows durability, production throughput, or trading authority.
