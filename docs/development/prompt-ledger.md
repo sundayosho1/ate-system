@@ -541,3 +541,58 @@ quality, explicit consumer-loss reconciliation, conservative source fences, lega
 limitations and volatile replay summaries remain mandatory. No live MT5 connection, terminal login,
 network discovery, broker authentication, financial orders/execution, autonomous trading, production
 deployment or main merge is authorized. **Prompt 22: NOT STARTED — NOT AUTHORIZED.**
+
+## CODEX-006D — Prompt 21 conditional governance decision
+
+**AUTHORIZED CONDITIONAL GOVERNANCE ACCEPTANCE — CODEX-006D.** This append-only record is effective
+with the separately authorized [acceptance record](prompt-21-conditional-acceptance.md) and verified
+governance publication. Conditionally accepted implementation:
+`fe7afdbda544b68c0ea87cbc081b29c6b1d424c5`, direct parent/original Prompt21 source
+`f07ba69294faf65ede3b4c387438027a1d3f30ee`, accepted Prompt20 governance ancestor
+`8d8f29ae7c69943f7d9542e29bde9323ed96b266`, version `0.21.0-broker-symbol-catalogue.1`.
+
+**Prompt 21: CONDITIONALLY ACCEPTED for bounded offline research only.** Decision: **ACCEPT**.
+Authorized signatory: **Sunday Osho**; designation **ATE Project Owner and Development Governance
+Approver**. Capacity/authority (owner-supplied): **Project owner responsible for approving ATE's
+development milestones, technical acceptance decisions, governance baselines and progression between
+development phases.** Approval/effective date: **14 October 2026**. Actual decision evidence:
+`CODEX-006D-StageB-evidence/authorized-user-approval.txt`, SHA256
+`472f691bf4295a5e34826d11660a3af67d5f1eda5d7a3797460b5718d803bae8`; completed by
+`authorized-signatory-details.txt`, SHA256
+`481f47adfb607c9e235c9d38b480e75c2bdbf6a56868a5732a3216c7cdcbda4e`. No name, date, consent or
+signature is inferred.
+
+Acceptance covers bounded offline namespace/symbol cataloguing, normalization/import, immutable
+snapshots, declared classification, canonical proposals, maker-checker research association,
+queries/history/reconciliation, bounded persistence/recovery, provenance and research integration.
+Research association approval is not trading authorization.
+
+CODEX-006A failed with126cases:120passed/sixfailed. CODEX-006B remediated A21-M01/M02 at this exact
+SHA; CODEX-006C technically passed:217new adversarial cases,1,337permanent
+tests/85files,tenjourneys, verification/security gates,original replay124passed/twofailed.
+A21-M01/M02 CLOSED technically. B003/Q-TICK and B005/Q-SELECTOR remain failed unchanged;
+no126/126claim. Historical failed audit, original failed assertions and separate harness-version
+corrections remain preserved. Reviewer participated in implementation, tests, A reassessment and B
+remediation: separately authored technical review, not organizational/third-party independent
+certification. Sunday Osho explicitly acknowledged this limitation; no organizational independence
+is inferred.
+
+Q-HIST/Q-TICK/Q-SELECTOR/Q-T01 are explicitly accepted qualifications by Sunday Osho; preserve
+F05/F06/T01/M02/O-C01/O-C02/Q01-A, trusted root/single writer/honest terminating owners, bounded
+quality, consumer-loss reconciliation, conservative source fences, legacy/native correction limits,
+volatile summaries and all previously accepted historical qualifications. No full historical checker
+membership, complete contract grid/execution suitability, whole-record economic agreement or
+cryptographic root/ certificate authenticity claim. Earlier prompt decisions/status/history remain
+unchanged.
+
+The explicit owner authorization permits only the new acceptance document and this append-only
+entry, subject to full verification and direct-successor/local-remote authentication. No source,
+permanent tests, dependencies/lock, version, capabilities, earlier governance or main merge. No live
+MT5/broker access, authentication, market-data subscriptions, orders, financial execution,
+autonomous trading or deployment. **Prompt 22 remains NOT AUTHORIZED even after acceptance; separate
+development instruction required.**
+
+This authorized append-only decision supersedes Prompt21 pending acceptance only with verified
+governance publication. Earlier prompt statuses and all historical audit/remediation records remain
+unchanged. The exact governance successor SHA and publication/verification belong to its delivery
+report.
