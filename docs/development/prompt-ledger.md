@@ -721,3 +721,38 @@ docs/development/prompt-23-conditional-acceptance.md and the sealed external COD
 
 **Prompt23 is CONDITIONALLY ACCEPTED for the bounded offline research scope under the explicit owner
 decision and verified Stage B publication. Prompt24 remains NOT AUTHORIZED.**
+
+## Prompt 24 — CODEX-009 implementation (acceptance pending)
+
+**Development AUTHORIZED; implementation pending independent technical audit and separate governance
+acceptance.** Version `0.24.0-instrument-eligibility.1`; development branch
+`codex/prompt-24-instrument-eligibility`, from exact accepted Prompt 23 governance baseline
+`91cc702d2eefbea9126632048ee8e2aa5dd067c2`. Earlier entries remain historical records of their own
+publication state; this entry does not rewrite their authorization or acceptance decisions.
+
+The project owner explicitly authorized bounded offline Instrument Eligibility Lifecycle, Research
+Promotion & Governed Readiness development. The subsequent P24-INT-01 architectural decision permits
+P24-owned references to externally source-declared research-validation attestations under existing
+issuer/checker authority. VALIDATED is governed attested research validation, never replay
+reproducibility alone, scientific certification, strategy profitability or production suitability.
+Required bindings include subject/hypothesis/methodology, canonical identity, exact
+datasets/quality, replay evidence, source authority, policy versions, provenance, effective/expiry
+and withdrawal status. Unverified/missing authority or evidence fails closed. No upstream authority
+grants or owner implementations are changed.
+
+Implemented scope: immutable per-capability eligibility, stages DISCOVERED through offline
+SIMULATION, separate blocking dispositions, governed request/approval/commit, separated actors,
+current owner evidence assessment, exact recorded history, policy compatibility, bounded recovery,
+hostile-input rejection and truthful publication uncertainty. LIVE_ELIGIBLE and ACTIVE remain
+prohibited and non-operational. No broker connectivity, authentication, execution, trading or
+deployment is authorized.
+
+The 25 Prompt 23 qualifications and immutable prior acceptance records remain unchanged, including
+F05/F06/T01/M02/O-C01/O-C02, E-T01, Q01-A, Q-HIST/Q-TICK/Q-SELECTOR/Q-T01, A22-Q01–Q06, A23-Q01–Q03,
+historical failures, reviewer participation and offline-only research scope. Existing bounded
+quality, consumer-loss reconciliation, source fences and correction limitations persist. See
+`docs/help/instrument-eligibility.md`, the permanent ten journeys and the external CODEX-009
+delivery evidence for exact verification results, source identity and manifest-test compatibility
+history. This entry records implementation, **not independent technical or governance acceptance**.
+
+**Prompt 24 acceptance PENDING. Prompt 25 NOT AUTHORIZED.**

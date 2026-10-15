@@ -1,8 +1,8 @@
 {
   "name": "ate-system",
-  "version": "0.23.0-instrument-specifications.1",
+  "version": "0.24.0-instrument-eligibility.1",
   "private": true,
-  "description": "ATE bounded offline research foundations through instrument specification intelligence.",
+  "description": "ATE bounded offline research foundations through governed instrument eligibility.",
   "license": "UNLICENSED",
   "type": "module",
   "engines": {

@@ -281,3 +281,9 @@ Prompt 22 adds the bounded offline
 identifier consistency and immutable cross-broker research qualifications. P20 canonical identity
 and P21 catalogue/approval authorities remain unchanged. Implementation is pending independent
 technical audit and governance acceptance; no trading or live broker permission.
+
+Prompt 24's bounded offline instrument eligibility laboratory is documented in
+[Instrument eligibility](docs/help/instrument-eligibility.md). Its implementation requires
+independent technical audit and separate governance acceptance. VALIDATED means governed external
+research attestation, not independently verified profitability or trading suitability. LIVE_ELIGIBLE
+and ACTIVE remain prohibited; Prompt 25 is not authorized.

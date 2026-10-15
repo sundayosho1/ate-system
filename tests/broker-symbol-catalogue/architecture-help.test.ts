@@ -97,13 +97,21 @@ it("truth manifest distinguishes implemented pending audit from trading authoriz
     capabilities: Record<string, boolean>;
     truth_statement: string;
   };
-  expect(m.completed_prompt).toBe(23);
-  expect(m.pre_production_version).toBe("0.23.0-instrument-specifications.1");
+  expect(m.completed_prompt).toBe(24);
+  expect(m.pre_production_version).toBe("0.24.0-instrument-eligibility.1");
   expect(m.capabilities["offline_broker_symbol_catalogue"]).toBe(true);
   for (const k of ["live_trading", "paper_trading", "execution_engine", "broker_order_submission"])
     expect(m.capabilities[k]).toBe(false);
   expect(m.truth_statement).toContain("pending independent technical audit");
-  expect(m.truth_statement).toContain("Prompt 24 is not authorized");
+  expect(m.truth_statement).toContain("Prompt 24 offline research implementation is authorized");
+  expect(m.truth_statement).toContain("Prompt 25 is not authorized");
+  const acceptedSpecifications = readFileSync(
+    join(base, "docs/development/prompt-23-conditional-acceptance.md"),
+    "utf8",
+  );
+  expect(acceptedSpecifications).toContain("676cd59fa4a971a0bd77e5ca2ee5f764b1f50f09");
+  expect(acceptedSpecifications).toContain("0.23.0-instrument-specifications.1");
+  expect(acceptedSpecifications).toContain("CONDITIONALLY ACCEPTED");
   const acceptedMapping = readFileSync(
     join(base, "docs/development/prompt-22-conditional-acceptance.md"),
     "utf8",
