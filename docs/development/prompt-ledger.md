@@ -689,3 +689,35 @@ qualification remain mandatory. Source-declared tick values and margin are not e
 values or current sufficiency. B003/B005 and earlier failed/harness/phase-correction evidence remain
 preserved. No live MT5, broker authentication, discovery, orders, trading, financial execution,
 production claim or main merge. **Prompt24 remains NOT AUTHORIZED.**
+
+## Prompt23 conditional governance acceptance — CODEX-008F
+
+**OWNER-AUTHORIZED CONDITIONAL ACCEPTANCE — CODEX-008F STAGE B.**
+
+Owner decision: ACCEPT — CONDITIONAL GOVERNANCE ACCEPTANCE of immutable implementation
+`676cd59fa4a971a0bd77e5ca2ee5f764b1f50f09`, version `0.23.0-instrument-specifications.1`, subject to
+all25 CODEX-008F qualifications expressly accepted in the owner decision. Seven findings
+A23-H01/H02/H03/M01/M02/M03 and A23-C-H01 are technically closed by CODEX-008E's qualified technical
+result. All A–E history remains preserved; technical review is not governance approval.
+
+Owner-authorized bounded scope: bounded deterministic offline specification research, declared
+metadata validation, versioned history, dependency-aware research comparisons, immutable
+evidence/governed recovery and bounded read-only queries. Retain E-T01 two-worker verification and
+unresolved timing stability, reviewer-participation disclosure,
+F05/F06/T01/M02/O-C01/O-C02/Q01-A/Q-HIST/Q-TICK/Q-SELECTOR/Q-T01, A22-Q01–Q06, all historical
+failures and every inherited qualification. No external broker accuracy, economic
+interchangeability, availability, trading suitability, financial execution, deployment or production
+certification is granted.
+
+Owner: Sunday Osho, under the previously established ATE Project Owner and Development Governance
+Approver role/capacity; no new authority or capability is created. Effective date: **15 October
+2026**, expressly subject to successful verification and publication. The owner authorized only
+finalization of the reviewed governance record and this append-only entry as a verified direct
+successor of the exact implementation on codex/prompt-23-governance-acceptance. On any required
+verification failure, material review departure or publication-boundary failure, STOP and report
+without publishing acceptance. Preserve all earlier ledger statuses and acceptance records. No
+application, test, dependency, version, capability or historical-evidence change is authorized. See
+docs/development/prompt-23-conditional-acceptance.md and the sealed external CODEX-008F review.
+
+**Prompt23 is CONDITIONALLY ACCEPTED for the bounded offline research scope under the explicit owner
+decision and verified Stage B publication. Prompt24 remains NOT AUTHORIZED.**
