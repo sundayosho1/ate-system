@@ -1,11 +1,11 @@
 {
   "$schema": "./capabilities.schema.json",
-  "project": "ATE — Autonomous Trading Engine",
+  "project": "ATE \u2014 Autonomous Trading Engine",
   "manifest_version": 1,
-  "updated_at": "2026-10-10",
-  "development_phase": "Phase III — Universal Data Platform",
-  "completed_prompt": 21,
-  "pre_production_version": "0.21.0-broker-symbol-catalogue.1",
+  "updated_at": "2026-10-14",
+  "development_phase": "Phase III \u2014 Universal Data Platform",
+  "completed_prompt": 22,
+  "pre_production_version": "0.22.0-canonical-symbol-mapping.1",
   "capabilities": {
     "repository_foundation": true,
     "engineering_constitution": true,
@@ -312,7 +312,12 @@
     "broker_symbol_normalization_laboratory": true,
     "governed_research_instrument_mapping": true,
     "immutable_broker_catalogue_reconciliation": true,
-    "offline_broker_catalogue_recovery": true
+    "offline_broker_catalogue_recovery": true,
+    "offline_canonical_symbol_mapping": true,
+    "whole_observation_identifier_consistency": true,
+    "cross_broker_research_mapping_groups": true,
+    "immutable_mapping_set_reconciliation": true,
+    "offline_mapping_set_recovery": true
   },
-  "truth_statement": "Prompts 1–21 implement bounded offline research foundations. Prompts 17–20 are conditionally accepted under their published governance records. Prompt 21 implementation is pending independent technical audit and governance acceptance. DISCOVERED ≠ CANONICALLY MATCHED ≠ AVAILABLE NOW ≠ SUITABLE ≠ AUTHORIZED TO TRADE. Imported offline broker declarations and checker-authorized research associations cannot establish current terminal availability or economic truth. F05 Windows and F06 production throughput/power-loss qualification remain outstanding. T01 trusted terminating owners/repositories/verifiers and honest certificates, trusted root/single writer, M02 current governed context, O-C01 compound callback and O-C02 historical acknowledgement qualifications remain mandatory. Q01-A canonical decimal qualification and historical audit failures remain preserved. New opt-in associations do not rewrite accepted data/capture/aggregation/replay histories. Volatile replay summaries do not provide a durable outbox or universal exactly-once delivery. No live MT5, terminal login, network discovery, broker authentication, orders, financial execution, trading or production approval. Prompt 22 is not authorized. ATE cannot trade, connect to MT5, submit orders or perform paper/live trading."
+  "truth_statement": "Prompts 1\u201322 implement bounded offline research foundations. Prompts 17\u201321 are conditionally accepted under their published governance records. Prompt 22 implementation is pending independent technical audit and governance acceptance. DISCOVERED \u2260 NORMALIZED \u2260 ECONOMICALLY IDENTICAL \u2260 RESEARCH-APPROVED \u2260 CURRENTLY AVAILABLE \u2260 SUITABLE \u2260 AUTHORIZED TO TRADE. P20 owns canonical identity; P21 owns raw catalogue/proposal approvals; P22 derives whole-observation qualification and immutable cross-broker mapping sets. Name/suffix similarity is lookup evidence only. Research association is not trading authorization. Q-HIST/Q-TICK/Q-SELECTOR/Q-T01, F05 Windows, F06 production throughput/power-loss, T01 honest terminating trusted owners/repositories/verifiers/certificates, trusted root/single writer, M02 current governed context, O-C01 compound operations versus ACK, O-C02 historical ACK versus readiness, Q01-A canonical decimal qualification and historical audit failures remain preserved. No complete tick-grid, whole-source authenticity, trading suitability or cryptographic certification. Opt-in research references do not rewrite accepted owner histories. Bounded quality, consumer-loss reconciliation, conservative source fences, legacy/native correction limits and volatile summaries remain mandatory. No live MT5, credentials, broker login/network discovery, live subscriptions, orders, financial execution, autonomous trading or production approval. Prompt 23 is not authorized. ATE cannot trade, connect to MT5, submit orders or perform paper/live trading."
 }

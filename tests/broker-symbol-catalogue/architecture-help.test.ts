@@ -97,13 +97,22 @@ it("truth manifest distinguishes implemented pending audit from trading authoriz
     capabilities: Record<string, boolean>;
     truth_statement: string;
   };
-  expect(m.completed_prompt).toBe(21);
-  expect(m.pre_production_version).toBe("0.21.0-broker-symbol-catalogue.1");
+  expect(m.completed_prompt).toBe(22);
+  expect(m.pre_production_version).toBe("0.22.0-canonical-symbol-mapping.1");
   expect(m.capabilities["offline_broker_symbol_catalogue"]).toBe(true);
   for (const k of ["live_trading", "paper_trading", "execution_engine", "broker_order_submission"])
     expect(m.capabilities[k]).toBe(false);
   expect(m.truth_statement).toContain("pending independent technical audit");
-  expect(m.truth_statement).toContain("Prompt 22 is not authorized");
+  expect(m.truth_statement).toContain("Prompt 23 is not authorized");
+  const historical = readFileSync(
+    join(base, "docs/development/prompt-21-conditional-acceptance.md"),
+    "utf8",
+  );
+  expect(historical).toContain("fe7afdbda544b68c0ea87cbc081b29c6b1d424c5");
+  expect(historical).toContain("0.21.0-broker-symbol-catalogue.1");
+  expect(historical).toContain("Research association approval is not trading authorization.");
+  for (const qualification of ["F05", "F06", "T01", "M02", "Q-TICK", "Q-SELECTOR"])
+    expect(historical).toContain(qualification);
 });
 it("explicit conflicting observation states never become availability or trade authorization", () => {
   const b = batch();

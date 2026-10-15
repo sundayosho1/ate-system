@@ -596,3 +596,26 @@ This authorized append-only decision supersedes Prompt21 pending acceptance only
 governance publication. Earlier prompt statuses and all historical audit/remediation records remain
 unchanged. The exact governance successor SHA and publication/verification belong to its delivery
 report.
+
+## CODEX-007 — Prompt 22 implementation record
+
+Prompt22 **IMPLEMENTED — PENDING INDEPENDENT TECHNICAL AUDIT AND GOVERNANCE ACCEPTANCE**. Version
+`0.22.0-canonical-symbol-mapping.1`; development branch `codex/prompt-22-canonical-symbol-mapping`.
+Exact authorized baseline `bb805eca5ece53da6aff3e83138cef50a32efdfe`, governance successor of
+accepted Prompt21 implementation `fe7afdbda544b68c0ea87cbc081b29c6b1d424c5`. Explicit instruction
+“PROCEED WITH CODEX-007 — PROMPT 22 CANONICAL SYMBOL MAPPING IMPLEMENTATION” authorizes bounded
+offline research implementation only.
+
+New derived @ate/canonical-symbol-mapping retains P20 identity and P21
+catalogue/B1/proposal/approval owners. Whole-observation consistency is a new P22 contract; it does
+not rewrite historical B005 or B003 failures. Exact implementation SHA, executed tests/security,
+actual FS artifacts and publication are recorded in external CODEX-007 delivery/evidence. Help
+canonical-symbol-mapping.md; ADR0090.
+
+P20/21 conditional acceptance and all prior histories/qualifications remain unchanged.
+Q-HIST/Q-TICK/ Q-SELECTOR/Q-T01, F05/F06/T01/M02/O-C01/O-C02/Q01-A, trusted root/single writer,
+bounded quality, consumer-loss/source/correction fences and volatile summaries remain mandatory. No
+new global identity, configuration/time/governance authority or upstream owner change. No live
+MT5/broker/authentication, orders/trading/financial execution/production deployment or main merge.
+**Prompt23 NOT AUTHORIZED.** Implementation completion is not independent acceptance or governance
+acceptance.

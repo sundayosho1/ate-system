@@ -1,8 +1,8 @@
 {
   "name": "ate-system",
-  "version": "0.21.0-broker-symbol-catalogue.1",
+  "version": "0.22.0-canonical-symbol-mapping.1",
   "private": true,
-  "description": "ATE bounded offline research foundations through broker symbol catalogue and governed canonical mapping.",
+  "description": "ATE bounded offline research foundations through whole-observation canonical symbol mapping.",
   "license": "UNLICENSED",
   "type": "module",
   "engines": {

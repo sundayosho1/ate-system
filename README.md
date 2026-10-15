@@ -268,3 +268,9 @@ research associations, immutable reconciliation and fail-closed recovery. See
 [ADR 0089](docs/adr/0089-offline-broker-symbol-catalogue.md). Implementation awaits independent
 technical audit and governance acceptance. No live MT5/broker connection or financial execution;
 Prompt 22 is not authorized.
+
+Prompt 22 adds the bounded offline
+[Canonical Symbol Mapping Laboratory](docs/help/canonical-symbol-mapping.md) with whole-observation
+identifier consistency and immutable cross-broker research qualifications. P20 canonical identity
+and P21 catalogue/approval authorities remain unchanged. Implementation is pending independent
+technical audit and governance acceptance; no trading or live broker permission.
