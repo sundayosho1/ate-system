@@ -660,3 +660,32 @@ append supersedes only pending Prompt22 governance status upon verified publicat
 ledger byte and unrelated prompt status remains unchanged. **Prompt23 NOT AUTHORIZED. No main merge,
 live broker connectivity, credentials, trading, financial execution or production deployment
 authorized.**
+
+## Prompt23 implementation — CODEX-008
+
+Prompt23 development was explicitly authorized by the project owner in this session from the
+released Prompt22 governance baseline `6aba5a60d398faa6bb531faabd4a3bf699f873fd`, whose direct
+implementation parent is `9dd10f15e4a9282d5e8cfbb65c9c1717f9f82dca`. Package:
+`@ate/instrument-specifications`. Version: `0.23.0-instrument-specifications.1`. Branch:
+`codex/prompt-23-instrument-specification-intelligence`.
+
+Status: **IMPLEMENTED — INDEPENDENT TECHNICAL AUDIT AND GOVERNANCE ACCEPTANCE PENDING**, contingent
+on the final executable verification and immutable publication recorded in the CODEX-008 delivery
+report. This append-only entry does not grant technical acceptance or supersede any earlier owner
+conditional decision. Existing historical ledger entries and accepted Prompt20/21/22 records remain
+unchanged. Exact final SHA, actual test counts, commands, results, evidence hashes and known gaps
+are recorded after verification in the external implementation delivery report.
+
+Scope: bounded offline source-declared instrument specifications, exact metadata normalization and
+validation, explicit completeness profiles, cross-source comparison, immutable revisions,
+reconciliation, bounded queries and honest repository acknowledgement/recovery. P20 economic
+identity, P21 catalogue/proposals, P22 mapping qualification, configuration/time/calendar/state
+owners remain authoritative. Internally consistent is not externally authenticated or suitable for
+execution. ADR-0091 and instrument-specifications help document contracts, bounded defaults and
+supported/unsupported interpretation rules.
+
+F05/F06/T01/M02/O-C01/O-C02/Q01-A/Q-HIST/Q-TICK/Q-SELECTOR/Q-T01, A22-Q01–Q06 and every inherited
+qualification remain mandatory. Source-declared tick values and margin are not externally verified
+values or current sufficiency. B003/B005 and earlier failed/harness/phase-correction evidence remain
+preserved. No live MT5, broker authentication, discovery, orders, trading, financial execution,
+production claim or main merge. **Prompt24 remains NOT AUTHORIZED.**

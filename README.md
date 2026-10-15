@@ -8,7 +8,8 @@ ATE is **not** currently a trading bot, MetaTrader Expert Advisor, or live execu
 ## Current development status
 
 - Phase: III — Universal Data Platform
-- Prompt: 19 of 84 — implementation complete; independent acceptance pending
+- Prompt: 23 of 84 — instrument specification implementation; independent technical audit and
+  governance acceptance pending
 - Status: foundation, domain contracts, runtime lifecycle, internal event architecture,
   persistence/state authority, temporal integrity, hierarchical configuration, and configuration
   schema validation, immutable configuration version-history, feature-flag/capability-control, and
@@ -23,6 +24,12 @@ ATE is **not** currently a trading bot, MetaTrader Expert Advisor, or live execu
 - Trading capability: **not implemented**
 - MT5 connectivity: **not implemented**
 - Live execution: **not implemented**
+
+Prompts20–22 are conditionally accepted for bounded offline research under their immutable
+governance records. Prompt23 adds source-declared specification validation and historical research
+metadata, preserving all qualifications. See
+[`instrument specification help`](docs/help/instrument-specifications.md) for supported contracts,
+limits and the ten synthetic journeys. Prompt24 is not authorized.
 
 See [`config/capabilities.json`](config/capabilities.json) for the authoritative machine-readable
 capability manifest.

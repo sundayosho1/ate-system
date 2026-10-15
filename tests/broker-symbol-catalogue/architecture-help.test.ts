@@ -97,13 +97,22 @@ it("truth manifest distinguishes implemented pending audit from trading authoriz
     capabilities: Record<string, boolean>;
     truth_statement: string;
   };
-  expect(m.completed_prompt).toBe(22);
-  expect(m.pre_production_version).toBe("0.22.0-canonical-symbol-mapping.1");
+  expect(m.completed_prompt).toBe(23);
+  expect(m.pre_production_version).toBe("0.23.0-instrument-specifications.1");
   expect(m.capabilities["offline_broker_symbol_catalogue"]).toBe(true);
   for (const k of ["live_trading", "paper_trading", "execution_engine", "broker_order_submission"])
     expect(m.capabilities[k]).toBe(false);
   expect(m.truth_statement).toContain("pending independent technical audit");
-  expect(m.truth_statement).toContain("Prompt 23 is not authorized");
+  expect(m.truth_statement).toContain("Prompt 24 is not authorized");
+  const acceptedMapping = readFileSync(
+    join(base, "docs/development/prompt-22-conditional-acceptance.md"),
+    "utf8",
+  );
+  expect(acceptedMapping).toContain("9dd10f15e4a9282d5e8cfbb65c9c1717f9f82dca");
+  expect(acceptedMapping).toContain("0.22.0-canonical-symbol-mapping.1");
+  expect(acceptedMapping).toContain("CONDITIONALLY ACCEPTED");
+  for (const q of ["A22-Q01", "A22-Q02", "A22-Q03", "A22-Q04", "A22-Q05", "A22-Q06"])
+    expect(acceptedMapping).toContain(q);
   const historical = readFileSync(
     join(base, "docs/development/prompt-21-conditional-acceptance.md"),
     "utf8",

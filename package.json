@@ -1,8 +1,8 @@
 {
   "name": "ate-system",
-  "version": "0.22.0-canonical-symbol-mapping.1",
+  "version": "0.23.0-instrument-specifications.1",
   "private": true,
-  "description": "ATE bounded offline research foundations through whole-observation canonical symbol mapping.",
+  "description": "ATE bounded offline research foundations through instrument specification intelligence.",
   "license": "UNLICENSED",
   "type": "module",
   "engines": {

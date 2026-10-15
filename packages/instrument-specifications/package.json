@@ -1,0 +1,23 @@
+{
+  "name": "@ate/instrument-specifications",
+  "version": "0.23.0-instrument-specifications.1",
+  "private": true,
+  "description": "Offline source-declared contract metadata, deterministic validation and immutable research history; no execution authority.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@ate/domain": "0.13.0-market-data-contracts.1",
+    "@ate/configuration": "0.12.0-config-promotion.1",
+    "@ate/time": "0.6.0-time.1",
+    "@ate/persistence": "0.5.0-persistence.1",
+    "@ate/instrument-registry": "0.20.0-instrument-registry.1",
+    "@ate/multitimeframe": "0.18.0-multitimeframe.1",
+    "zod": "^4.1.13",
+    "@ate/broker-symbol-catalogue": "0.21.0-broker-symbol-catalogue.1",
+    "@ate/canonical-symbol-mapping": "0.22.0-canonical-symbol-mapping.1"
+  }
+}
