@@ -619,3 +619,44 @@ new global identity, configuration/time/governance authority or upstream owner c
 MT5/broker/authentication, orders/trading/financial execution/production deployment or main merge.
 **Prompt23 NOT AUTHORIZED.** Implementation completion is not independent acceptance or governance
 acceptance.
+
+## CODEX-007B — Prompt22 authorized conditional governance acceptance (STAGE B)
+
+**AUTHORIZED OWNER DECISION: ACCEPT — PROMPT22 CONDITIONALLY ACCEPTED** for immutable implementation
+`9dd10f15e4a9282d5e8cfbb65c9c1717f9f82dca`, version `0.22.0-canonical-symbol-mapping.1`, direct
+accepted Prompt21 governance parent `bb805eca5ece53da6aff3e83138cef50a32efdfe`. Scope is only
+bounded offline research mapping/qualification/groups/history/queries/recovery. Verified Stage B
+publication establishes the governance successor baseline as a direct child of the accepted
+implementation.
+
+Record: `docs/development/prompt-22-conditional-acceptance.md`. Authenticate CODEX-007A audit seal
+`d59012d2a7364cc35d5be6c1c08c55035f63710b46a43d5145e0abbd974f3dc0`, 1447 passing tests/91 files,10
+journeys,298 external executions/291 passes/7 preserved historical harness failures, separately
+corrected probes,0 confirmed application defects. The separately executed technical audit is not
+governance acceptance or organizationally independent certification; Sunday Osho explicitly
+acknowledged reviewer implementation participation and absence of organizational independence.
+
+A22-Q01–Q06 and F05/F06/T01/M02/O-C01/O-C02/Q01-A/Q-HIST/Q-TICK/Q-SELECTOR/Q-T01, all other
+inherited restrictions, B003/B005 and all historical failed audits remain mandatory. The authorized
+three-assertion manifest-test compatibility exception and its original failed source/results remain
+disclosed, unchanged and not relabelled as passing. No external
+authenticity/independent-attestation/contract-equivalence/execution/production claim. STORED
+researchApproved=true is historical selector evidence, not current permission; unsupported verified
+approval paths remain unsupported. No source/test/dependency/version/ capability or previous
+acceptance modification. All earlier ledger bytes stay unchanged.
+
+Owner decision: **ACCEPT**, explicitly supplied. Signatory: **Sunday Osho**, **ATE Project Owner and
+Development Governance Approver**. Capacity/authority: **Project owner responsible for approving ATE
+development milestones, technical acceptance decisions, governance baselines and progression between
+development phases**. Approval/effective date: **15 October 2026**, owner-supplied. All18
+qualifications, preserved historical failures/exceptions, reviewer participation and operational
+restrictions were expressly accepted. Governance-only two-file publication on
+`codex/prompt-22-governance-acceptance` was explicitly authorized. Decision transcription:
+`CODEX-007B-StageB-evidence/authorized-user-approval.txt`, SHA256
+`cf8d82f90096ee0baa346d422ddfea5ec7ece7766b9c25a140973081dbc51335`. Exact published governance
+successor SHA, verification/security results and local/remote agreement are authenticated in the
+Stage B publication/baseline-sealing report; no self-referential commit identity is invented. This
+append supersedes only pending Prompt22 governance status upon verified publication; every earlier
+ledger byte and unrelated prompt status remains unchanged. **Prompt23 NOT AUTHORIZED. No main merge,
+live broker connectivity, credentials, trading, financial execution or production deployment
+authorized.**
