@@ -214,6 +214,7 @@ export class InstrumentSpecifications {
       s.prepared.evaluatedAt,
       s.prepared.clockProvenance,
     );
+    if (rebuilt.validations.length > p.maxDiagnostics) throw Error("DIAGNOSTIC_CAPACITY");
     if (fingerprint(rebuilt) !== fingerprint(s.prepared))
       throw Error("SPECIFICATION_EVIDENCE_CHANGED");
     if (

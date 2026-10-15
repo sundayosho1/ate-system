@@ -238,3 +238,49 @@ independent broker authentication or organizationally independent certification 
 Historical failed audits, B003/B005 and prior phase-correction evidence stay failed and preserved.
 Prompt23 is an implementation deliverable, not independent technical or governance acceptance.
 Prompt24, production, live connectivity, broker authentication, orders and trading are unauthorized.
+
+## Six-finding remediation semantics (CODEX-008B)
+
+Completeness derives rule ownership from typed specification fields, separately from human-readable
+validation evidence. A maintenance interval must have positive duration. Reversed or zero-length
+maintenance makes SESSION_HISTORY contradictory, without invalidating unrelated profiles. P18
+remains the calendar and session-break authority.
+
+Lifecycle effective start must not follow any present last-trading, expiry, maturity or retirement
+date. Present last-trading must not follow expiry or maturity; present expiry must not follow
+maturity. These lifecycle date comparisons permit equality. An effectiveTo boundary remains
+exclusive and must be strictly later than effectiveFrom. Omitted dates remain omitted; no missing
+intermediate date removes a relationship between other present dates.
+
+Price precision applies to tick, declared grid origin, sample price and declared price-tier bounds
+and increments. Representability and tick alignment are separate exact fixed-point checks, with no
+rounding. Unsupported quotations remain unsupported. Additional contradiction diagnostics are
+emitted only when a newly enforced relationship fails; valid S1 diagnostic bodies remain stable.
+This retains recoverability of unaffected historical generations. A stored conclusion changed by a
+corrected validation fails recovery as SPECIFICATION_EVIDENCE_CHANGED; no automatic migration,
+rewriting or grandfathering of false qualification is authorized. Preserve such roots for review.
+
+maxPriceTiers and maxQuantityTiers are per retained table, including each contradictory alternative
+(price uses maxPriceTiers; volume and margin use maxQuantityTiers). Several individually bounded
+alternatives may have a combined length above the per-table limit; no new aggregate tier limit is
+introduced. Existing schema alternative-count limits and input/snapshot/retained-byte budgets still
+apply. Rejection happens before repository commit, and recovery enforces current limits without
+truncating retained tables.
+
+Native JSON-shaped input bytes are the UTF-8 length of JSON.stringify after safe descriptor, proxy,
+cycle, Unicode and owner-clone validation. That encoding includes member names, punctuation,
+quotation/backslash escapes and multibyte characters. Serialized JSON is measured as its actual
+UTF-8 wire text, including whitespace and escape spelling, before parsing; therefore nonminimal wire
+representations can require more bytes than equivalent native input. When the serialized text equals
+the native deterministic encoding, both interfaces enforce the same physical-byte boundary. No
+getters or proxies are invoked to measure bytes. Current recovery input limits apply to the stored
+native request encoding, never to a silently truncated representation. Accepted P18 clone complexity
+limits remain additional protections.
+
+Compatible historical policies govern historical interpretation only. Current diagnostic-count,
+input-byte, tier, generation, snapshot and retained-resource budgets still apply before READY.
+Over-budget diagnostics produce DIAGNOSTIC_CAPACITY and NOT_READY/DEGRADED, preserving original
+history bytes. No historical policy allowlist entry grants a resource-limit exemption.
+
+These changes are implementation remediation, not Prompt 23 independent acceptance. All inherited
+offline research restrictions remain; Prompt 24 is not authorized by CODEX-008B.

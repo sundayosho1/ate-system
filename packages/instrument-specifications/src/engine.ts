@@ -53,11 +53,14 @@ const decimalPaths = new Set([
   "constraints.priceLower",
   "constraints.priceUpper",
 ]);
+type Category = keyof Metadata;
+type FieldPath = { [C in Category]: `${C}.${Extract<keyof Metadata[C], string>}` }[Category];
+const categoryOf = (path: FieldPath): Category => path.split(".")[0] as Category;
 type Field = { state: string; value?: unknown; evidence: string; alternatives?: unknown[] };
-export function fields(m: Metadata): [string, Field][] {
+export function fields(m: Metadata): [FieldPath, Field][] {
   return Object.entries(m).flatMap(([category, values]) =>
     Object.entries(values).map(
-      ([name, v]) => [`${category}.${name}`, v as Field] as [string, Field],
+      ([name, v]) => [`${category}.${name}`, v as Field] as [FieldPath, Field],
     ),
   );
 }
@@ -69,7 +72,7 @@ export function canonicalRequest(raw: unknown, p: Policy): Request {
   const r = requestSchema.parse(safeClone(raw, p.maxInputBytes, p.maxInputDepth));
   if (fields(r.metadata).length > p.maxFields) throw Error("FIELD_CAPACITY");
   for (const [path, f] of fields(r.metadata)) {
-    const n = Array.isArray(f.value) ? f.value.length : 0;
+    const tables = path.endsWith(".tiers") ? [f.value, ...(f.alternatives ?? [])] : [f.value];
     const max =
       path === "price.tiers"
         ? p.maxPriceTiers
@@ -78,7 +81,8 @@ export function canonicalRequest(raw: unknown, p: Policy): Request {
           : path === "lifecycle.corporateActions"
             ? p.maxLifecycleEvents
             : p.maxFields;
-    if (n > max) throw Error("METADATA_CAPACITY");
+    if (tables.some((table) => Array.isArray(table) && table.length > max))
+      throw Error("METADATA_CAPACITY");
   }
   const calendar = r.metadata.sessions.calendar;
   if (
@@ -237,12 +241,16 @@ export function buildQualification(
       }
   }
   const validations: Validation[] = [];
+  // Rule ownership is explicit and typed; human-readable evidence never selects profiles.
+  const affectedFields = new Map<string, readonly FieldPath[]>();
   const add = (
     ruleId: string,
     classification: Classification,
     evidence: string[],
     explanation: string,
+    affected: readonly FieldPath[],
   ) => {
+    affectedFields.set(ruleId, affected);
     if (validations.length >= p.maxDiagnostics) throw Error("DIAGNOSTIC_CAPACITY");
     validations.push({
       ruleId,
@@ -269,6 +277,7 @@ export function buildQualification(
             : "INCOMPLETE",
       [path, f.evidence],
       `Source state ${f.state}; no external authentication.`,
+      [path],
     );
     if (
       decimalPaths.has(path) &&
@@ -287,10 +296,11 @@ export function buildQualification(
         n > 0n || (zeroAllowed && n === 0n) ? "INTERNALLY_CONSISTENT" : "CONTRADICTORY",
         [path],
         zeroAllowed ? "Margin metadata must be nonnegative." : "Positive declaration required.",
+        [path],
       );
     }
   }
-  const check = (id: string, inputs: string[], test: () => boolean, explanation: string) => {
+  const check = (id: string, inputs: FieldPath[], test: () => boolean, explanation: string) => {
     add(
       id,
       inputs.some((x) => v(x) === undefined)
@@ -300,6 +310,7 @@ export function buildQualification(
           : "CONTRADICTORY",
       inputs,
       explanation,
+      inputs,
     );
   };
   check(
@@ -314,6 +325,46 @@ export function buildQualification(
     () => number("price.tick")! % 10n ** BigInt(18 - (v("price.precision") as number)) === 0n,
     "Tick must be representable under declared precision.",
   );
+  for (const [path, rule] of [
+    ["price.gridOrigin", "PRICE_ORIGIN_REPRESENTABILITY"],
+    ["price.samplePrice", "PRICE_SAMPLE_REPRESENTABILITY"],
+  ] as const) {
+    if (
+      v(path) !== undefined &&
+      v("price.precision") !== undefined &&
+      number(path)! % 10n ** BigInt(18 - (v("price.precision") as number)) !== 0n
+    )
+      check(
+        rule,
+        ["price.precision", path],
+        () => number(path)! % 10n ** BigInt(18 - (v("price.precision") as number)) === 0n,
+        "Declared price coordinates must be representable without rounding.",
+      );
+  }
+  const priceTiers = normalized.price.tiers;
+  if (
+    priceTiers?.state === "DECLARED" &&
+    priceTiers.value?.length &&
+    v("price.precision") !== undefined &&
+    priceTiers.value.some((tier) =>
+      [tier.lower, tier.upper, tier.increment].some(
+        (coordinate) =>
+          integer(coordinate) % 10n ** BigInt(18 - (v("price.precision") as number)) !== 0n,
+      ),
+    )
+  )
+    check(
+      "PRICE_TIER_REPRESENTABILITY",
+      ["price.precision", "price.tiers"],
+      () =>
+        priceTiers.value!.every((tier) =>
+          [tier.lower, tier.upper, tier.increment].every(
+            (coordinate) =>
+              integer(coordinate) % 10n ** BigInt(18 - (v("price.precision") as number)) === 0n,
+          ),
+        ),
+      "Price tier coordinates and increments must respect declared precision.",
+    );
   check(
     "PRICE_GRID",
     ["price.samplePrice", "price.tick", "price.gridOrigin"],
@@ -384,7 +435,7 @@ export function buildQualification(
     },
     "Synthetic metadata boundary check, not live sizing.",
   );
-  for (const path of ["price.tiers", "volume.tiers", "margin.tiers"]) {
+  for (const path of ["price.tiers", "volume.tiers", "margin.tiers"] as const) {
     const tiers = v(path) as
       | {
           lower: string;
@@ -412,6 +463,7 @@ export function buildQualification(
       valid ? "INTERNALLY_CONSISTENT" : "CONTRADICTORY",
       [path],
       "Contiguous ordered tiers require one inclusive shared boundary and common units.",
+      [path],
     );
     const unit =
       path === "volume.tiers"
@@ -428,6 +480,7 @@ export function buildQualification(
           : "CONTRADICTORY",
       [path],
       "Tier units must equal the explicitly declared category unit.",
+      [path],
     );
     const sample = v(path === "price.tiers" ? "price.samplePrice" : "volume.sampleQuantity") as
       string | undefined;
@@ -445,6 +498,7 @@ export function buildQualification(
           : "CONTRADICTORY",
         [path],
         "Exactly one tier and an aligned sample are required.",
+        [path],
       );
     }
   }
@@ -458,6 +512,7 @@ export function buildQualification(
       v("price.tickCurrency") === undefined ? "INCOMPLETE" : "INTERNALLY_CONSISTENT",
       ["price.tickCurrency"],
       "Declared monetary values retain currency and are never externally verified.",
+      ["price.tickCurrency"],
     );
   const quotation = v("price.quotation");
   if (quotation !== undefined)
@@ -466,6 +521,7 @@ export function buildQualification(
       quotation === "DECIMAL" ? "INTERNALLY_CONSISTENT" : "UNSUPPORTED",
       ["price.quotation"],
       "Only explicit decimal quotation is interpreted; other conventions remain recorded.",
+      ["price.quotation"],
     );
   const convention = v("volume.convention");
   if (convention !== undefined)
@@ -476,6 +532,7 @@ export function buildQualification(
         : "UNSUPPORTED",
       ["volume.convention"],
       "No undocumented fractional convention is inferred.",
+      ["volume.convention"],
     );
   const ownerSet = ports.mapping.snapshot(r.mappingSet);
   if (!ownerSet.ok || !ownerSet.value) throw Error("MAPPING_EVIDENCE_UNAVAILABLE");
@@ -496,16 +553,23 @@ export function buildQualification(
     ["volume.increment", "volumeStep"],
     ["volume.limit", "volumeLimit"],
     ["contract.expiry", "expiry"],
-  ]) {
-    if (v(path!) === undefined || original[key!] === undefined) continue;
-    const same = decimalPaths.has(path!)
-      ? decimal(String(v(path!))) === decimal(String(original[key!]))
-      : v(path!) === original[key!];
+  ] as const) {
+    if (v(path) === undefined || original[key] === undefined) continue;
+    const source = original[key];
+    const sourceDecimal = () => {
+      if (typeof source !== "string" && typeof source !== "number")
+        throw Error("SOURCE_DECLARATION_TYPE");
+      return decimal(String(source));
+    };
+    const same = decimalPaths.has(path)
+      ? decimal(String(v(path))) === sourceDecimal()
+      : v(path) === original[key];
     add(
-      `SOURCE_${key!.toUpperCase()}`,
+      `SOURCE_${key.toUpperCase()}`,
       same ? "INTERNALLY_CONSISTENT" : "CONTRADICTORY",
-      [path!, ctx.observationFingerprint],
+      [path, ctx.observationFingerprint],
       "An enriched declaration may not silently contradict its exact upstream source observation.",
+      [path],
     );
   }
   const revision = ports.registry.revision(ctx.revisionId);
@@ -518,15 +582,16 @@ export function buildQualification(
     ["contract.maturity", "maturity"],
     ["contract.quoteCurrency", "quote"],
     ["contract.quoteCurrency", "currency"],
-  ])
-    if (v(path!) !== undefined && identity[key!] !== undefined)
+  ] as const)
+    if (v(path) !== undefined && identity[key] !== undefined)
       add(
-        `IDENTITY_${key!.toUpperCase()}`,
-        v(path!) === identity[key!] ? "INTERNALLY_CONSISTENT" : "CONTRADICTORY",
-        [path!, ctx.revisionId],
+        `IDENTITY_${key.toUpperCase()}`,
+        v(path) === identity[key] ? "INTERNALLY_CONSISTENT" : "CONTRADICTORY",
+        [path, ctx.revisionId],
         "Accepted canonical identity must not be contradicted by a declaration.",
+        [path],
       );
-  for (const category of ["sessions", "lifecycle", "margin", "constraints"]) {
+  for (const category of ["sessions", "lifecycle", "margin", "constraints"] as const) {
     const start = v(`${category}.effectiveFrom`) as string | undefined,
       end = v(`${category}.effectiveTo`) as string | undefined;
     if (start && end)
@@ -535,6 +600,7 @@ export function buildQualification(
         start < end ? "INTERNALLY_CONSISTENT" : "CONTRADICTORY",
         [`${category}.effectiveFrom`, `${category}.effectiveTo`],
         "Effective start precedes exclusive end.",
+        [`${category}.effectiveFrom`, `${category}.effectiveTo`],
       );
     if (start || end)
       add(
@@ -542,23 +608,35 @@ export function buildQualification(
         (start && at < start) || (end && at >= end) ? "STALE_CONTEXT" : "INTERNALLY_CONSISTENT",
         [category, at],
         "Applicability is bounded to recorded evidence and evaluation time.",
+        [`${category}.effectiveFrom`, `${category}.effectiveTo`],
       );
   }
   for (const [a, b] of [
     ["effectiveFrom", "lastTrading"],
+    ["effectiveFrom", "expiry"],
+    ["effectiveFrom", "maturity"],
+    ["lastTrading", "maturity"],
     ["lastTrading", "expiry"],
     ["expiry", "maturity"],
     ["effectiveFrom", "retirement"],
-  ]) {
-    if (v(`lifecycle.${a}`) !== undefined && v(`lifecycle.${b}`) !== undefined)
+  ] as const) {
+    if (
+      v(`lifecycle.${a}`) !== undefined &&
+      v(`lifecycle.${b}`) !== undefined &&
+      // Preserve valid S1 diagnostic bodies; new non-adjacent checks emit contradictions only.
+      ((a === "effectiveFrom" && ["lastTrading", "retirement"].includes(b)) ||
+        (a === "lastTrading" && b === "expiry") ||
+        (a === "expiry" && b === "maturity") ||
+        String(v(`lifecycle.${a}`)) > String(v(`lifecycle.${b}`)))
+    )
       check(
-        `LIFECYCLE_${a!.toUpperCase()}_${b!.toUpperCase()}`,
+        `LIFECYCLE_${a.toUpperCase()}_${b.toUpperCase()}`,
         [`lifecycle.${a}`, `lifecycle.${b}`],
         () => String(v(`lifecycle.${a}`)) <= String(v(`lifecycle.${b}`)),
         "Lifecycle chronology cannot silently be repaired.",
       );
   }
-  for (const name of ["expiry", "maturity"])
+  for (const name of ["expiry", "maturity"] as const)
     if (v(`contract.${name}`) !== undefined && v(`lifecycle.${name}`) !== undefined)
       check(
         `CONTRACT_${name.toUpperCase()}`,
@@ -583,6 +661,7 @@ export function buildQualification(
           : "INTERNALLY_CONSISTENT",
         [ctx.calendarFingerprint!],
         "Accepted P18 calendar authority validates schedule, timezone, folds and breaks.",
+        ["sessions.calendar"],
       );
     } catch {
       add(
@@ -590,6 +669,7 @@ export function buildQualification(
         "CONTRADICTORY",
         ["sessions.calendar"],
         "Accepted calendar rejects the declared timezone or schedule.",
+        ["sessions.calendar"],
       );
     }
   }
@@ -599,6 +679,7 @@ export function buildQualification(
       "UNSUPPORTED",
       ["sessions.weeklyTemplate"],
       "Free-form templates are retained only; provide an accepted explicit calendar to interpret instants.",
+      ["sessions.weeklyTemplate"],
     );
   for (const interval of normalized.sessions.maintenance?.value ?? [])
     add(
@@ -606,6 +687,7 @@ export function buildQualification(
       interval.start < interval.end ? "INTERNALLY_CONSISTENT" : "CONTRADICTORY",
       [interval.start, interval.end],
       "Maintenance declarations must have positive intervals.",
+      ["sessions.maintenance"],
     );
   if (Object.keys(normalized.margin).length) {
     add(
@@ -617,6 +699,14 @@ export function buildQualification(
         : "INCOMPLETE",
       ["margin"],
       "Missing account, jurisdiction, currency, mode or effective dates prevent applicability qualification.",
+      [
+        "margin.mode",
+        "margin.currency",
+        "margin.accountClass",
+        "margin.jurisdiction",
+        "margin.effectiveFrom",
+        "margin.effectiveTo",
+      ],
     );
     if (
       v("margin.mode") === "FIXED_AMOUNT" &&
@@ -635,6 +725,7 @@ export function buildQualification(
         v("margin.mode") === "FIXED_AMOUNT" ? "INTERNALLY_CONSISTENT" : "UNSUPPORTED",
         ["margin.mode"],
         "Only fixed-amount declarations are interpreted; no margin sufficiency calculation.",
+        ["margin.mode"],
       );
     if (v("margin.currency") !== undefined && v("contract.marginCurrency") !== undefined)
       check(
@@ -647,12 +738,12 @@ export function buildQualification(
   for (const [left, right, id] of [
     ["constraints.minimumIncrement", "price.tick", "CONSTRAINT_PRICE_INCREMENT"],
     ["constraints.quantityIncrement", "volume.increment", "CONSTRAINT_QUANTITY_INCREMENT"],
-  ])
-    if (v(left!) !== undefined && v(right!) !== undefined)
+  ] as const)
+    if (v(left) !== undefined && v(right) !== undefined)
       check(
-        id!,
-        [left!, right!],
-        () => number(left!) === number(right!),
+        id,
+        [left, right],
+        () => number(left) === number(right),
         "Constraint and category declarations must agree.",
       );
   if (v("constraints.priceLower") !== undefined && v("constraints.priceUpper") !== undefined)
@@ -668,12 +759,14 @@ export function buildQualification(
       "UNSUPPORTED",
       [declaration.name, declaration.value],
       "Source declaration retained; no execution permission or unsupported rule interpretation.",
+      ["constraints.declarations"],
     );
   add(
     "SOURCE_PROVENANCE",
     r.rawEvidence.length && r.importBatchId.length ? "INTERNALLY_CONSISTENT" : "INCOMPLETE",
     [r.rawEvidence, r.importBatchId],
     "Exact request and upstream source references retained; broker authenticity remains unverified.",
+    [],
   );
   add(
     "SOURCE_TIME",
@@ -682,6 +775,7 @@ export function buildQualification(
       : "INTERNALLY_CONSISTENT",
     [r.sourceDeclaredAt, at],
     "Future or aged declarations do not establish current applicability.",
+    [],
   );
   const completeness = profiles.map((profile) => {
     const required = requirements[profile],
@@ -689,7 +783,7 @@ export function buildQualification(
     const requiredRules = profileRules[profile];
     const relevant = validations.filter(
       (x) =>
-        (x.evidence.some((e) => categories.has(e.split(".")[0])) &&
+        ((affectedFields.get(x.ruleId) ?? []).some((field) => categories.has(categoryOf(field))) &&
           x.classification !== "INCOMPLETE") ||
         requiredRules.includes(x.ruleId) ||
         ["SOURCE_TIME", "SOURCE_PROVENANCE"].includes(x.ruleId),

@@ -42,7 +42,10 @@ export function safeClone(raw: unknown, maxBytes = 65536, maxDepth = 20): unknow
     seen.delete(v);
   };
   visit(raw, 0);
-  return ownerClone(raw, maxBytes);
+  const cloned = ownerClone(raw, maxBytes);
+  // Native input is measured by deterministic JSON encoding after hostile descriptors are rejected.
+  if (Buffer.byteLength(JSON.stringify(cloned), "utf8") > maxBytes) throw Error("SOURCE_BYTES");
+  return cloned;
 }
 /** Reject duplicate JSON object members before JSON.parse discards their evidence. */
 export function parseJson(raw: unknown, maxBytes: number): unknown {
