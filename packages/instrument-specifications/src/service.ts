@@ -36,6 +36,84 @@ import {
   fields,
   type EvidencePorts,
 } from "./engine.js";
+type Metadata = Prepared["normalized"];
+type ComparisonField = {
+  [C in keyof Metadata]: `${C}.${Extract<keyof Metadata[C], string>}`;
+}[keyof Metadata];
+// Dependencies describe supplied values, not a blanket requirement for optional categories.
+const comparisonDependencies: readonly {
+  id: string;
+  values: readonly ComparisonField[];
+  requires: readonly ComparisonField[];
+  unbound?: true;
+}[] = [
+  {
+    id: "TICK_VALUE_CURRENCY",
+    values: ["price.tickValue", "price.profitTickValue", "price.lossTickValue"],
+    requires: ["price.tickCurrency"],
+  },
+  {
+    id: "VOLUME_UNIT",
+    values: [
+      "volume.minimum",
+      "volume.maximum",
+      "volume.increment",
+      "volume.origin",
+      "volume.limit",
+      "volume.sampleQuantity",
+      "volume.tiers",
+    ],
+    requires: ["volume.unit"],
+  },
+  {
+    id: "MARGIN_INTERPRETATION",
+    values: ["margin.initial", "margin.maintenance", "margin.hedged", "margin.tiers"],
+    requires: ["margin.currency", "margin.mode"],
+  },
+  {
+    id: "CONTRACT_UNIT",
+    values: ["contract.size", "contract.multiplier"],
+    requires: ["contract.unit"],
+  },
+  {
+    id: "PRICE_QUOTATION",
+    values: [
+      "price.point",
+      "price.tick",
+      "price.minimumIncrement",
+      "price.gridOrigin",
+      "price.samplePrice",
+      "price.tiers",
+      "constraints.minimumIncrement",
+      "constraints.priceLower",
+      "constraints.priceUpper",
+    ],
+    requires: ["price.quotation"],
+  },
+  { id: "PRICE_TIER_CURRENCY", values: ["price.tiers"], requires: ["contract.quoteCurrency"] },
+  {
+    id: "CONSTRAINT_QUANTITY_UNIT",
+    values: ["constraints.quantityIncrement"],
+    requires: ["volume.unit"],
+  },
+  // The current schema supplies no dedicated notional currency binding. Do not borrow one.
+  {
+    id: "NOTIONAL_CURRENCY_UNSPECIFIED",
+    values: ["volume.minimumNotional"],
+    requires: [],
+    unbound: true,
+  },
+];
+const comparisonUnitFields = new Set([
+  "price.tickCurrency",
+  "volume.unit",
+  "margin.currency",
+  "contract.unit",
+  "contract.underlyingUnit",
+  "contract.quoteCurrency",
+  "contract.profitCurrency",
+  "contract.marginCurrency",
+]);
 export interface SpecificationPorts extends EvidencePorts {
   configuration: () => EffectiveConfiguration;
   authority: StateAuthorityRegistry;
@@ -681,7 +759,7 @@ export class InstrumentSpecifications {
         const classification =
           !av || !bv || av.state !== "DECLARED" || bv.state !== "DECLARED"
             ? "INSUFFICIENT_EVIDENCE"
-            : path.endsWith("unit") || path.endsWith("Currency")
+            : comparisonUnitFields.has(path)
               ? "INCOMPATIBLE_CONTRACT_SEMANTICS"
               : "MATERIAL_DIFFERENCE";
         differences.push({ field: path, before: av, after: bv, classification });
@@ -697,6 +775,40 @@ export class InstrumentSpecifications {
             after: bv,
             classification: "CONTEXT_CHANGED",
           });
+      let incompleteDependencies = false;
+      const unresolvedValueFields = new Set<string>();
+      for (const rule of comparisonDependencies) {
+        const evidence = (metadata: typeof old) => {
+          const applicable = rule.values.filter((path) => metadata.get(path)?.state === "DECLARED");
+          const missing = applicable.length
+            ? rule.requires.filter((path) => metadata.get(path)?.state !== "DECLARED")
+            : [];
+          return {
+            applicable: applicable.map((field) => ({ field, declaration: metadata.get(field)! })),
+            required: rule.requires.map((field) => ({
+              field,
+              declaration: metadata.get(field) ?? null,
+            })),
+            missing,
+            unbound: applicable.length > 0 && rule.unbound === true,
+          };
+        };
+        const left = evidence(old),
+          right = evidence(next);
+        if (left.missing.length || right.missing.length || left.unbound || right.unbound) {
+          incompleteDependencies = true;
+          for (const field of rule.values) unresolvedValueFields.add(field);
+          differences.push({
+            field: `COMPARISON_DEPENDENCY_${rule.id}`,
+            before: left,
+            after: right,
+            classification: "INSUFFICIENT_EVIDENCE",
+          });
+        }
+      }
+      for (const difference of differences)
+        if (unresolvedValueFields.has(difference.field))
+          difference.classification = "INSUFFICIENT_EVIDENCE";
       if (differences.length > p.maxComparisons) return fail("COMPARISON_CAPACITY");
       const sameIdentity =
         a.prepared.context.instrumentId === b.prepared.context.instrumentId &&
@@ -717,20 +829,22 @@ export class InstrumentSpecifications {
       );
       const classification = !sameIdentity
         ? "INCOMPATIBLE_CONTRACT_SEMANTICS"
-        : unsupported
-          ? "UNSUPPORTED_COMPARISON"
-          : !complete ||
-              contradictory ||
-              unresolvedFields ||
-              a.prepared.policyFingerprint !== b.prepared.policyFingerprint
-            ? "INSUFFICIENT_EVIDENCE"
-            : differences.some((x) => x.classification === "INCOMPATIBLE_CONTRACT_SEMANTICS")
-              ? "INCOMPATIBLE_CONTRACT_SEMANTICS"
-              : differences.some((x) => x.classification === "INSUFFICIENT_EVIDENCE")
-                ? "INSUFFICIENT_EVIDENCE"
-                : differences.some((x) => x.classification === "MATERIAL_DIFFERENCE")
-                  ? "MATERIAL_DIFFERENCE"
-                  : "EXACT_MATCH_UNDER_RECORDED_POLICY";
+        : incompleteDependencies
+          ? "INSUFFICIENT_EVIDENCE"
+          : unsupported
+            ? "UNSUPPORTED_COMPARISON"
+            : !complete ||
+                contradictory ||
+                unresolvedFields ||
+                a.prepared.policyFingerprint !== b.prepared.policyFingerprint
+              ? "INSUFFICIENT_EVIDENCE"
+              : differences.some((x) => x.classification === "INCOMPATIBLE_CONTRACT_SEMANTICS")
+                ? "INCOMPATIBLE_CONTRACT_SEMANTICS"
+                : differences.some((x) => x.classification === "INSUFFICIENT_EVIDENCE")
+                  ? "INSUFFICIENT_EVIDENCE"
+                  : differences.some((x) => x.classification === "MATERIAL_DIFFERENCE")
+                    ? "MATERIAL_DIFFERENCE"
+                    : "EXACT_MATCH_UNDER_RECORDED_POLICY";
       const comparisonContext = (s: Snapshot) => ({
         snapshot: s.fingerprint,
         generation: s.generation,

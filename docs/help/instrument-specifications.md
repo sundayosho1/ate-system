@@ -284,3 +284,53 @@ history bytes. No historical policy allowlist entry grants a resource-limit exem
 
 These changes are implementation remediation, not Prompt 23 independent acceptance. All inherited
 offline research restrictions remain; Prompt 24 is not authorized by CODEX-008B.
+
+## Dependency-aware comparison (CODEX-008D)
+
+An exact recorded research comparison requires the measurement context for each supplied value on
+both records. Omitting an applicable dependency is unresolved just like explicit UNKNOWN or ABSENT;
+it cannot be supplied by canonical identity or an unrelated contract/currency field. Missing or
+unresolved dependencies produce INSUFFICIENT_EVIDENCE even when numbers match or differ. Existing
+canonical-identity incompatibility remains an incompatible comparison. Unsupported/contradictory
+metadata is not promoted to exact equivalence.
+
+| Supplied values                                                                                                                  | Required interpretation evidence                                                                                                                                          |
+| -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| price.tickValue / profitTickValue / lossTickValue                                                                                | price.tickCurrency                                                                                                                                                        |
+| volume.minimum / maximum / increment / origin / limit / sampleQuantity / tiers                                                   | volume.unit                                                                                                                                                               |
+| margin.initial / maintenance / hedged / tiers                                                                                    | margin.currency and margin.mode                                                                                                                                           |
+| contract.size / multiplier                                                                                                       | contract.unit (also required by the existing contract profile)                                                                                                            |
+| price.point / tick / minimumIncrement / gridOrigin / samplePrice / tiers; constraints.minimumIncrement / priceLower / priceUpper | price.quotation                                                                                                                                                           |
+| price.tiers                                                                                                                      | contract.quoteCurrency, the existing tier-validation category currency                                                                                                    |
+| constraints.quantityIncrement                                                                                                    | volume.unit                                                                                                                                                               |
+| volume.minimumNotional                                                                                                           | No dedicated notional-currency binding exists in the current schema; supplied notional evidence remains insufficient for exact comparison. No contract-currency fallback. |
+
+Dependencies activate only for supplied DECLARED values, including zero monetary amounts. An empty
+optional category does not activate requirements. Optional samples, underlyingUnit and unrelated
+account/jurisdiction/effective-date fields do not become universal comparison requirements. Existing
+explicit unresolved-field and relevant invalid-validation protections remain. Fixed-amount margin
+metadata may be compared with its declared currency/mode without claiming actual account-level
+applicability. Unsupported margin modes remain unsupported when dependencies are resolved.
+
+Matching complete values and units may still exact-match under recorded policy. Different declared
+currencies or quantity units produce incompatible contract semantics, without implicit conversion.
+Price quotation and category units retain their accepted authority; no new economic identity,
+monetary valuation or external broker authentication is inferred.
+
+The existing differences array also carries deterministic COMPARISON_DEPENDENCY_* evidence records.
+Their before/after payloads identify applicable declarations, required declarations, missing field
+paths and any unbound interpretation. They can appear even when raw field values are identical; they
+explain insufficient evidence, not a fabricated numerical difference. These records consume the
+existing maxComparisons budget; overflow rejects COMPARISON_CAPACITY rather than truncating
+evidence.
+
+Comparison and CHANGES queries apply these semantics to eligible immutable historical records. No
+specification body, stored qualification, generation, policy fingerprint or source reference is
+rewritten. Recovery still validates exact stored derivation under its authorized policy and enforces
+current resources. Comparison-result fingerprints may change with corrected interpretation while
+underlying specification fingerprints remain unchanged. All prior qualifications and offline-only
+restrictions remain; this remediation is not Prompt 23 acceptance or Prompt 24 authorization.
+
+When a supplied value lacks an applicable dependency, its individual difference is also classified
+as `INSUFFICIENT_EVIDENCE`; a numeric mismatch alone does not establish a material difference in
+unresolved units. Complete values retain their existing material-difference classification.
