@@ -62,7 +62,12 @@ import {
   cloneHistory,
   retainedHistoryBytes,
 } from "./primitives.js";
-import { canonicalPlan, comparePlans } from "./canonical.js";
+import {
+  canonicalPlan,
+  comparePlans,
+  validateMemberState,
+  creationFailureReason,
+} from "./canonical.js";
 import { validateTransition } from "./structural.js";
 import { readPolicy } from "./configuration.js";
 export type ReplayOwnerEvidence = Readonly<{
@@ -518,7 +523,12 @@ export class MOSECoreRuntime {
       } catch (e) {
         const label = errorCode(e);
         if (label === "RESOURCE_BUDGET_EXCEEDED") throw e;
-        codes.push(label in reasons ? (label as Reason) : "REPLAY_EVIDENCE_INVALID");
+        codes.push(
+          creationFailureReason(
+            eligible,
+            label in reasons ? (label as Reason) : "REPLAY_EVIDENCE_INVALID",
+          ),
+        );
         sourceReady = false;
         expected = null;
       }
@@ -548,6 +558,11 @@ export class MOSECoreRuntime {
       new Set(ordered.map((e) => e.key)).size !== ordered.length
     )
       throw Error("RESOURCE_BUDGET_EXCEEDED");
+    for (const member of members)
+      validateMemberState(
+        member,
+        ordered.filter((entry) => entry.instrumentId === member.instrumentId).length,
+      );
     const body = {
       schemaVersion: 1 as const,
       sessionId: a.sessionId,
@@ -829,18 +844,7 @@ export class MOSECoreRuntime {
         throw Error("CANONICAL_PLAN_MISMATCH");
       for (const m of u.members) {
         const count = u.plan.filter((p) => p.instrumentId === m.instrumentId).length;
-        if (
-          m.included !== (m.eligible && m.sourceReady && m.reasons.length === 0) ||
-          (m.included
-            ? !m.context ||
-              !m.inputFingerprint ||
-              !m.eligibilityVersion ||
-              !m.eligibilityAssessment ||
-              m.expected === null ||
-              m.expected !== count
-            : count !== 0)
-        )
-          throw Error("CANONICAL_PLAN_MISMATCH");
+        validateMemberState(m, count);
         if (m.included) {
           const replay = m.context?.replay;
           if (
@@ -1528,7 +1532,7 @@ export class MOSECoreRuntime {
       pending: outcomes.filter((o) => ["PENDING", "DEFERRED"].includes(o.outcome)).length,
       unreceived: s.universe.plan.length - s.cursor,
       unresolvedSources: s.universe.members.filter((m) => m.eligible && !m.sourceReady).length,
-      canonicalVerification: verificationPending ? "UNVERIFIED" : "VERIFIED",
+      canonicalVerification: unknown ? "UNVERIFIED" : "VERIFIED",
       expectedObligations: unknown ? null : expected,
       coverageComplete: !unknown && completed === expected,
       eligibilityCoverage: ratio(

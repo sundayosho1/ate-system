@@ -483,3 +483,46 @@ history capacity leaves no space to drain pending work. No Windows, fsync/power-
 throughput, dishonest-owner, hostile-root, concurrent-writer or external-authentication guarantee is
 added. Trusted terminating owners, immutable roots/evidence and single-writer restrictions remain.
 Prompt 25 technical/governance acceptance remains PENDING. Prompt 26 remains NOT AUTHORIZED.
+
+## Excluded-member integrity and reachable CREATE states
+
+Recovery validates every member in every retained generation **before** selecting included sources
+for canonical replay verification. The same pure member-state validator checks newly constructed
+universes before publication. A schema-valid, correctly rehashed checkpoint is not sufficient
+evidence of a reachable member state.
+
+| Historical CREATE result                                       | Flags and count                                                                                                                                                                              | Retained evidence and reason                                                                                                                                                                                                                                                                                                   | Plan and verification                                                                                                                                                                                     |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Eligibility did not succeed                                    | `eligible=false`, `sourceReady=false`, `included=false`, `expected=null`                                                                                                                     | Context, eligibility version/assessment and input fingerprint are null. Exactly one early-path reason: `INSTRUMENT_INELIGIBLE`, `SOURCE_UNAVAILABLE`, `TEMPORAL_INCONSISTENCY`, `REPLAY_EVIDENCE_INVALID` or `UNKNOWN_EVIDENCE`.                                                                                               | No plan entries; no source-reconstruction duty was created. The requested source reference remains a request, not a source certificate.                                                                   |
+| Eligibility succeeded; source construction failed              | `eligible=true`, `sourceReady=false`, `included=false`, `expected=null`                                                                                                                      | Context and both eligibility identities are present. Input fingerprint may be absent (failure before source resolution) or present (later binding/temporal failure). Exactly one source-path reason: `SOURCE_UNAVAILABLE`, `PROVENANCE_INCOMPLETE`, `TEMPORAL_INCONSISTENCY`, `REPLAY_EVIDENCE_INVALID` or `UNKNOWN_EVIDENCE`. | No retained plan entries. Coverage and canonical verification remain unknown/unverified; current restoration cannot silently invent a historical inclusion or authorize COMPLETE.                         |
+| Eligibility and source construction succeeded                  | All three flags true; non-null expected count equals this member's plan count (including a legitimate zero-event source)                                                                     | Context, eligibility version/assessment and input fingerprint are present; reasons are empty.                                                                                                                                                                                                                                  | Complete canonical source reconstruction is required for recovery certification. Source manifest/certificate evidence belongs to the accepted owners and retained context/plan, not a new MOSE authority. |
+| Historically valid included member; current permission revoked | Historical flags, evidence and counts remain unchanged                                                                                                                                       | New owner checks establish current restrictions separately.                                                                                                                                                                                                                                                                    | Historical ACKs and receipts remain facts. New unauthorized observations cannot be admitted; genuine rejected receipts still reconcile their canonical obligations.                                       |
+| Any contradictory combination                                  | Rejected, including false eligibility with retained context/authority/readiness/count, ready-but-excluded state, missing eligible authority, mismatched reason or unexpected plan membership | No fields are discarded or repaired.                                                                                                                                                                                                                                                                                           | `CANONICAL_PLAN_MISMATCH`; recovery remains required and NOT_READY/DEGRADED. No new command ACK, affirmative summary or successful shutdown conceals invalid history.                                     |
+
+Eligibility authority is acquired only after the accepted eligibility call succeeds. Source input
+identity is acquired later. The builder catches one failure per member, clears source readiness and
+count, and retains only evidence already acquired. Ordinary unclassified owner exceptions use the
+existing `UNKNOWN_EVIDENCE` normalization. Membership validation concerns those joint historical
+facts; it does not authenticate historical registry membership or invent approval certificates.
+Genuine ineligible exclusions do not require source replay reconstruction.
+
+The validator runs before recovery's inclusion filter and before live publication. Invalid earlier
+generations cannot be excused by a valid latest generation. Known contradictions reject even while
+owners are unavailable. Rejected histories preserve their original bytes and recovery debt;
+direct/JSON mutation commands and latest/as-of queries remain behind the lifecycle gate.
+
+Canonical verification is `UNVERIFIED` whenever coverage is unknown, including an eligible source
+that was unavailable at publication. This does not retroactively include that source, rewrite a
+checkpoint or add an event obligation that was never constructed. Finite history limits and
+NONE/UNKNOWN/lost-ACK semantics are unchanged. Historical PAUSED shutdown intent remains
+unauthenticated (C-Q01); bounded history may retain unresolved obligations (C-Q02).
+
+All inherited qualifications remain mandatory. This remediation does not establish technical or
+governance acceptance, Windows qualification, production durability, trading permission or Prompt 26
+authorization. Prompt 25 acceptance remains pending independent review.
+
+CREATE uses the same phase-specific failure-reason lists as recovery. A thrown affirmative or
+wrong-phase reason from an owner callback is conservatively normalized to `REPLAY_EVIDENCE_INVALID`;
+it cannot manufacture an ineligibility proof. Existing genuine early, source-unavailability,
+provenance, temporal and unknown-exception reasons retain their meanings. No successful owner result
+is fabricated by that normalization.
