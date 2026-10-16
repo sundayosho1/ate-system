@@ -292,15 +292,19 @@ manifest, P15 report and P16 catalogue-version record. P20's explicit research a
 separately required for every declared version. Matching prices, origin counts, friendly names or
 manifest positions do not establish identity.
 
-The qualified domain is a set of full origin identities, with duplicates prohibited. P19 owns
-manifest and event multiplicity: its specification requires unique manifest IDs and dataset content
-fingerprints, and its sequencer checks their exact input lists. Repeated full origins cannot inflate
-P24 coverage, including under distinct manifest IDs. P24 does not remove or merge replay records.
+The qualified domain is a set of full origin identities; repeated declarations cannot inflate it.
+P19 owns manifest and event multiplicity: its specification requires unique manifest IDs and dataset
+content fingerprints, and its sequencer checks their exact input lists. Valid disjoint partitions of
+one dataset may have different manifest/content identities but the same full origin. P24 compares
+that origin once while retaining all P19 manifests and events; it does not merge records or require
+one manifest per dataset. Duplicate manifest IDs/content remain rejected by P19. An undeclared
+origin still fails even when another origin appears in multiple partitions.
+
 Different catalogue versions participate in full origin identity; simultaneous versions sharing
 identical content are not supported by P19's unique-content specification. Versions in one family
 still obey P16's active-version rule. No inactive version becomes current merely because it appears
 in a replay. Complete one-, two- and three-origin research remains supported when each origin has
-qualified, distinct owner evidence.
+qualified owner evidence.
 
 Missing, extra, substituted, unresolved or unsupported origins deny replay reproducibility and
 attestation receipt. VALIDATED/SIMULATION qualification, transition previews, requests, approval,

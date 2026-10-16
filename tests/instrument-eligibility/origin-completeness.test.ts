@@ -409,3 +409,67 @@ it("later multi-origin contradictory receipt restricts current eligibility witho
   ).toEqual(recorded);
   take(await reader.stop());
 });
+it("valid non-overlapping public P19 partitions share one qualified origin without losing event multiplicity", async () => {
+  const original = owners.inputs[0]!.manifests[0]!;
+  const { fingerprint: ignored, contentFingerprint: ignoredContent, ...body } = original;
+  void ignored;
+  void ignoredContent;
+  const parts = [body.records.slice(0, 1), body.records.slice(1)].map((records, i) =>
+    createReplayInputManifest(
+      { ...body, manifestId: "origin-part-" + i, records },
+      owners.pairs[0]![0]!.specification.resourceLimits,
+    ),
+  );
+  const pair = await owners.pair(parts);
+  const path = root(),
+    f = await research(owners, 1, new FilesystemEligibilityRepository(path));
+  f.setParticipants(pair);
+  f.context.replay = {
+    leftSession: pair[0]!.specification.sessionId,
+    leftCheckpoint: pair[0]!.checkpoint.fingerprint,
+    rightSession: pair[1]!.specification.sessionId,
+    rightCheckpoint: pair[1]!.checkpoint.fingerprint,
+  };
+  await f.toResearch();
+  take((await f.attest()).result);
+  expect((await preview(f)).allowed).toBe(true);
+  expect(pair[0]!.inputs.manifests).toHaveLength(2);
+  expect(pair[0]!.inputs.manifests.flatMap((m) => m.records)).toHaveLength(original.records.length);
+  await f.promote("VALIDATED");
+  await f.promote("SIMULATION");
+  take(await f.service.stop());
+  const reader = new InstrumentEligibility("origin-lab", {
+    ...f.ports,
+    repository: new FilesystemEligibilityRepository(path),
+  });
+  take(await reader.initialize());
+  expect(take(await reader.getEligibility(f.context.instrumentId)).current.allowed).toBe(true);
+  take(await reader.stop());
+});
+it("partitioned declared origin cannot hide an additional genuine undeclared origin", async () => {
+  const original = owners.inputs[0]!.manifests[0]!;
+  const { fingerprint: ignored, contentFingerprint: ignoredContent, ...body } = original;
+  void ignored;
+  void ignoredContent;
+  const parts = [body.records.slice(0, 1), body.records.slice(1)].map((records, i) =>
+    createReplayInputManifest(
+      { ...body, manifestId: "extra-origin-part-" + i, records },
+      owners.pairs[0]![0]!.specification.resourceLimits,
+    ),
+  );
+  const pair = await owners.pair([...parts, owners.inputs[1]!.manifests[0]!]);
+  const f = await research(owners, 1);
+  f.setParticipants(pair);
+  f.context.replay = {
+    leftSession: pair[0]!.specification.sessionId,
+    leftCheckpoint: pair[0]!.checkpoint.fingerprint,
+    rightSession: pair[1]!.specification.sessionId,
+    rightCheckpoint: pair[1]!.checkpoint.fingerprint,
+  };
+  await f.toResearch();
+  expect((await f.attest()).result.ok).toBe(false);
+  const a = await preview(f);
+  expect(a.replayReproducible).toBe(false);
+  expect(a.allowed).toBe(false);
+  expect(a.reasons).toContain("REPLAY_ORIGIN_INCOMPLETE");
+});

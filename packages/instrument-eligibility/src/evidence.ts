@@ -362,18 +362,15 @@ export async function assess(
       throw Error();
     // P19 owns manifest/event multiplicity. P24 qualifies the complete set of immutable
     // historical origins, including the owner-hashed quality and catalogue version.
-    // Duplicate declarations or actual origin references cannot inflate coverage.
+    // A dataset may be partitioned across valid P19 manifests. Compare origin identities
+    // once without changing manifest/event multiplicity; reject duplicate declarations.
     const complete = (input: ReplayResolvedInputs) => {
       const actual = new Set<string>();
       for (const manifest of input.manifests) {
         if (manifest.kind !== "HISTORICAL") return false;
         actual.add(originIdentity(manifest.originReference, manifest.originFingerprint));
       }
-      return (
-        actual.size === input.manifests.length &&
-        actual.size === origins.size &&
-        [...actual].every((identity) => origins.has(identity))
-      );
+      return actual.size === origins.size && [...actual].every((identity) => origins.has(identity));
     };
     if (origins.size !== c.datasets.length || !complete(a.inputs) || !complete(b.inputs)) {
       add("validation", "REPLAY_ORIGIN_INCOMPLETE");
