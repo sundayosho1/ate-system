@@ -756,3 +756,51 @@ delivery evidence for exact verification results, source identity and manifest-t
 history. This entry records implementation, **not independent technical or governance acceptance**.
 
 **Prompt 24 acceptance PENDING. Prompt 25 NOT AUTHORIZED.**
+
+## Prompt 24 — CODEX-009F conditional governance acceptance
+
+**Prompt 24: CONDITIONALLY ACCEPTED for bounded offline research**, by the explicit owner-supplied
+CODEX-009F authorization, subject to all 25 inherited qualifications and successful verification and
+publication of the governance-only direct successor. Accepted implementation:
+`9514059c28a6533e056c18ebfd10f0738edbf70f`; package `@ate/instrument-eligibility`; version
+`0.24.0-instrument-eligibility.1`. Record date: 16 October 2026 UTC (execution date). This appendix
+supersedes only the earlier pending Prompt 24 governance status; every earlier ledger byte and
+historical decision remains unchanged. It creates no authority, role, policy or capability.
+
+CODEX-009E verdict: **B. TECHNICAL RE-AUDIT PASSED WITH QUALIFICATIONS — READY FOR SEPARATE
+GOVERNANCE REVIEW**, not an unqualified pass. A24-H01, A24-M01, A24-M02, A24-C-H01 and A24-C-L01 are
+CLOSED within their documented scope. Final E permanent baseline: 1,963 tests/109 files, zero
+failures/skips; 260 fresh distinct independent scenarios from 279 identities after 19 conservative
+exclusions. All original failed audits, unsafe histories, candidate/partition regressions, harness
+corrections, initial permanent timeout and monolithic journey timeouts remain preserved separately.
+Passing phase-qualified controls do not retrospectively pass timed monolithic probes.
+
+Accepted scope: offline research evidence, governed lifecycle/history, complete immutable replay
+provenance, source-declared validation-attestation recording, deterministic decisions and bounded
+recovery. VALIDATED means governed evidence/attestation requirements met, not replay alone,
+profitability, independent scientific truth or production suitability. Historical stages are not
+current permission. Under-declared historical replay roots remain immutable and fail closed; no
+repair, migration, fabricated evidence or silent promotion is authorized. P19 retains valid
+partition/event multiplicity and all accepted owners remain authoritative.
+
+All 25 qualification identities/meanings remain in the acceptance document and authenticated
+original register: A22-Q01–Q06, F05, F06, T01, M02, O-C01/O-C02, Q01-A, Q-HIST, Q-TICK, Q-SELECTOR,
+Q-T01, INHERITED-OTHER, E-T01, REVIEWER-PARTICIPATION, A23-Q01–Q03, HISTORICAL-EVIDENCE,
+RESEARCH-SCOPE. Windows/open handles, production throughput/crash/power-loss durability, trusted
+terminating owners, trusted root/single writer, current registry context, acknowledgement/readiness
+distinctions, bounded quality, consumer-loss reconciliation, unsupported corrections, timing
+uncertainty and reviewer implementation/audit participation remain explicit. No organizationally
+independent certification is established. LIVE_ELIGIBLE/ACTIVE remain prohibited and
+non-operational; no live financial/broker connectivity, authentication, execution, trading or
+production deployment approved.
+
+CODEX-009E evidence index SHA256: `464204395a6d3a9efcadf3415185678379917018392854028873072b60536dd4`
+(2,213 entries). Only docs/development/prompt-24-conditional-acceptance.md and this ledger append
+are authorized on codex/prompt-24-governance-acceptance, directly from the accepted implementation.
+The CODEX-009F external publication report records final committed-source two-worker verification,
+security gates, exact governance SHA, local/remote agreement, unchanged implementation/historical
+seals and clean tree. Acceptance must be reopened on contradictory blocking evidence or loss of
+stated controls.
+
+**Prompt 24 CONDITIONALLY ACCEPTED for offline research under these conditions. Prompt 25 remains
+NOT AUTHORIZED.**
