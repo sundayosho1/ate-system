@@ -366,3 +366,44 @@ The exported `ReservedFunnelEventEnvelopeV1` and `FunnelStage` are type-only fut
 vocabulary. They grant no runtime authority and have no emitter. The operational strict schema
 permits only MOSE_CORE / OBSERVED, with explicit policy version 1; later stages require separate
 authorized owners.
+
+## CODEX-010B recovery, capacity and fresh-health corrections
+
+Live commands and recovery use the same pure structural transition validator. It checks the recorded
+prior session state, command, source obligation/cursor, capacity and predecessor
+identity/status/debt before applying the exact command delta. An acknowledged journalled STOP is
+terminal for new commands, including after fresh recovery. Reading valid stopped history and
+returning an existing idempotent acknowledgement do not create a new command. A local operational
+shutdown is distinct from journalled STOP. Valid PAUSED processing during a local shutdown drain
+remains structurally recoverable: volatile local stop intent is not fabricated as historical
+external authority, and ordinary live processing while paused still requires that local shutdown
+request. Current permission and source availability are checked separately from historical
+structural correctness; revocation does not erase valid recorded observations.
+
+Retained-history bytes mean the **sum of UTF-8 JSON checkpoint record bytes**, including each
+record's actual numeric widths and fingerprints. Collection brackets and commas are transport
+framing, not stored checkpoint records. Admission projects that same sum; memory and physical
+publication acknowledge the same records; recovery clones and counts each record against the same
+sum. Recovery validates the native collection length/shape before accessing rows, limits record
+count by both maxHistory and maxRecoverySteps, and bounds every row by maxCheckpointBytes and the
+remaining retained-byte budget. It does not serialize an unbounded collection to measure it.
+Physical repositories additionally bound actual file sizes/total file bytes and reject unexpected
+files or symlinks. Normal canonical writes therefore recover at exact capacity without raising the
+limit. A stricter applicable policy may deny recovery; this does not authorize policy migration or
+rewriting old evidence. NONE, genuine ACK and UNKNOWN obligations remain distinct.
+
+`health()` and recovery now reuse the same full source-binding predicate as processing: exact replay
+participant/input identity, every required historical origin, dataset version/content, quality
+report, manifest and planned event fingerprints/cursors. The per-source readiness axes add
+`dataSourceReasons`, an additive list of stable reason codes (empty when that axis is ready).
+Unavailable, throwing, malformed or mismatched binding owners produce a false dataSourceReady axis
+and DEGRADED health, without changing durable history. An unaffected canonical source can remain
+ready independently. Restoring an owner requires a new fresh check; cached diagnostics do not
+establish current availability. These reads remain finite and sequential under existing budgets and
+the trusted-terminating-owner assumption; no polling, background service or timeout preemption was
+introduced. Temporal qualification remains a separate observation decision, not a claim that source
+readiness alone establishes a valid final higher-timeframe observation.
+
+Developer remediation verification is not independent technical or governance acceptance. All 25
+inherited qualifications remain in force. Prompt 25 acceptance remains PENDING and Prompt 26 remains
+NOT AUTHORIZED.

@@ -130,3 +130,31 @@ export function parseJSON(raw: unknown, maxBytes: number): unknown {
   if (at !== raw.length) throw Error("UNKNOWN_EVIDENCE");
   return clone(JSON.parse(raw), maxBytes);
 }
+
+/** Sum of checkpoint UTF-8 JSON bytes; collection brackets/commas are not retained records. */
+export function retainedHistoryBytes(records: readonly unknown[]): number {
+  return records.reduce<number>((total, record) => total + bytes(record), 0);
+}
+
+/** Validate the bounded native collection before reading any row getter or allocating copies. */
+export function cloneHistory(
+  raw: unknown,
+  maxRecords: number,
+  maxCheckpointBytes: number,
+  maxRetainedBytes: number,
+): unknown[] {
+  if (types.isProxy(raw) || !Array.isArray(raw)) throw Error("UNKNOWN_EVIDENCE");
+  if (raw.length > maxRecords) throw Error("RESOURCE_BUDGET_EXCEEDED");
+  if (Reflect.ownKeys(raw).length !== raw.length + 1) throw Error("UNKNOWN_EVIDENCE");
+  const records: unknown[] = [];
+  let retained = 0;
+  for (let i = 0; i < raw.length; i++) {
+    const d = Object.getOwnPropertyDescriptor(raw, String(i));
+    if (!d || !("value" in d) || !d.enumerable) throw Error("UNKNOWN_EVIDENCE");
+    const record = clone(d.value, Math.min(maxCheckpointBytes, maxRetainedBytes - retained));
+    retained += bytes(record);
+    if (retained > maxRetainedBytes) throw Error("RESOURCE_BUDGET_EXCEEDED");
+    records.push(record);
+  }
+  return records;
+}

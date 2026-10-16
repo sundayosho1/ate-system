@@ -60,7 +60,10 @@ import {
   withoutFingerprint,
   bytes,
   parseJSON,
+  cloneHistory,
+  retainedHistoryBytes,
 } from "./primitives.js";
+import { validateTransition } from "./structural.js";
 import { readPolicy } from "./configuration.js";
 export type ReplayOwnerEvidence = Readonly<{
   specification: ReplaySessionSpecification;
@@ -116,6 +119,7 @@ export class MOSECoreRuntime {
       eligibilityReady: boolean;
       universeAuthority: boolean;
       checkedAt: string;
+      dataSourceReasons: Reason[];
     }
   >();
   private refusedAPIAttempts = 0;
@@ -227,6 +231,7 @@ export class MOSECoreRuntime {
     let dataSourceReady = false,
       eligibilityReady = false,
       universeAuthority = false;
+    const dataSourceReasons: Reason[] = [];
     try {
       this.verifyUniverseAuthority(s.universe);
       universeAuthority = true;
@@ -241,10 +246,14 @@ export class MOSECoreRuntime {
       /* No historical permission inference. */
     }
     try {
-      const source = await this.source(m.source);
-      dataSourceReady = source.e.inputs.fingerprint === m.inputFingerprint;
-    } catch {
-      /* No false complete coverage. */
+      await this.boundSource(
+        m,
+        s.universe.plan.filter((p) => p.instrumentId === m.instrumentId),
+      );
+      dataSourceReady = true;
+    } catch (e) {
+      const reason = errorCode(e);
+      dataSourceReasons.push(reason in reasons ? (reason as Reason) : "REPLAY_EVIDENCE_INVALID");
     }
     const scope = s.universe.sessionId + ":" + m.instrumentId;
     this.readinessAxes.set(scope, {
@@ -252,6 +261,7 @@ export class MOSECoreRuntime {
       eligibilityReady,
       universeAuthority,
       checkedAt: this.now(),
+      dataSourceReasons,
     });
     this.currentSources.set(scope, dataSourceReady && eligibilityReady && universeAuthority);
   }
@@ -356,16 +366,52 @@ export class MOSECoreRuntime {
     if (matches.length !== 1) throw Error("PROVENANCE_INCOMPLETE");
     return matches[0]!;
   }
+  private async boundSource(member: Universe["members"][number], plans: readonly Plan[]) {
+    const context = member.context;
+    if (
+      !context?.replay ||
+      ![context.replay.leftSession, context.replay.rightSession].includes(
+        member.source.sessionId,
+      ) ||
+      (member.source.sessionId === context.replay.leftSession
+        ? context.replay.leftCheckpoint
+        : context.replay.rightCheckpoint) !== member.source.checkpoint
+    )
+      throw Error("PROVENANCE_INCOMPLETE");
+    const resolved = await this.source(member.source);
+    if (resolved.e.inputs.fingerprint !== member.inputFingerprint)
+      throw Error("REPLAY_EVIDENCE_INVALID");
+    for (const manifest of resolved.e.inputs.manifests) {
+      const binding = await this.binding(context, manifest);
+      for (const plan of plans.filter((p) => p.manifestId === manifest.manifestId))
+        if (
+          fingerprint(binding) !==
+          fingerprint({
+            datasetId: plan.datasetId,
+            datasetVersion: plan.datasetVersion,
+            datasetVersionFingerprint: plan.datasetVersionFingerprint,
+            datasetContentFingerprint: plan.datasetContentFingerprint,
+            qualityReportId: plan.qualityReportId,
+            qualityFingerprint: plan.qualityFingerprint,
+          })
+        )
+          throw Error("PROVENANCE_INCOMPLETE");
+    }
+    for (const plan of plans) {
+      const event = resolved.events.find((e) => e.eventId === plan.eventId);
+      if (
+        !event ||
+        event.manifestId !== plan.manifestId ||
+        event.manifestFingerprint !== plan.manifestFingerprint ||
+        event.payloadFingerprint !== plan.payloadFingerprint ||
+        event.sourceCursor !== plan.sourceCursor
+      )
+        throw Error("REPLAY_EVIDENCE_INVALID");
+    }
+    return resolved;
+  }
   private async universe(a: Extract<Command, { kind: "CREATE" }>): Promise<Universe> {
     const p = this.policy!;
-    if (
-      a.instruments.length > p.maxInstruments ||
-      new Set(a.instruments.map((i) => i.instrumentId)).size !== a.instruments.length ||
-      a.maker.actorId === a.checker.actorId ||
-      !a.maker.actorId ||
-      !a.checker.actorId
-    )
-      throw Error("UNIVERSE_NOT_AUTHORIZED");
     const checkedAt = this.now(),
       provenance = fingerprint(this.ports.clock.provenance),
       authority = this.ports.authorityResolver.resolve(a.checker, {
@@ -552,31 +598,11 @@ export class MOSECoreRuntime {
       if (eligibility.recorded.version !== member.eligibilityVersion)
         throw Error("INSTRUMENT_INELIGIBLE");
       assessment = eligibility.current.fingerprint;
-      const source = await this.source(o.plan.source);
-      if (source.e.inputs.fingerprint !== member.inputFingerprint)
-        throw Error("REPLAY_EVIDENCE_INVALID");
-      const event = source.events.find((e) => e.eventId === o.plan.eventId);
-      if (
-        !event ||
-        event.manifestFingerprint !== o.plan.manifestFingerprint ||
-        event.payloadFingerprint !== o.plan.payloadFingerprint ||
-        event.sourceCursor !== o.plan.sourceCursor
-      )
-        throw Error("REPLAY_EVIDENCE_INVALID");
-      const manifest = source.e.inputs.manifests.find((m) => m.manifestId === event.manifestId);
-      if (
-        !manifest ||
-        fingerprint(await this.binding(member.context!, manifest)) !==
-          fingerprint({
-            datasetId: o.plan.datasetId,
-            datasetVersion: o.plan.datasetVersion,
-            datasetVersionFingerprint: o.plan.datasetVersionFingerprint,
-            datasetContentFingerprint: o.plan.datasetContentFingerprint,
-            qualityReportId: o.plan.qualityReportId,
-            qualityFingerprint: o.plan.qualityFingerprint,
-          })
-      )
-        throw Error("PROVENANCE_INCOMPLETE");
+      const source = await this.boundSource(
+        member,
+        s.universe.plan.filter((p) => p.instrumentId === o.instrumentId),
+      );
+      const event = source.events.find((e) => e.eventId === o.plan.eventId)!;
       qualityReferences = event.record.input.quality
         ? [event.record.input.quality.reportFingerprint]
         : [];
@@ -671,7 +697,8 @@ export class MOSECoreRuntime {
           },
     );
   }
-  private replayDelta(previous: State, next: Checkpoint): void {
+  private replayDelta(previous: State, next: Checkpoint, priorCommand?: Command): void {
+    validateTransition(previous, next.command, this.policy!, priorCommand);
     const a = next.command,
       p = this.policy!,
       expected = stateSchema.parse(clone(previous, p.maxCheckpointBytes));
@@ -698,21 +725,13 @@ export class MOSECoreRuntime {
         throw Error("CHECKPOINT_INTEGRITY");
       expected.sessions.push(created);
     } else if (a.kind === "STOP") {
-      if (
-        expected.sessions.some((s) =>
-          s.observations.some((o) => ["PENDING", "DEFERRED"].includes(o.outcome)),
-        )
-      )
-        throw Error("CHECKPOINT_INTEGRITY");
       for (const s of expected.sessions) s.status = "STOPPED";
     } else {
       const s = this.session(expected, a.sessionId),
         actual = this.session(next.state, a.sessionId);
       if (a.kind === "START") {
-        if (!["READY", "PAUSED", "RUNNING"].includes(s.status)) throw Error("CHECKPOINT_INTEGRITY");
         s.status = "RUNNING";
       } else if (a.kind === "PAUSE") {
-        if (!["RUNNING", "PAUSED"].includes(s.status)) throw Error("CHECKPOINT_INTEGRITY");
         s.status = "PAUSED";
       } else if (a.kind === "COMPLETE") s.status = "COMPLETED";
       else if (a.kind === "RECEIVE") {
@@ -741,11 +760,7 @@ export class MOSECoreRuntime {
         s.observations.push(o);
         s.cursor++;
       } else if (a.kind === "PROCESS") {
-        if (
-          a.limit > p.maxBatch ||
-          a.limit > p.maxAuditBatch ||
-          actual.observations.length !== s.observations.length
-        )
+        if (actual.observations.length !== s.observations.length)
           throw Error("CHECKPOINT_INTEGRITY");
         let count = 0;
         for (let i = 0; i < s.observations.length && count < a.limit; i++) {
@@ -916,7 +931,12 @@ export class MOSECoreRuntime {
       this.obligation = { generation: 0, fingerprint: "RECOVERY_IN_FLIGHT" };
       const loaded = await this.ports.repository.load();
       if (!loaded.ok) throw Error("RECOVERY_REQUIRED");
-      const raw = clone(loaded.value, c.policy.maxRetainedBytes) as unknown[];
+      const raw = cloneHistory(
+        loaded.value,
+        Math.min(c.policy.maxRecoverySteps, c.policy.maxHistory),
+        c.policy.maxCheckpointBytes,
+        c.policy.maxRetainedBytes,
+      );
       if (
         !Array.isArray(raw) ||
         raw.length > c.policy.maxRecoverySteps ||
@@ -944,7 +964,7 @@ export class MOSECoreRuntime {
           throw Error("CHECKPOINT_INTEGRITY");
         clone(s.command, c.policy.maxInputBytes, c.policy.maxInputDepth);
         this.validateState(s.state, c.policy, s.at);
-        this.replayDelta(history.at(-1)?.state ?? { sessions: [] }, s);
+        this.replayDelta(history.at(-1)?.state ?? { sessions: [] }, s, history.at(-1)?.command);
         history.push(freeze(s));
       }
       const state = history.at(-1)?.state ?? { sessions: [] };
@@ -992,21 +1012,8 @@ export class MOSECoreRuntime {
         throw Error("RESOURCE_BUDGET_EXCEEDED");
       const at = this.now(),
         state = stateSchema.parse(clone(this.state, p.maxCheckpointBytes));
+      validateTransition(state, a, p, this.history.at(-1)?.command);
       if (a.kind === "CREATE") {
-        if (
-          state.sessions.length >= p.maxSessions ||
-          state.sessions.some((s) => s.universe.sessionId === a.sessionId)
-        )
-          throw Error("RESOURCE_BUDGET_EXCEEDED");
-        if (a.previousUniverse) {
-          const old = state.sessions.find((s) => s.universe.fingerprint === a.previousUniverse);
-          if (
-            !old ||
-            !["PAUSED", "COMPLETED", "STOPPED"].includes(old.status) ||
-            old.observations.some((o) => ["PENDING", "DEFERRED"].includes(o.outcome))
-          )
-            throw Error("UNIVERSE_NOT_AUTHORIZED");
-        }
         state.sessions.push({
           universe: await this.universe(a),
           status: "READY",
@@ -1014,18 +1021,11 @@ export class MOSECoreRuntime {
           observations: [],
         });
       } else if (a.kind === "STOP") {
-        if (
-          state.sessions.some((s) =>
-            s.observations.some((o) => ["PENDING", "DEFERRED"].includes(o.outcome)),
-          )
-        )
-          throw Error("PROCESSING_DEFERRED");
         for (const s of state.sessions) s.status = "STOPPED";
       } else {
         const s = this.session(state, a.sessionId);
         if (a.kind === "START") {
           this.verifyUniverseAuthority(s.universe);
-          if (!["READY", "PAUSED", "RUNNING"].includes(s.status)) throw Error("RUNTIME_NOT_READY");
           const included = s.universe.members.filter((m) => m.included);
           let eligible = 0;
           for (const m of included) {
@@ -1043,43 +1043,12 @@ export class MOSECoreRuntime {
           if (included.length && !eligible) throw Error("INSTRUMENT_INELIGIBLE");
           s.status = "RUNNING";
         } else if (a.kind === "PAUSE") {
-          if (!["RUNNING", "PAUSED"].includes(s.status)) throw Error("RUNTIME_NOT_READY");
           s.status = "PAUSED";
         } else if (a.kind === "COMPLETE") {
-          if (
-            !["RUNNING", "PAUSED"].includes(s.status) ||
-            s.cursor !== s.universe.plan.length ||
-            s.observations.some((o) => ["PENDING", "DEFERRED"].includes(o.outcome)) ||
-            s.universe.members.some((m) => m.eligible && !m.sourceReady)
-          )
-            throw Error("PROCESSING_DEFERRED");
           s.status = "COMPLETED";
         } else if (a.kind === "RECEIVE") {
           this.verifyUniverseAuthority(s.universe);
-          if (
-            !["RUNNING", "PAUSED"].includes(s.status) ||
-            a.universeSnapshot !== s.universe.fingerprint
-          )
-            throw Error("UNIVERSE_NOT_AUTHORIZED");
-          if (
-            s.observations.some(
-              (o) => o.plan.eventId === a.eventId && o.instrumentId === a.instrumentId,
-            )
-          )
-            throw Error("DUPLICATE_OBSERVATION");
-          const next = s.universe.plan[s.cursor];
-          if (!next || next.eventId !== a.eventId || next.instrumentId !== a.instrumentId)
-            throw Error("OUT_OF_ORDER_OBSERVATION");
-          if (
-            state.sessions.reduce((n, s) => n + s.observations.length, 0) >= p.maxRetained ||
-            state.sessions.reduce(
-              (n, s) =>
-                n +
-                s.observations.filter((o) => ["PENDING", "DEFERRED"].includes(o.outcome)).length,
-              0,
-            ) >= p.maxQueued
-          )
-            throw Error("RESOURCE_BUDGET_EXCEEDED");
+          const next = s.universe.plan[s.cursor]!;
           const id = fingerprint({
             sessionId: a.sessionId,
             universe: s.universe.fingerprint,
@@ -1135,13 +1104,7 @@ export class MOSECoreRuntime {
           });
           s.cursor++;
         } else if (a.kind === "PROCESS") {
-          if (
-            a.limit > p.maxBatch ||
-            a.limit > p.maxAuditBatch ||
-            !["RUNNING", "PAUSED"].includes(s.status) ||
-            (s.status === "PAUSED" && !this.stopRequested)
-          )
-            throw Error("RESOURCE_BUDGET_EXCEEDED");
+          if (s.status === "PAUSED" && !this.stopRequested) throw Error("RESOURCE_BUDGET_EXCEEDED");
           let n = 0;
           for (let i = 0; i < s.observations.length && n < a.limit; i++) {
             const o = s.observations[i]!;
@@ -1171,10 +1134,10 @@ export class MOSECoreRuntime {
       const next = freeze(checkpointSchema.parse({ ...body, fingerprint: fingerprint(body) }));
       if (
         bytes(next) > p.maxCheckpointBytes ||
-        this.history.reduce((n, c) => n + bytes(c), bytes(next)) > p.maxRetainedBytes
+        retainedHistoryBytes(this.history) + bytes(next) > p.maxRetainedBytes
       )
         throw Error("RESOURCE_BUDGET_EXCEEDED");
-      this.replayDelta(this.state, next);
+      this.replayDelta(this.state, next, this.history.at(-1)?.command);
       const mutation = this.ports.authority.validateMutation({
         stateId: persistenceId(
           fingerprint({ runtimeId: this.runtimeId, generation: next.generation }),
