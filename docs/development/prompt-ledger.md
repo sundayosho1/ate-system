@@ -804,3 +804,27 @@ stated controls.
 
 **Prompt 24 CONDITIONALLY ACCEPTED for offline research under these conditions. Prompt 25 remains
 NOT AUTHORIZED.**
+
+## Prompt 25 — CODEX-010 offline MOSE implementation
+
+Development authorized from exact Prompt24 governance baseline
+`2dec78d50c8ffa9ed325513306324bbc4bc81c9b` on `codex/prompt-25-mose-core-surveillance`. Package
+`@ate/mose-core`, version `0.25.0-mose-core.1`. Bounded offline historical and
+synthetic-via-historical-owner research only. Current P24 capability and exact P19 participant/event
+identities govern immutable universes, receipts, deterministic research dispositions, explicit
+coverage denominators, checkpoints and fail-closed publication/recovery. P18 remains
+aggregation/temporal evidence owner; P5/P6 and configuration/governance owners remain authoritative.
+OBSERVED is the only emitted funnel stage. All subsequent stages are reserved vocabulary, never a
+signal or permission to act.
+
+All17 accepted owner packages and P24 acceptance remain unchanged. All25 inherited qualifications
+remain mandatory, including Windows, throughput/crash/power-loss, trusted terminating owners and
+repositories, trusted root/single writer, current governed context, historical acknowledgements,
+canonical representation, bounded evidence, historical failures, reviewer participation and E-T01
+timing uncertainty. Full source/test/security results, source identities, narrow historical
+manifest/guard compatibility updates and evidence seals are in the external CODEX-010 delivery
+report. Earlier ledger entries remain historical; no acceptance is inferred from implementation.
+
+**Prompt 25 technical and governance acceptance: PENDING. Prompt 26: NOT AUTHORIZED.** No live
+connectivity, credentials, broker integration, execution, strategy signals, opportunity ranking,
+financial risk/portfolio decisions, trading or production deployment is authorized.

@@ -160,6 +160,7 @@ it("unchanged upstream packages retain their exact baseline bytes", () => {
         "packages",
         ":(exclude)packages/instrument-specifications",
         ":(exclude)packages/instrument-eligibility",
+        ":(exclude)packages/mose-core",
       ],
       { encoding: "utf8" },
     ),

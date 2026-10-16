@@ -1,8 +1,8 @@
 {
   "name": "ate-system",
-  "version": "0.24.0-instrument-eligibility.1",
+  "version": "0.25.0-mose-core.1",
   "private": true,
-  "description": "ATE bounded offline research foundations through governed instrument eligibility.",
+  "description": "ATE bounded offline research foundations through core market surveillance.",
   "license": "UNLICENSED",
   "type": "module",
   "engines": {

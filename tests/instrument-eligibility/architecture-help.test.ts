@@ -109,8 +109,8 @@ it("truthful P24 manifest retains trading prohibitions and pending acceptance", 
     capabilities: Record<string, boolean>;
     truth_statement: string;
   };
-  expect(m.completed_prompt).toBe(24);
-  expect(m.pre_production_version).toBe("0.24.0-instrument-eligibility.1");
+  expect(m.completed_prompt).toBe(25);
+  expect(m.pre_production_version).toBe("0.25.0-mose-core.1");
   expect(m.capabilities.offline_instrument_eligibility).toBe(true);
   for (const k of [
     "live_trading",
@@ -122,5 +122,5 @@ it("truthful P24 manifest retains trading prohibitions and pending acceptance", 
   ])
     expect(m.capabilities[k]).toBe(false);
   expect(m.truth_statement).toContain("pending independent technical audit");
-  expect(m.truth_statement).toContain("Prompt 25 is not authorized");
+  expect(m.truth_statement).toContain("Prompt 26 is not authorized");
 });
