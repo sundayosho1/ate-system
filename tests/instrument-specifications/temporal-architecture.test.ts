@@ -159,6 +159,7 @@ it("unchanged upstream packages retain their exact baseline bytes", () => {
         "--",
         "packages",
         ":(exclude)packages/instrument-specifications",
+        ":(exclude)packages/instrument-eligibility",
       ],
       { encoding: "utf8" },
     ),

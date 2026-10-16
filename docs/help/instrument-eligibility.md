@@ -251,3 +251,34 @@ npm audit --json
 npm audit --omit=dev --json
 npm ls --all --json
 ```
+
+## CODEX-009B remediation semantics
+
+Validation qualification considers every current, verified declaration whose instrument, subject,
+hypothesis, methodology/version, dataset/quality/association and replay bindings, policy/version,
+configured source/issuer and effective period apply. Different outcomes among those declarations
+produce **VALIDATION_DECLARATION_CONFLICT**. Selecting a PASSED fingerprint, changing declaration
+ID, or publishing a newer declaration does not resolve the conflict. Unrelated or expired
+declarations are not applicable. A governed ATTEST_STATUS revocation or supersession can close an
+applicable conflicting declaration; the original immutable declaration and historical stages remain
+retained. No fabricated reference or unverified checker can close it. Qualification is recomputed
+afterwards. New declarations can be recorded after VALIDATED or SIMULATION without pretending that
+evidence recording is a backwards stage transition; conflicts then restrict current
+validation/simulation.
+
+Compatible history retains its recorded semantic policy, but each recovered action must satisfy
+**current maxInputBytes and maxInputDepth** as well as current history, snapshot and retained
+budgets. Oversized or overdeep history rejects initialization with recovery required, never silent
+truncation or READY/HEALTHY. Preserve the intact root and unresolved publication evidence. A fresh
+service with a valid governed budget may retry recovery under the same identity; an already failed
+reader does not reset itself, and an original writer's unknown obligation is not cleared by another
+reader.
+
+These corrections do not constitute technical or governance acceptance. Prompt 25, live
+connectivity, financial execution and production deployment remain unauthorized; all inherited
+qualifications apply.
+
+Conflict applicability compares the exact dataset-binding multiset and exact replay participant
+pairs independent of list order. Reordering identical evidence cannot hide a negative declaration.
+This comparison does not rewrite stored declarations, fingerprints or historical actions, and does
+not relax the selected declaration's exact context-binding checks.

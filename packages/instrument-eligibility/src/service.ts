@@ -468,7 +468,11 @@ export class InstrumentEligibility {
       if (!rows.has(d.instrumentId)) throw Error("RECORD_NOT_FOUND");
       assessment = await this.evaluation(
         context,
-        rows.get(d.instrumentId),
+        // Recording new evidence after promotion must remain possible: it can invalidate
+        // current eligibility, but is not itself a backwards lifecycle transition.
+        record.stage === "VALIDATED" || record.stage === "SIMULATION"
+          ? { ...record, stage: "RESEARCH" }
+          : record,
         "RESEARCH",
         p,
         at,
@@ -595,6 +599,8 @@ export class InstrumentEligibility {
         )
           throw Error("CONFIGURATION_CHANGED");
         if (history.some((x) => x.action.id === s.action.id)) throw Error("DUPLICATE_REQUEST");
+        // Recorded policy interprets semantics; current policy bounds physical admission.
+        safeClone(s.action, c.policy.maxInputBytes, c.policy.maxInputDepth);
         this.limits(s.action, c.policy, history);
         const derived = await this.derive(s.action, s.policy, s.observedAt, history, true);
         if (fingerprint(derived.assessment) !== fingerprint(s.assessment))

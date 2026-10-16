@@ -374,6 +374,46 @@ export async function assess(
   else present.push("REPLAY_REPRODUCIBLE");
   if (!c.subject || !c.hypothesis || !c.methodology || !c.methodologyVersion)
     add("validation", "RESEARCH_CONTEXT_MISSING");
+  // A fingerprint selects evidence, not authority to hide other applicable declarations.
+  // Time/authority/status exclusions are explicit; neither order nor a new ID resolves conflict.
+  const datasetBindings = (rows: Context["datasets"]) => fingerprint(rows.map(fingerprint).sort());
+  const replayBindings = (pair: Context["replay"]) =>
+    pair === null
+      ? null
+      : fingerprint(
+          [
+            fingerprint({ session: pair.leftSession, checkpoint: pair.leftCheckpoint }),
+            fingerprint({ session: pair.rightSession, checkpoint: pair.rightCheckpoint }),
+          ].sort(),
+        );
+  const datasets = datasetBindings(c.datasets),
+    replay = replayBindings(c.replay);
+  const applicable = attestations.filter(
+    ({ declaration: a, status, verified }) =>
+      verified &&
+      status === "CURRENT" &&
+      a.issuedAt <= at &&
+      a.effectiveAt <= at &&
+      (a.expiresAt === null || a.expiresAt > at) &&
+      !age(a.issuedAt) &&
+      p.validationSources.some(
+        (x) =>
+          x.sourceId === a.sourceId &&
+          x.issuerId === a.issuer.actorId &&
+          x.methodologyVersion === a.methodologyVersion,
+      ) &&
+      a.subject === c.subject &&
+      a.instrumentId === c.instrumentId &&
+      a.hypothesis === c.hypothesis &&
+      a.methodology === c.methodology &&
+      a.methodologyVersion === c.methodologyVersion &&
+      a.policyId === p.policyId &&
+      a.policyVersion === p.version &&
+      datasetBindings(a.datasets) === datasets &&
+      replayBindings(a.replay) === replay,
+  );
+  if (new Set(applicable.map((x) => x.declaration.outcome)).size > 1)
+    add("validation", "VALIDATION_DECLARATION_CONFLICT");
   let validationAttested = false;
   const att = attestations.find((x) => x.declaration.fingerprint === c.attestation);
   if (!att) add("validation", "VALIDATION_EVIDENCE_MISSING");
