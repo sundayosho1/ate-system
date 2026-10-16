@@ -11,7 +11,8 @@ export function safeClone(raw: unknown, maxBytes = 65536, maxDepth = 20): unknow
   let nodes = 0;
   const seen = new Set<object>();
   const visit = (v: unknown, depth: number): void => {
-    if (depth > maxDepth || ++nodes > maxBytes) throw Error("INPUT_BOUNDS");
+    if (depth > maxDepth) throw Error(`INPUT_DEPTH_LIMIT_${maxDepth}`);
+    if (++nodes > maxBytes) throw Error("INPUT_BOUNDS");
     if (typeof v === "string") {
       if (v.length > maxBytes || !wellFormed(v) || hasControl(v)) throw Error("INVALID_TEXT");
       return;

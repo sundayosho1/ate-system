@@ -603,6 +603,11 @@ export class InstrumentEligibility {
         safeClone(s.action, c.policy.maxInputBytes, c.policy.maxInputDepth);
         this.limits(s.action, c.policy, history);
         const derived = await this.derive(s.action, s.policy, s.observedAt, history, true);
+        if (
+          s.assessment?.replayReproducible &&
+          derived.assessment?.dimensions.validation?.includes("REPLAY_ORIGIN_INCOMPLETE")
+        )
+          throw Error("HISTORICAL_REPLAY_ORIGIN_INCOMPLETE");
         if (fingerprint(derived.assessment) !== fingerprint(s.assessment))
           throw Error("DECISION_REDERIVATION_MISMATCH");
         const actors =

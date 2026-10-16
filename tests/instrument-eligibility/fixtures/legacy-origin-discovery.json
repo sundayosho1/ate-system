@@ -1,0 +1,164 @@
+{
+  "action": {
+    "context": {
+      "attestation": null,
+      "calendar": {
+        "fold": "REJECT",
+        "holidays": [],
+        "id": "utc",
+        "kind": "UTC_CONTINUOUS",
+        "sessions": [],
+        "timezone": "Etc/UTC",
+        "version": "1",
+        "weekdays": [0, 1, 2, 3, 4, 5, 6],
+        "weekStart": 1
+      },
+      "calendarFingerprint": "108840530daf13891df71825985980d012aa76202ba5c04c9a2a2caa5f3e40c1",
+      "datasets": [
+        {
+          "associationFingerprint": "sha256:89eb0c83960aeb89ba75418fb098ff393ef99eeaec98712916e299681d857d86",
+          "contentFingerprint": "sha256:5ab92a54044bd78cf804592c99032f0bc28ea690223c10c3c7c7f426d1b3904e",
+          "instrumentId": "40000000-0000-4000-8000-000000000002",
+          "qualityFingerprint": "sha256:eeb30b5477af1c807165ad7bbc9412f196524caa5543202b9b26d69d29993427",
+          "qualityReportId": "dqr-eeb30b5477af1c807165ad7bbc9412f1",
+          "versionFingerprint": "sha256:34ac97de594c1646e0a87c5c01bb27bbf1b4842c963b4a80555b72118491eaa4",
+          "versionId": "dsv-e056dd6082fec9173068cd559a870d13"
+        }
+      ],
+      "hypothesis": "C-hypothesis",
+      "instrumentId": "ins-43b1f98c946fd910ff07477671af024f8aba59eec47a15a4e48202335a91d9c4",
+      "mappingFingerprint": "sha256:384fade6b785803b8bf2bc3bfbfde5f8005dde1dcfec1e603f8e7350051fd616",
+      "mappingSet": "sha256:8bc262c13a0df8a263e35293b30e400373bdf8ca64eb25da43df70d38d329776",
+      "methodology": "C-methodology",
+      "methodologyVersion": "C-method-v1",
+      "replay": {
+        "leftCheckpoint": "dad7c2d5ac651528502fdf87be16f601fc772315eea116603aba973d330e3f5d",
+        "leftSession": "C-multi-left",
+        "rightCheckpoint": "bd6ec7e9defd275506eb1ecfc9c573b912b157f7f25ef32d471c091596bb3a2a",
+        "rightSession": "C-multi-right"
+      },
+      "revisionId": "sha256:cd7a48872d9c737757d481a5145fcdfd4dc5e614534b4e9704eb7999ccd60b3f",
+      "source": {
+        "catalogueFingerprint": "sha256:cf8fec9351a02c3a627542a5f2b352c8ce99bb7882d44f905784c78f93005076",
+        "observationFingerprint": "sha256:ecf6a54c049986a08571e3119b447a71ff2de5dd4ca2f3c350bfc9ad84143819",
+        "ownerId": "offline-lab"
+      },
+      "specification": "sha256:2c6bcc61a7e6f8c550d5ee94d92020d9566ff9e49fadd7116e65d7df81211d03",
+      "subject": "C-subject",
+      "timeframes": ["M1", "M5"]
+    },
+    "effectiveAt": "2026-10-10T09:00:00.000Z",
+    "id": "discovery",
+    "instrumentId": "ins-43b1f98c946fd910ff07477671af024f8aba59eec47a15a4e48202335a91d9c4",
+    "kind": "DISCOVER",
+    "maker": { "actorId": "00000000-0000-4000-8000-000000000001", "actorType": "USER" },
+    "occurredAt": "2026-10-10T09:00:00.000Z"
+  },
+  "assessment": {
+    "allowed": true,
+    "capabilities": [
+      { "allowed": true, "capability": "CATALOGUE_INSPECTION", "reasons": [] },
+      {
+        "allowed": false,
+        "capability": "HISTORICAL_DATA_RESEARCH",
+        "reasons": ["STAGE_NOT_ADMITTED"]
+      },
+      {
+        "allowed": false,
+        "capability": "MULTI_TIMEFRAME_RESEARCH",
+        "reasons": ["STAGE_NOT_ADMITTED"]
+      },
+      {
+        "allowed": false,
+        "capability": "SPECIFICATION_COMPARISON",
+        "reasons": ["STAGE_NOT_ADMITTED"]
+      },
+      {
+        "allowed": false,
+        "capability": "STRATEGY_RESEARCH",
+        "reasons": ["CAPABILITY_NOT_SUPPORTED", "STAGE_NOT_ADMITTED"]
+      },
+      { "allowed": false, "capability": "VALIDATION_REVIEW", "reasons": ["STAGE_NOT_ADMITTED"] },
+      {
+        "allowed": false,
+        "capability": "OFFLINE_SIMULATION",
+        "reasons": ["STAGE_NOT_ADMITTED", "VALIDATION_EVIDENCE_MISSING"]
+      }
+    ],
+    "commitAuthorized": false,
+    "contextFingerprint": "sha256:1f5bac47a7ede90e3548f9f4ba2cea12d4f0850cfb0b151ce2784a32e55fbb53",
+    "contradictory": [],
+    "currentDisposition": "NONE",
+    "destination": "DISCOVERED",
+    "dimensions": {
+      "data": [],
+      "governance": [],
+      "identity": [],
+      "mapping": [],
+      "operational": [],
+      "specification": [],
+      "temporal": [],
+      "validation": ["VALIDATION_EVIDENCE_MISSING"]
+    },
+    "evaluatedAt": "2026-10-10T09:00:00.000Z",
+    "expired": [],
+    "fingerprint": "sha256:59323ef91e21ee2f6eb228285b2c2e7af77af1db3998b2aac5881b508cea27d2",
+    "missing": [],
+    "policyFingerprint": "sha256:709f793215fc1aae66c98b72fefe66167e0d461bcfe1682ca3d46981ec54fe59",
+    "present": [
+      "CALENDAR_BOUND",
+      "DATASET_QUALIFIED",
+      "IDENTITY_RESOLVED",
+      "MAPPING_QUALIFIED",
+      "REPLAY_REPRODUCIBLE",
+      "SOURCE_DISCOVERY_VERIFIED",
+      "SPECIFICATION_BOUND"
+    ],
+    "reasons": [],
+    "replayReproducible": true,
+    "required": ["CANONICAL_IDENTITY", "ACCEPTED_DISCOVERY"],
+    "requiredApprovals": [],
+    "source": "DISCOVERED",
+    "validationAttested": false,
+    "validationIndependentlyVerified": false
+  },
+  "certificates": [],
+  "clockProvenance": { "clockId": "virtual-clock", "quality": "SYNCHRONIZED", "source": "TEST" },
+  "configurationFingerprint": "sha256:e6fced3a53b016722bf91e6af56caa4f32838a9a52f8c8493abfde73ca2c10f5",
+  "fingerprint": "sha256:d26e086b88192b71c73a1535ddfe15531daefb0eb12d72dea23ab9cf6ab36503",
+  "generation": 1,
+  "observedAt": "2026-10-10T09:00:00.000Z",
+  "policy": {
+    "allowQualityWarnings": true,
+    "approvalPolicyId": "eligibility.research",
+    "compatibleHistoryPolicies": [],
+    "maxApprovals": 128,
+    "maxDependencies": 64,
+    "maxDiagnostics": 128,
+    "maxEvidence": 32,
+    "maxEvidenceAgeMs": 604800000,
+    "maxHistory": 512,
+    "maxInputBytes": 65536,
+    "maxInputDepth": 20,
+    "maxQueryResults": 100,
+    "maxRecords": 128,
+    "maxRecoverySteps": 512,
+    "maxRequests": 128,
+    "maxRetainedBytes": 67108864,
+    "maxSnapshotBytes": 1048576,
+    "policyId": "eligibility.research",
+    "validationSources": [
+      {
+        "issuerId": "00000000-0000-4000-8000-000000000003",
+        "methodologyVersion": "C-method-v1",
+        "sourceId": "C-validation"
+      }
+    ],
+    "version": 1
+  },
+  "policyFingerprint": "sha256:709f793215fc1aae66c98b72fefe66167e0d461bcfe1682ca3d46981ec54fe59",
+  "previous": null,
+  "publishedAt": "2026-10-10T09:00:00.000Z",
+  "schemaVersion": 1,
+  "serviceId": "audit-1"
+}

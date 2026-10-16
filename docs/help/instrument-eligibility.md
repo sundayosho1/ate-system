@@ -282,3 +282,43 @@ Conflict applicability compares the exact dataset-binding multiset and exact rep
 pairs independent of list order. Reordering identical evidence cannot hide a negative declaration.
 This comparison does not rewrite stored declarations, fingerprints or historical actions, and does
 not relax the selected declaration's exact context-binding checks.
+
+## Complete replay-origin qualification (CODEX-009D)
+
+P24 requires bidirectional coverage of the complete immutable historical dataset origins in **each**
+P19 replay participant. A selected PASSED declaration cannot compensate for an omitted input. The
+identity is the historical dataset ID plus P19's origin fingerprint, computed from the complete P14
+manifest, P15 report and P16 catalogue-version record. P20's explicit research association remains
+separately required for every declared version. Matching prices, origin counts, friendly names or
+manifest positions do not establish identity.
+
+The qualified domain is a set of full origin identities, with duplicates prohibited. P19 owns
+manifest and event multiplicity: its specification requires unique manifest IDs and dataset content
+fingerprints, and its sequencer checks their exact input lists. Repeated full origins cannot inflate
+P24 coverage, including under distinct manifest IDs. P24 does not remove or merge replay records.
+Different catalogue versions participate in full origin identity; simultaneous versions sharing
+identical content are not supported by P19's unique-content specification. Versions in one family
+still obey P16's active-version rule. No inactive version becomes current merely because it appears
+in a replay. Complete one-, two- and three-origin research remains supported when each origin has
+qualified, distinct owner evidence.
+
+Missing, extra, substituted, unresolved or unsupported origins deny replay reproducibility and
+attestation receipt. VALIDATED/SIMULATION qualification, transition previews, requests, approval,
+commit and current eligibility reuse this evidence gate. RESEARCH may remain available for evidence
+review; it does not imply validation. P19's IDENTICAL comparison additionally requires compatible
+complete immutable input fingerprints; P24 does not assume output equality alone proves origins.
+
+Fresh recovery re-derives retained decisions. Previously recorded evidence that falsely claimed
+reproducible complete origins is fenced with `HISTORICAL_REPLAY_ORIGIN_INCOMPLETE`:
+RECOVERY_REQUIRED, NOT_READY, DEGRADED and a retained recovery obligation. Repeated shutdown cannot
+conceal the failure. No historical file is rewritten, truncated, deleted, automatically repaired or
+upgraded. Source restoration may support recovery only when the unchanged historical claims are
+actually valid; a new process is not authority to repair an under-declared history.
+
+Current depth-limit rejection reports `INPUT_DEPTH_LIMIT_N`, where N is the governed applicable
+limit. The bounded existing error-label field is used; no new diagnostic/public schema is added.
+`INPUT_BOUNDS` still identifies the separate input-node budget. Both retain existing fail-closed
+recovery/readiness and shutdown behavior. No input contents or secrets appear in these labels.
+
+All prior qualifications and offline-only prohibitions remain. This remediation does not record
+technical/governance acceptance or authorize Prompt 25, live connectivity, trading or deployment.
