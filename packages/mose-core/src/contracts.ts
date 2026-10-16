@@ -9,6 +9,10 @@ import {
 } from "@ate/instrument-eligibility";
 export { code, digest };
 export const reasons = {
+  CANONICAL_PLAN_MISMATCH:
+    "Retained obligations or metadata differ from canonical accepted source evidence.",
+  CANONICAL_PLAN_UNVERIFIED:
+    "Canonical source-plan verification remains unresolved; no affirmative coverage authority.",
   OBSERVED: "Qualified offline observation; no signal or permission to act.",
   INSTRUMENT_INELIGIBLE: "Current owner capability does not permit this research activity.",
   UNIVERSE_NOT_AUTHORIZED: "Universe identity or governed approval is unavailable.",

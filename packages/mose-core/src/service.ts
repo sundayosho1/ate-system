@@ -32,7 +32,6 @@ import {
   commandSchema,
   checkpointSchema,
   universeSchema,
-  planSchema,
   observationSchema,
   stateSchema,
   ok,
@@ -63,6 +62,7 @@ import {
   cloneHistory,
   retainedHistoryBytes,
 } from "./primitives.js";
+import { canonicalPlan, comparePlans } from "./canonical.js";
 import { validateTransition } from "./structural.js";
 import { readPolicy } from "./configuration.js";
 export type ReplayOwnerEvidence = Readonly<{
@@ -122,7 +122,53 @@ export class MOSECoreRuntime {
       dataSourceReasons: Reason[];
     }
   >();
+  // Immutable historical authentication is separate from fresh availability/permission axes.
+  private readonly verifiedPlans = new Set<string>();
+  private readonly pendingPlanVerification = new Map<string, Reason>();
   private refusedAPIAttempts = 0;
+  private planScope(u: Universe, instrumentId: string) {
+    return u.fingerprint + ":" + instrumentId;
+  }
+  private async verifyMember(u: Universe, m: Universe["members"][number]) {
+    const scope = this.planScope(u, m.instrumentId);
+    try {
+      const source = await this.boundSource(
+        m,
+        u.plan.filter((p) => p.instrumentId === m.instrumentId),
+      );
+      this.verifiedPlans.add(scope);
+      this.pendingPlanVerification.delete(scope);
+      return source;
+    } catch (e) {
+      if (errorCode(e) === "CANONICAL_PLAN_MISMATCH") throw e;
+      if (!this.verifiedPlans.has(scope)) {
+        const reason = errorCode(e);
+        this.pendingPlanVerification.set(
+          scope,
+          reason in reasons ? (reason as Reason) : "REPLAY_EVIDENCE_INVALID",
+        );
+      }
+      throw e;
+    }
+  }
+  private async requireVerified(u: Universe, m: Universe["members"][number]) {
+    try {
+      await this.verifyMember(u, m);
+    } catch (e) {
+      if (errorCode(e) === "CANONICAL_PLAN_MISMATCH") {
+        const last = this.history.at(-1);
+        this.obligation = last
+          ? { generation: last.generation, fingerprint: last.fingerprint }
+          : this.obligation;
+        this.lifecycle = "RECOVERY_REQUIRED";
+        throw e;
+      }
+      // Already authenticated immutable facts may support a rejected/deferred receipt;
+      // a freshly recovered, unverified source cannot authorize a new publication.
+      if (!this.verifiedPlans.has(this.planScope(u, m.instrumentId)))
+        throw Error("CANONICAL_PLAN_UNVERIFIED", { cause: e });
+    }
+  }
   public constructor(
     public readonly runtimeId: string,
     private readonly ports: MOSEPorts,
@@ -246,12 +292,10 @@ export class MOSECoreRuntime {
       /* No historical permission inference. */
     }
     try {
-      await this.boundSource(
-        m,
-        s.universe.plan.filter((p) => p.instrumentId === m.instrumentId),
-      );
+      await this.verifyMember(s.universe, m);
       dataSourceReady = true;
     } catch (e) {
+      if (errorCode(e) === "CANONICAL_PLAN_MISMATCH") throw e;
       const reason = errorCode(e);
       dataSourceReasons.push(reason in reasons ? (reason as Reason) : "REPLAY_EVIDENCE_INVALID");
     }
@@ -380,34 +424,25 @@ export class MOSECoreRuntime {
       throw Error("PROVENANCE_INCOMPLETE");
     const resolved = await this.source(member.source);
     if (resolved.e.inputs.fingerprint !== member.inputFingerprint)
-      throw Error("REPLAY_EVIDENCE_INVALID");
-    for (const manifest of resolved.e.inputs.manifests) {
-      const binding = await this.binding(context, manifest);
-      for (const plan of plans.filter((p) => p.manifestId === manifest.manifestId))
-        if (
-          fingerprint(binding) !==
-          fingerprint({
-            datasetId: plan.datasetId,
-            datasetVersion: plan.datasetVersion,
-            datasetVersionFingerprint: plan.datasetVersionFingerprint,
-            datasetContentFingerprint: plan.datasetContentFingerprint,
-            qualityReportId: plan.qualityReportId,
-            qualityFingerprint: plan.qualityFingerprint,
-          })
-        )
-          throw Error("PROVENANCE_INCOMPLETE");
-    }
-    for (const plan of plans) {
-      const event = resolved.events.find((e) => e.eventId === plan.eventId);
-      if (
-        !event ||
-        event.manifestId !== plan.manifestId ||
-        event.manifestFingerprint !== plan.manifestFingerprint ||
-        event.payloadFingerprint !== plan.payloadFingerprint ||
-        event.sourceCursor !== plan.sourceCursor
-      )
-        throw Error("REPLAY_EVIDENCE_INVALID");
-    }
+      throw Error("CANONICAL_PLAN_MISMATCH");
+    if (
+      resolved.e.specification.replayMode === "EVENT_TIME_RECONSTRUCTION" &&
+      !this.policy!.allowReconstruction
+    )
+      throw Error("CANONICAL_PLAN_MISMATCH");
+    const bindings = new Map<string, Awaited<ReturnType<MOSECoreRuntime["binding"]>>>();
+    for (const manifest of resolved.e.inputs.manifests)
+      bindings.set(manifest.manifestId, await this.binding(context, manifest));
+    const expected = canonicalPlan(
+      member,
+      context,
+      resolved.events,
+      resolved.e.specification.replayMode,
+      bindings,
+      this.policy!.maxRetained,
+    );
+    if (member.expected !== expected.length || fingerprint(plans) !== fingerprint(expected))
+      throw Error("CANONICAL_PLAN_MISMATCH");
     return resolved;
   }
   private async universe(a: Extract<Command, { kind: "CREATE" }>): Promise<Universe> {
@@ -471,44 +506,15 @@ export class MOSECoreRuntime {
         const bindings = new Map<string, Awaited<ReturnType<MOSECoreRuntime["binding"]>>>();
         for (const manifest of source.e.inputs.manifests)
           bindings.set(manifest.manifestId, await this.binding(context, manifest));
-        for (const [ownerOrdinal, event] of source.events.entries()) {
-          if (!context.datasets.some((d) => d.instrumentId === event.instrumentId))
-            throw Error("PROVENANCE_INCOMPLETE");
-          const boundaryAt = mustParseUtc(
-            [
-              event.eligibilityAt,
-              event.record.qualityAvailableAt,
-              event.record.evidence?.qualityAvailableAt,
-              event.record.input.sourcePublishedAt,
-            ]
-              .filter((v): v is NonNullable<typeof v> => v !== undefined)
-              .sort()
-              .at(-1)!,
-          );
-          const o = event.record.input.observation;
-          plan.push(
-            planSchema.parse({
-              key: fingerprint({
-                instrumentId: request.instrumentId,
-                source: request.source,
-                event: event.eventId,
-              }),
-              instrumentId: request.instrumentId,
-              source: request.source,
-              ...bindings.get(event.manifestId),
-              eventId: event.eventId,
-              sourceCursor: event.sourceCursor,
-              ownerOrdinal,
-              eventAt: event.eventAt,
-              boundaryAt,
-              timeframe: o.observationKind === "BAR" ? o.timeframe : "TICK",
-              manifestId: event.manifestId,
-              manifestFingerprint: event.manifestFingerprint,
-              payloadFingerprint: event.payloadFingerprint,
-              evidenceClass: source.e.specification.replayMode,
-            }),
-          );
-        }
+        for (const entry of canonicalPlan(
+          request,
+          context,
+          source.events,
+          source.e.specification.replayMode,
+          bindings,
+          p.maxRetained,
+        ))
+          plan.push(entry);
       } catch (e) {
         const label = errorCode(e);
         if (label === "RESOURCE_BUDGET_EXCEEDED") throw e;
@@ -536,19 +542,7 @@ export class MOSECoreRuntime {
       });
     }
     const included = new Set(members.filter((m) => m.included).map((m) => m.instrumentId));
-    const ordered = plan
-      .filter((e) => included.has(e.instrumentId))
-      .sort((a, b) =>
-        a.boundaryAt < b.boundaryAt
-          ? -1
-          : a.boundaryAt > b.boundaryAt
-            ? 1
-            : a.instrumentId < b.instrumentId
-              ? -1
-              : a.instrumentId > b.instrumentId
-                ? 1
-                : a.ownerOrdinal - b.ownerOrdinal,
-      );
+    const ordered = plan.filter((e) => included.has(e.instrumentId)).sort(comparePlans);
     if (
       ordered.length > p.maxRetained ||
       new Set(ordered.map((e) => e.key)).size !== ordered.length
@@ -831,6 +825,34 @@ export class MOSECoreRuntime {
           p.maxQueued
       )
         throw Error("CHECKPOINT_INTEGRITY");
+      if (fingerprint(u.plan) !== fingerprint([...u.plan].sort(comparePlans)))
+        throw Error("CANONICAL_PLAN_MISMATCH");
+      for (const m of u.members) {
+        const count = u.plan.filter((p) => p.instrumentId === m.instrumentId).length;
+        if (
+          m.included !== (m.eligible && m.sourceReady && m.reasons.length === 0) ||
+          (m.included
+            ? !m.context ||
+              !m.inputFingerprint ||
+              !m.eligibilityVersion ||
+              !m.eligibilityAssessment ||
+              m.expected === null ||
+              m.expected !== count
+            : count !== 0)
+        )
+          throw Error("CANONICAL_PLAN_MISMATCH");
+        if (m.included) {
+          const replay = m.context?.replay;
+          if (
+            !replay ||
+            ![replay.leftSession, replay.rightSession].includes(m.source.sessionId) ||
+            (m.source.sessionId === replay.leftSession
+              ? replay.leftCheckpoint
+              : replay.rightCheckpoint) !== m.source.checkpoint
+          )
+            throw Error("CANONICAL_PLAN_MISMATCH");
+        }
+      }
       for (const plan of u.plan) {
         const member = u.members.find((m) => m.instrumentId === plan.instrumentId);
         if (
@@ -969,13 +991,19 @@ export class MOSECoreRuntime {
       }
       const state = history.at(-1)?.state ?? { sessions: [] };
       for (const s of state.sessions)
-        for (const m of s.universe.members.filter((m) => m.included)) await this.recheck(s, m);
+        for (const m of s.universe.members.filter((m) => m.included)) {
+          this.pendingPlanVerification.set(
+            this.planScope(s.universe, m.instrumentId),
+            "CANONICAL_PLAN_UNVERIFIED",
+          );
+          await this.recheck(s, m);
+        }
       this.configuration();
       if (this.stopRequested) throw Error("STOP_REQUESTED");
       this.history = history;
       this.state = freeze(state);
       this.obligation = null;
-      this.lifecycle = "READY";
+      this.lifecycle = this.pendingPlanVerification.size ? "PAUSED" : "READY";
       return ok(undefined);
     } catch (e) {
       if (!this.obligation) {
@@ -1008,6 +1036,13 @@ export class MOSECoreRuntime {
         if (fingerprint(previous.command) !== fingerprint(a)) throw Error("IDEMPOTENCY_CONFLICT");
         return ok(previous);
       }
+      // A recovered journal with unresolved semantic authentication is readable evidence,
+      // not authority for any new publication (including no-op PROCESS, PAUSE or STOP).
+      for (const s of this.state.sessions)
+        for (const m of s.universe.members.filter((m) =>
+          this.pendingPlanVerification.has(this.planScope(s.universe, m.instrumentId)),
+        ))
+          await this.requireVerified(s.universe, m);
       if (this.history.length >= Math.min(p.maxHistory, p.maxRecoverySteps))
         throw Error("RESOURCE_BUDGET_EXCEEDED");
       const at = this.now(),
@@ -1030,13 +1065,17 @@ export class MOSECoreRuntime {
           let eligible = 0;
           for (const m of included) {
             try {
+              await this.requireVerified(s.universe, m);
+              if (!this.verifiedPlans.has(this.planScope(s.universe, m.instrumentId)))
+                throw Error("CANONICAL_PLAN_UNVERIFIED");
               const current = await this.ownerEligibility(m.instrumentId, m.context ?? undefined);
               if (
                 current.current.replayReproducible &&
                 current.recorded.version === m.eligibilityVersion
               )
                 eligible++;
-            } catch {
+            } catch (e) {
+              if (errorCode(e) === "CANONICAL_PLAN_MISMATCH") throw e;
               /* Instrument-local exclusion; another eligible instrument can proceed. */
             }
           }
@@ -1045,6 +1084,11 @@ export class MOSECoreRuntime {
         } else if (a.kind === "PAUSE") {
           s.status = "PAUSED";
         } else if (a.kind === "COMPLETE") {
+          for (const m of s.universe.members.filter((m) => m.included)) {
+            await this.requireVerified(s.universe, m);
+            if (!this.verifiedPlans.has(this.planScope(s.universe, m.instrumentId)))
+              throw Error("CANONICAL_PLAN_UNVERIFIED");
+          }
           s.status = "COMPLETED";
         } else if (a.kind === "RECEIVE") {
           this.verifyUniverseAuthority(s.universe);
@@ -1060,6 +1104,7 @@ export class MOSECoreRuntime {
             eligibilityAssessment: string | null = null,
             eligibilityReasons: string[] = [];
           const member = s.universe.members.find((m) => m.instrumentId === a.instrumentId)!;
+          await this.requireVerified(s.universe, member);
           try {
             const current = await this.ownerEligibility(
               a.instrumentId,
@@ -1109,6 +1154,10 @@ export class MOSECoreRuntime {
           for (let i = 0; i < s.observations.length && n < a.limit; i++) {
             const o = s.observations[i]!;
             if (!["PENDING", "DEFERRED"].includes(o.outcome)) continue;
+            await this.requireVerified(
+              s.universe,
+              s.universe.members.find((m) => m.instrumentId === o.instrumentId)!,
+            );
             s.observations[i] = await this.evaluate(s, o, at);
             n++;
           }
@@ -1183,6 +1232,11 @@ export class MOSECoreRuntime {
       if (fingerprint(ack.value) !== fingerprint(next)) throw Error("ACK_MISMATCH");
       this.history.push(next);
       this.state = next.state;
+      if (a.kind === "CREATE") {
+        const u = next.state.sessions.at(-1)!.universe;
+        for (const m of u.members.filter((m) => m.included))
+          this.verifiedPlans.add(this.planScope(u, m.instrumentId));
+      }
       this.obligation = null;
       attempted = false;
       this.lifecycle =
@@ -1217,6 +1271,7 @@ export class MOSECoreRuntime {
     if (this.busy) return failure("OPERATION_IN_FLIGHT", this.obligation ? "UNKNOWN" : "NONE");
     if (this.obligation || this.lifecycle === "RECOVERY_REQUIRED")
       return failure("RECOVERY_REQUIRED", "UNKNOWN");
+    if (this.pendingPlanVerification.size) return failure("CANONICAL_PLAN_UNVERIFIED");
     if (
       this.state.sessions.some((s) =>
         s.observations.some((o) => ["PENDING", "DEFERRED"].includes(o.outcome)),
@@ -1256,6 +1311,7 @@ export class MOSECoreRuntime {
         !this.busy &&
         !this.obligation &&
         !this.stopRequested &&
+        this.pendingPlanVerification.size === 0 &&
         ["READY", "RUNNING", "PAUSED"].includes(this.lifecycle)
           ? "READY"
           : "NOT_READY",
@@ -1301,6 +1357,9 @@ export class MOSECoreRuntime {
       pendingObservations: pending,
       pendingAcknowledgments: this.obligation ? 1 : 0,
       recoveryObligation: this.obligation,
+      canonicalVerificationObligations: [...this.pendingPlanVerification].map(
+        ([scope, reason]) => ({ scope, reason }),
+      ),
       history: this.history.length,
       lastError: this.lastError,
       sourceReadiness: [...this.currentSources].map(([scope, ready]) => ({ scope, ready })),
@@ -1345,6 +1404,11 @@ export class MOSECoreRuntime {
       acquired = false;
       return ok(this.diagnostics());
     } catch (e) {
+      if (errorCode(e) === "CANONICAL_PLAN_MISMATCH") {
+        const last = this.history.at(-1);
+        if (last) this.obligation = { generation: last.generation, fingerprint: last.fingerprint };
+        return this.reject(e, true);
+      }
       return this.reject(e);
     } finally {
       if (acquired) this.busy = false;
@@ -1439,7 +1503,13 @@ export class MOSECoreRuntime {
       completed = outcomes.filter((o) =>
         ["ADMITTED", "REJECTED", "QUARANTINED"].includes(o.outcome),
       ).length,
-      unknown = s.universe.members.some((m) => m.eligible && !m.sourceReady),
+      verificationPending = s.universe.members.some(
+        (m) => m.included && !this.verifiedPlans.has(this.planScope(s.universe, m.instrumentId)),
+      ),
+      expected = s.universe.members
+        .filter((m) => m.included)
+        .reduce((n, m) => n + (m.expected ?? 0), 0),
+      unknown = verificationPending || s.universe.members.some((m) => m.eligible && !m.sourceReady),
       admitted = outcomes.filter((o) => o.outcome === "ADMITTED").length;
     return {
       eligibilityScope: "UNIVERSE_PUBLICATION_NOT_CURRENT_AUTHORITY",
@@ -1458,12 +1528,14 @@ export class MOSECoreRuntime {
       pending: outcomes.filter((o) => ["PENDING", "DEFERRED"].includes(o.outcome)).length,
       unreceived: s.universe.plan.length - s.cursor,
       unresolvedSources: s.universe.members.filter((m) => m.eligible && !m.sourceReady).length,
-      coverageComplete: !unknown && completed === s.universe.plan.length,
+      canonicalVerification: verificationPending ? "UNVERIFIED" : "VERIFIED",
+      expectedObligations: unknown ? null : expected,
+      coverageComplete: !unknown && completed === expected,
       eligibilityCoverage: ratio(
         s.universe.members.filter((m) => m.eligible).length,
         s.universe.members.length,
       ),
-      completionCoverage: ratio(completed, unknown ? null : s.universe.plan.length),
+      completionCoverage: ratio(completed, unknown ? null : expected),
       evidenceQualificationCoverage: ratio(admitted, completed),
       counterSemantics:
         "Durable unique receipts only; deferred is a subset of pending; API refusals are returned with audit correlation and never fabricate a receipt or denominator.",

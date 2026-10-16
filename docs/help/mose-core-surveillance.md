@@ -407,3 +407,79 @@ readiness alone establishes a valid final higher-timeframe observation.
 Developer remediation verification is not independent technical or governance acceptance. All 25
 inherited qualifications remain in force. Prompt 25 acceptance remains PENDING and Prompt 26 remains
 NOT AUTHORIZED.
+
+## CODEX-010D canonical source-plan authentication
+
+A retained hash chain authenticates its own bytes; it does not establish that its plan contains all
+genuine replay obligations. Live CREATE and verification now share the pure, bounded `canonicalPlan`
+derivation and `comparePlans` order in `@ate/mose-core`'s internal canonical module. No upstream
+owner or persisted checkpoint schema changes. No new configuration key, issuer, background worker,
+network service, policy migration or resource allowance is introduced.
+
+Canonical authority is field-specific:
+
+| Retained fact                            | Accepted authority and comparison                                                                                        |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Canonical member/source                  | CREATE request membership, retained P24 context, exact left/right P19 session and checkpoint                             |
+| Input fingerprint, replay mode and scope | Verified P19 specification/checkpoint/input set and deterministic sequencer                                              |
+| Count and membership                     | Every sequenced event exactly once; member.expected, per-member plan count and event identities agree                    |
+| Ordering and ordinal                     | Original sequencer ordinal; global order by availability boundary, canonical instrument and owner ordinal                |
+| Event time, payload, cursor and manifest | Genuine P19 event envelope and validated source records                                                                  |
+| Availability boundary                    | Maximum of event eligibility, quality availability and source publication timestamps, using the existing live derivation |
+| Timeframe and evidence class             | Original observation kind/timeframe and actual P19 replay mode; no retained upgrade or downgrade                         |
+| Dataset version/content and quality      | Exact P24 dataset bindings resolved through P16/P15 owner interfaces                                                     |
+| Historical identity and origin           | P14 manifest plus complete manifest/report/catalogue-version origin fingerprint                                          |
+| Current permission                       | Existing P24 capabilities/version and configuration checker authority; never reconstructed from a historical plan        |
+
+Comparison is bidirectional and covers the complete strict plan record, not selected fingerprints. A
+subset, superset, duplicate, reorder, equal-count substitution or metadata change fails closed.
+Distinct valid partitions retain their distinct manifest/event identities even when they share an
+origin. Existing accepted P19 inputs require at least one manifest and at least one record per
+manifest; this remediation does not invent an empty source or relax that contract.
+
+Recovery first checks all checkpoint bytes, structural deltas, canonical ordering and static
+member/count/context consistency. Every session's immutable universe remains in the final state;
+exact delta replay prevents an earlier universe from disappearing or changing. Each included
+universe/source is then reconstructed from genuine owners before any READY certification.
+`CANONICAL_PLAN_MISMATCH` returns structured failure, preserves the physical bytes and recorded
+recovery obligation, and prevents new successful acknowledgements. There is no silent repair.
+
+Temporary evidence unavailability is not proof of historical fraud. A fresh reader can retain and
+expose recorded history while verification is unresolved: initialize succeeds with lifecycle PAUSED,
+readiness NOT_READY, health DEGRADED and explicit `canonicalVerificationObligations` (scope/reason).
+These are derived semantic obligations, distinct from `pendingAcknowledgments` and storage
+commitment uncertainty. They are rebuilt from the intact journal on every fresh initialization. No
+new checkpoint, including no-op PROCESS, PAUSE or journalled STOP, can publish across this recovery
+verification barrier. Previously acknowledged idempotent commands can still return their historical
+acknowledgement; this grants no new readiness or publication authority.
+
+Restore the trusted owner and call `health()` for bounded same-instance revalidation, retry a new
+command (which attempts pending verification before publication), or initialize a fresh reader. No
+polling is added. A successful full comparison clears the semantic obligation without writing a
+checkpoint. If restored evidence proves substitution, the reader enters RECOVERY_REQUIRED and
+retains the offending durable checkpoint identity; it does not rewrite or migrate it. Local stop
+cannot conceal unresolved verification. Once stop has been requested, use the existing lifecycle
+contract and a fresh instance rather than assuming the stopped instance can resume.
+
+Verified immutable historical facts and current evidence availability remain different. A live
+session whose plan was genuinely authenticated may retain a rejected/deferred receipt when an owner
+later withdraws; PROCESS still checks current owner evidence before any ADMITTED/OBSERVED result.
+Current authority withdrawal does not erase honest observations. Fresh unverified recovery cannot
+use that historical-authentication rule to manufacture permission. Existing live source isolation,
+FIFO/cursor rules, quality propagation, ACK/NONE/UNKNOWN handling and paused shutdown drains remain.
+
+Coverage summaries expose `canonicalVerification` and `expectedObligations`. Affirmative completion
+requires authenticated canonical obligations and terminal disposition of all expected events; it
+cannot follow merely from a shortened stored plan. Unverified coverage is false, its expected count
+and completion denominator unavailable, while recorded receipt/outcome counts remain readable. The
+summary's existing historical scope still does not establish current authority or certify that every
+research observation is admitted. Queries are synchronous recorded-fact reads, not fresh owner
+availability certificates; use `health()` for fresh current axes. Historical as-of queries preserve
+their recorded time boundary and use authentication of the same immutable universe.
+
+All 25 inherited qualifications remain unchanged. The additional C-Q01 still limits proof of the
+original volatile intent behind a historical PAUSED drain; C-Q02 still limits progress when finite
+history capacity leaves no space to drain pending work. No Windows, fsync/power-loss, production
+throughput, dishonest-owner, hostile-root, concurrent-writer or external-authentication guarantee is
+added. Trusted terminating owners, immutable roots/evidence and single-writer restrictions remain.
+Prompt 25 technical/governance acceptance remains PENDING. Prompt 26 remains NOT AUTHORIZED.
