@@ -93,7 +93,13 @@ const sourceFailureReasons: readonly Reason[] = [
   "UNKNOWN_EVIDENCE",
 ];
 /** Owner exceptions cannot turn a downstream/affirmative code into an early exclusion proof. */
-export function creationFailureReason(eligible: boolean, reason: Reason): Reason {
+export function creationFailureReason(
+  eligible: boolean,
+  reason: Reason,
+  confirmedExclusion = false,
+): Reason {
+  if (!eligible && reason === "INSTRUMENT_INELIGIBLE" && !confirmedExclusion)
+    return "REPLAY_EVIDENCE_INVALID";
   return (eligible ? sourceFailureReasons : earlyFailureReasons).includes(reason)
     ? reason
     : "REPLAY_EVIDENCE_INVALID";
@@ -148,3 +154,20 @@ export function validateMemberState(member: Universe["members"][number], count: 
   )
     throw Error("CANONICAL_PLAN_MISMATCH");
 }
+
+/** Historical classification only: current availability cannot rewrite a retained universe. */
+export function classifyMember(member: Universe["members"][number]) {
+  if (!member.eligible)
+    return member.reasons.length === 1 && member.reasons[0] === "INSTRUMENT_INELIGIBLE"
+      ? ("CONFIRMED_EXCLUSION" as const)
+      : ("ELIGIBILITY_UNRESOLVED" as const);
+  return member.sourceReady
+    ? ("ELIGIBLE_SOURCE_READY" as const)
+    : ("ELIGIBLE_SOURCE_UNREADY" as const);
+}
+export const unresolvedMember = (member: Universe["members"][number]) => {
+  const classification = classifyMember(member);
+  return (
+    classification === "ELIGIBILITY_UNRESOLVED" || classification === "ELIGIBLE_SOURCE_UNREADY"
+  );
+};

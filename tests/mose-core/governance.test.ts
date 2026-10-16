@@ -154,9 +154,26 @@ it("a genuine response for A cannot lend its authority to a different requested 
   expect(cp.state.sessions[0]!.universe.members[0]).toMatchObject({
     included: false,
     eligible: false,
-    reasons: ["INSTRUMENT_INELIGIBLE"],
+    reasons: ["REPLAY_EVIDENCE_INVALID"],
   });
   expect(cp.state.sessions[0]!.universe.plan).toHaveLength(0);
+  expect(take(f.service.getSessionSummary("session-A"))).toMatchObject({
+    unresolvedEligibility: 1,
+    excluded: 0,
+    canonicalVerification: "UNVERIFIED",
+    expectedObligations: null,
+    coverageComplete: false,
+  });
+  expect(take(await f.service.health()).health).toBe("DEGRADED");
+  take(await f.start());
+  expect((await f.send({ kind: "COMPLETE", sessionId: "session-A" })).ok).toBe(false);
+  expect(
+    (
+      await f.service.dispatchJson(
+        JSON.stringify({ kind: "COMPLETE", id: "wrong-subject-complete", sessionId: "session-A" }),
+      )
+    ).ok,
+  ).toBe(false);
 });
 it("a changed current assessment cannot reuse an older owner's fingerprint", async () => {
   const f = await fixture(base);

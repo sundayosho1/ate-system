@@ -67,6 +67,8 @@ import {
   comparePlans,
   validateMemberState,
   creationFailureReason,
+  classifyMember,
+  unresolvedMember,
 } from "./canonical.js";
 import { validateTransition } from "./structural.js";
 import { readPolicy } from "./configuration.js";
@@ -103,6 +105,9 @@ const ratio = (numerator: number, denominator: number | null) => ({
   status: denominator === null ? "UNAVAILABLE" : denominator === 0 ? "NOT_APPLICABLE" : "AVAILABLE",
   value: denominator === null || denominator === 0 ? null : numerator / denominator,
 });
+// Tuple encoding prevents one session/instrument pair from concealing another scope.
+const sourceScope = (sessionId: string, instrumentId: string) =>
+  JSON.stringify([sessionId, instrumentId]) + ":" + instrumentId;
 export class MOSECoreRuntime {
   private lifecycle: Lifecycle = "CREATED";
   private busy = false;
@@ -263,7 +268,8 @@ export class MOSECoreRuntime {
       policyId: configurationApprovalPolicyId(this.policy!.approvalPolicyId),
     });
     if (!r.ok) {
-      for (const m of u.members) this.currentSources.set(u.sessionId + ":" + m.instrumentId, false);
+      for (const m of u.members)
+        this.currentSources.set(sourceScope(u.sessionId, m.instrumentId), false);
       throw Error("UNIVERSE_NOT_AUTHORIZED");
     }
     const c = certificateSchema.safeParse(clone(r.value, this.policy!.maxInputBytes));
@@ -274,11 +280,29 @@ export class MOSECoreRuntime {
       c.data.checkedAt > this.now() ||
       provenance !== fingerprint(this.ports.clock.provenance)
     ) {
-      for (const m of u.members) this.currentSources.set(u.sessionId + ":" + m.instrumentId, false);
+      for (const m of u.members)
+        this.currentSources.set(sourceScope(u.sessionId, m.instrumentId), false);
       throw Error("UNIVERSE_NOT_AUTHORIZED");
     }
   }
+  private seedUnresolvedHealth(u: Universe, m: Universe["members"][number]) {
+    const scope = sourceScope(u.sessionId, m.instrumentId);
+    this.currentSources.set(scope, false);
+    this.readinessAxes.set(scope, {
+      dataSourceReady: false,
+      eligibilityReady: false,
+      universeAuthority: false,
+      checkedAt: this.now(),
+      dataSourceReasons: [...m.reasons],
+    });
+  }
   private async recheck(s: Session, m: Universe["members"][number]) {
+    const classification = classifyMember(m);
+    if (classification === "CONFIRMED_EXCLUSION") return;
+    if (classification === "ELIGIBILITY_UNRESOLVED") {
+      this.seedUnresolvedHealth(s.universe, m);
+      return;
+    }
     let dataSourceReady = false,
       eligibilityReady = false,
       universeAuthority = false;
@@ -297,14 +321,16 @@ export class MOSECoreRuntime {
       /* No historical permission inference. */
     }
     try {
-      await this.verifyMember(s.universe, m);
+      if (classification === "ELIGIBLE_SOURCE_UNREADY") await this.deriveMemberSource(m, true);
+      else await this.verifyMember(s.universe, m);
       dataSourceReady = true;
     } catch (e) {
-      if (errorCode(e) === "CANONICAL_PLAN_MISMATCH") throw e;
+      if (classification === "ELIGIBLE_SOURCE_READY" && errorCode(e) === "CANONICAL_PLAN_MISMATCH")
+        throw e;
       const reason = errorCode(e);
       dataSourceReasons.push(reason in reasons ? (reason as Reason) : "REPLAY_EVIDENCE_INVALID");
     }
-    const scope = s.universe.sessionId + ":" + m.instrumentId;
+    const scope = sourceScope(s.universe.sessionId, m.instrumentId);
     this.readinessAxes.set(scope, {
       dataSourceReady,
       eligibilityReady,
@@ -318,6 +344,7 @@ export class MOSECoreRuntime {
     instrumentId: string,
     context?: Context,
     observe?: (a: Assessment) => void,
+    confirmedExclusion?: () => void,
   ) {
     const r = await this.ports.eligibility.getEligibility(instrumentId);
     if (
@@ -325,10 +352,13 @@ export class MOSECoreRuntime {
       (r.value.current.evaluatedAt > this.now() || r.value.recorded.decisionAt > this.now())
     )
       throw Error("TEMPORAL_INCONSISTENCY");
-    if (!r.ok)
-      throw Error(
-        r.error.code === "RECORD_NOT_FOUND" ? "INSTRUMENT_INELIGIBLE" : "SOURCE_UNAVAILABLE",
-      );
+    if (!r.ok) {
+      if (r.error.code === "RECORD_NOT_FOUND") {
+        confirmedExclusion?.();
+        throw Error("INSTRUMENT_INELIGIBLE");
+      }
+      throw Error("SOURCE_UNAVAILABLE");
+    }
     if (
       r.value.recorded.instrumentId !== instrumentId ||
       r.value.recorded.context.instrumentId !== instrumentId ||
@@ -336,14 +366,16 @@ export class MOSECoreRuntime {
       r.value.current.fingerprint !== fingerprint(withoutFingerprint(r.value.current)) ||
       r.value.current.source !== r.value.recorded.stage
     )
-      throw Error("INSTRUMENT_INELIGIBLE");
+      throw Error("REPLAY_EVIDENCE_INVALID");
     if (r.ok) observe?.(r.value.current);
     if (
       ["LIVE_ELIGIBLE", "ACTIVE"].includes(r.value.recorded.stage) ||
-      !r.value.current.capabilities.find((c) => c.capability === this.policy!.capability)
-        ?.allowed ||
-      (context && fingerprint(context) !== fingerprint(r.value.recorded.context))
-    )
+      !r.value.current.capabilities.find((c) => c.capability === this.policy!.capability)?.allowed
+    ) {
+      confirmedExclusion?.();
+      throw Error("INSTRUMENT_INELIGIBLE");
+    }
+    if (context && fingerprint(context) !== fingerprint(r.value.recorded.context))
       throw Error("INSTRUMENT_INELIGIBLE");
     return r.value;
   }
@@ -415,7 +447,7 @@ export class MOSECoreRuntime {
     if (matches.length !== 1) throw Error("PROVENANCE_INCOMPLETE");
     return matches[0]!;
   }
-  private async boundSource(member: Universe["members"][number], plans: readonly Plan[]) {
+  private async deriveMemberSource(member: Universe["members"][number], allowMissingInput = false) {
     const context = member.context;
     if (
       !context?.replay ||
@@ -428,7 +460,10 @@ export class MOSECoreRuntime {
     )
       throw Error("PROVENANCE_INCOMPLETE");
     const resolved = await this.source(member.source);
-    if (resolved.e.inputs.fingerprint !== member.inputFingerprint)
+    if (
+      !(allowMissingInput && member.inputFingerprint === null) &&
+      resolved.e.inputs.fingerprint !== member.inputFingerprint
+    )
       throw Error("CANONICAL_PLAN_MISMATCH");
     if (
       resolved.e.specification.replayMode === "EVENT_TIME_RECONSTRUCTION" &&
@@ -446,6 +481,10 @@ export class MOSECoreRuntime {
       bindings,
       this.policy!.maxRetained,
     );
+    return { resolved, expected };
+  }
+  private async boundSource(member: Universe["members"][number], plans: readonly Plan[]) {
+    const { resolved, expected } = await this.deriveMemberSource(member);
     if (member.expected !== expected.length || fingerprint(plans) !== fingerprint(expected))
       throw Error("CANONICAL_PLAN_MISMATCH");
     return resolved;
@@ -478,12 +517,15 @@ export class MOSECoreRuntime {
         eligibilityVersion: string | null = null,
         eligibilityAssessment: string | null = null,
         eligible = false,
+        confirmedExclusion = false,
         sourceReady: boolean,
         inputFingerprint: string | null = null,
         expected: number | null;
       const codes: Reason[] = [];
       try {
-        const r = await this.ownerEligibility(request.instrumentId);
+        const r = await this.ownerEligibility(request.instrumentId, undefined, undefined, () => {
+          confirmedExclusion = true;
+        });
         context = r.recorded.context;
         eligible = true;
         eligibilityVersion = r.recorded.version;
@@ -527,16 +569,13 @@ export class MOSECoreRuntime {
           creationFailureReason(
             eligible,
             label in reasons ? (label as Reason) : "REPLAY_EVIDENCE_INVALID",
+            confirmedExclusion,
           ),
         );
         sourceReady = false;
         expected = null;
       }
-      if (eligible)
-        this.currentSources.set(
-          a.sessionId + ":" + request.instrumentId,
-          eligible && sourceReady && codes.length === 0,
-        );
+
       members.push({
         instrumentId: request.instrumentId,
         eligible,
@@ -659,12 +698,12 @@ export class MOSECoreRuntime {
           outcome = "DEFERRED";
         }
       }
-      this.currentSources.set(s.universe.sessionId + ":" + o.instrumentId, true);
+      this.currentSources.set(sourceScope(s.universe.sessionId, o.instrumentId), true);
     } catch (e) {
       const c = errorCode(e);
       reason = c in reasons ? (c as Reason) : "REPLAY_EVIDENCE_INVALID";
       outcome = reason === "SOURCE_UNAVAILABLE" ? "DEFERRED" : "REJECTED";
-      this.currentSources.set(s.universe.sessionId + ":" + o.instrumentId, false);
+      this.currentSources.set(sourceScope(s.universe.sessionId, o.instrumentId), false);
     }
     const body = {
       ...o,
@@ -995,12 +1034,15 @@ export class MOSECoreRuntime {
       }
       const state = history.at(-1)?.state ?? { sessions: [] };
       for (const s of state.sessions)
-        for (const m of s.universe.members.filter((m) => m.included)) {
-          this.pendingPlanVerification.set(
-            this.planScope(s.universe, m.instrumentId),
-            "CANONICAL_PLAN_UNVERIFIED",
-          );
-          await this.recheck(s, m);
+        for (const m of s.universe.members) {
+          if (unresolvedMember(m)) this.seedUnresolvedHealth(s.universe, m);
+          else if (m.included) {
+            this.pendingPlanVerification.set(
+              this.planScope(s.universe, m.instrumentId),
+              "CANONICAL_PLAN_UNVERIFIED",
+            );
+            await this.recheck(s, m);
+          }
         }
       this.configuration();
       if (this.stopRequested) throw Error("STOP_REQUESTED");
@@ -1088,6 +1130,7 @@ export class MOSECoreRuntime {
         } else if (a.kind === "PAUSE") {
           s.status = "PAUSED";
         } else if (a.kind === "COMPLETE") {
+          if (s.universe.members.some(unresolvedMember)) throw Error("PROCESSING_DEFERRED");
           for (const m of s.universe.members.filter((m) => m.included)) {
             await this.requireVerified(s.universe, m);
             if (!this.verifiedPlans.has(this.planScope(s.universe, m.instrumentId)))
@@ -1126,7 +1169,7 @@ export class MOSECoreRuntime {
             const c = errorCode(e);
             reason = c in reasons ? (c as Reason) : "UNKNOWN_EVIDENCE";
             outcome = reason === "SOURCE_UNAVAILABLE" ? "DEFERRED" : "REJECTED";
-            this.currentSources.set(s.universe.sessionId + ":" + a.instrumentId, false);
+            this.currentSources.set(sourceScope(s.universe.sessionId, a.instrumentId), false);
             processingTime = at;
           }
 
@@ -1238,8 +1281,12 @@ export class MOSECoreRuntime {
       this.state = next.state;
       if (a.kind === "CREATE") {
         const u = next.state.sessions.at(-1)!.universe;
-        for (const m of u.members.filter((m) => m.included))
-          this.verifiedPlans.add(this.planScope(u, m.instrumentId));
+        for (const m of u.members) {
+          if (m.included) {
+            this.verifiedPlans.add(this.planScope(u, m.instrumentId));
+            this.currentSources.set(sourceScope(u.sessionId, m.instrumentId), true);
+          } else if (unresolvedMember(m)) this.seedUnresolvedHealth(u, m);
+        }
       }
       this.obligation = null;
       attempted = false;
@@ -1328,6 +1375,13 @@ export class MOSECoreRuntime {
           : "DEGRADED",
       researchOnly: true,
       tradingAuthority: false,
+      memberClassifications: this.state.sessions.flatMap((s) =>
+        s.universe.members.map((m) => ({
+          sessionId: s.universe.sessionId,
+          instrumentId: m.instrumentId,
+          classification: classifyMember(m),
+        })),
+      ),
       sessions: this.state.sessions.map((s) => ({
         sessionId: s.universe.sessionId,
         status: s.status,
@@ -1402,7 +1456,7 @@ export class MOSECoreRuntime {
       this.busy = true;
       acquired = true;
       for (const s of this.state.sessions)
-        for (const m of s.universe.members.filter((m) => m.included)) await this.recheck(s, m);
+        for (const m of s.universe.members) await this.recheck(s, m);
       this.configuration();
       this.busy = false;
       acquired = false;
@@ -1513,14 +1567,19 @@ export class MOSECoreRuntime {
       expected = s.universe.members
         .filter((m) => m.included)
         .reduce((n, m) => n + (m.expected ?? 0), 0),
-      unknown = verificationPending || s.universe.members.some((m) => m.eligible && !m.sourceReady),
+      unknown = verificationPending || s.universe.members.some(unresolvedMember),
       admitted = outcomes.filter((o) => o.outcome === "ADMITTED").length;
     return {
       eligibilityScope: "UNIVERSE_PUBLICATION_NOT_CURRENT_AUTHORITY",
       sessionStatus: s.status,
       configured: s.universe.members.length,
       eligible: s.universe.members.filter((m) => m.eligible).length,
-      excluded: s.universe.members.filter((m) => !m.included).length,
+      excluded: s.universe.members.filter((m) => classifyMember(m) === "CONFIRMED_EXCLUSION")
+        .length,
+      unresolvedEligibility: s.universe.members.filter(
+        (m) => classifyMember(m) === "ELIGIBILITY_UNRESOLVED",
+      ).length,
+      notIncluded: s.universe.members.filter((m) => !m.included).length,
       scheduled: new Set(s.universe.plan.map((e) => e.instrumentId)).size,
       observed: new Set(outcomes.filter((o) => o.outcome === "ADMITTED").map((o) => o.instrumentId))
         .size,
@@ -1531,7 +1590,7 @@ export class MOSECoreRuntime {
       deferred: outcomes.filter((o) => o.outcome === "DEFERRED").length,
       pending: outcomes.filter((o) => ["PENDING", "DEFERRED"].includes(o.outcome)).length,
       unreceived: s.universe.plan.length - s.cursor,
-      unresolvedSources: s.universe.members.filter((m) => m.eligible && !m.sourceReady).length,
+      unresolvedSources: s.universe.members.filter(unresolvedMember).length,
       canonicalVerification: unknown ? "UNVERIFIED" : "VERIFIED",
       expectedObligations: unknown ? null : expected,
       coverageComplete: !unknown && completed === expected,

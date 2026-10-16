@@ -526,3 +526,74 @@ wrong-phase reason from an owner callback is conservatively normalized to `REPLA
 it cannot manufacture an ineligibility proof. Existing genuine early, source-unavailability,
 provenance, temporal and unknown-exception reasons retain their meanings. No successful owner result
 is fabricated by that normalization.
+
+## Eligibility certainty and current source health
+
+A publication-time `eligible=false` flag means that eligibility was not established. It does not, by
+itself, prove exclusion. The shared internal classifier derives the following meanings from existing
+authenticated member fields; it adds no checkpoint fields or external authority:
+
+| Classification            | Historical evidence                                                                                                                                    | Coverage and authority                                                                                                                                    |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CONFIRMED_EXCLUSION`     | Valid trusted negative result, including accepted `RECORD_NOT_FOUND` or an authenticated capability denial; retained reason is `INSTRUMENT_INELIGIBLE` | Counts as `excluded`; creates no source-reconstruction duty. A genuinely excluded zero-obligation universe can complete.                                  |
+| `ELIGIBILITY_UNRESOLVED`  | Eligibility failed with unavailable, unknown, malformed or temporally invalid evidence                                                                 | `unresolvedEligibility` is positive; `expectedObligations=null`, canonical verification is `UNVERIFIED`, and coverage is incomplete. COMPLETE is refused. |
+| `ELIGIBLE_SOURCE_UNREADY` | Acquired genuine eligibility context, but source reconstruction/binding failed                                                                         | Historical expected obligations remain unknown and coverage stays incomplete; source health is initially degraded.                                        |
+| `ELIGIBLE_SOURCE_READY`   | Acquired eligibility and complete accepted source evidence                                                                                             | Existing canonical-plan verification, quality, receipt and current-permission controls remain mandatory.                                                  |
+
+`excluded` counts only confirmed exclusions. `notIncluded` reports the raw historical non-inclusion
+count, including both kinds of unresolved member. `unresolvedSources` includes unresolved
+eligibility and historically source-unready members; `unresolvedEligibility` distinguishes the
+former. Diagnostics expose `memberClassifications` as historical publication-time facts. Neither
+boolean absence nor an error vocabulary string alone creates a trusted denial: CREATE marks a
+negative as confirmed only on the accepted owner-result path. A thrown denial label or malformed
+positive identity is retained as unverified evidence instead.
+
+The earlier reachability table describes which fields CREATE can retain; its early failure row must
+be interpreted using this certainty distinction. Only confirmed negative eligibility is a verified
+exclusion. Early `SOURCE_UNAVAILABLE`, `TEMPORAL_INCONSISTENCY`, `REPLAY_EVIDENCE_INVALID` and
+`UNKNOWN_EVIDENCE` remain unresolved even when all acquired fields are null. They must not become a
+numeric zero denominator or VERIFIED completion.
+
+CREATE and START preserve bounded partial-source semantics. Direct and JSON COMPLETE use the same
+classification barrier; no new successful COMPLETE ACK is possible over unresolved members. A valid
+peer may process its genuine observations, but cannot complete a mixed universe while another
+configured member is unresolved. None of this invents a plan or receipt for missing data.
+
+Fresh recovery seeds truthful degraded health for every unresolved member before exposing the
+service. Included members retain their existing source authentication. An explicit health check for
+an eligible-but-source-unready member resolves the genuine immutable replay, input identity,
+manifest/dataset/quality bindings, policy and current eligibility through accepted owner interfaces.
+Successful current verification may improve `sourceReadinessAxes` and HEALTHY status. It never adds
+historical plan entries, changes a universe, sets historical expected counts or certifies historical
+coverage. The historical classifier can therefore remain source-unready while current source health
+is supported by a successful check. Runtime readiness, source health, historical coverage and
+publication commitment are independent axes.
+
+Historical unknown eligibility is not retroactively resolved by current restoration. Its context
+remains unverified; create a separately verified universe under the accepted lifecycle contracts for
+affirmative research completion. Historical summaries preserve the old uncertainty. Aggregate health
+may remain degraded while an older retained universe is unresolved, even if a new universe has
+genuine completed coverage.
+
+Existing acknowledged legacy COMPLETE checkpoints are preserved byte for byte. A historical
+`sessionStatus=COMPLETED` or idempotent replay of its original ACK is not fresh completion
+authority: its derived coverage can remain UNVERIFIED/incomplete under this corrected model. No
+migration, checkpoint rewriting or fabricated historical membership is performed. Current P24
+revocation does not erase legitimate old identities or receipts.
+
+Health state from a newly constructed universe is installed only after its genuine ACK. NONE cannot
+install phantom member health; UNKNOWN and lost ACK retain their existing recovery debt. Local
+shutdown remains distinct from completion certification: classification uncertainty alone is not a
+fabricated pending receipt or durable publication debt. Unresolved genuine ACK/receipt duties still
+block successful shutdown under the existing contract.
+
+Accepted P19 input manifests require records, and replay specifications require source manifests. An
+included zero-event positive source cannot be fabricated under those contracts. A confirmed excluded
+zero-obligation universe is supported and distinct. No accepted upstream contract, resource limit,
+dependency, version, capability or governance acceptance is changed. All 25 inherited qualifications
+and C-Q01/C-Q02 remain mandatory; Prompt 25 acceptance is pending independent review and Prompt 26
+remains unauthorized.
+
+Health diagnostic scope strings encode the session/instrument tuple unambiguously. They are opaque
+identifiers: a verified peer cannot overwrite another session’s unresolved health obligation,
+including when identifiers contain colons. This changes no retained checkpoint identity or body.
