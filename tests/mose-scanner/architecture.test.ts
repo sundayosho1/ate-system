@@ -39,7 +39,7 @@ it("scanner source integrity has an explicit implementation review identity", ()
   const actual = fingerprint(
     files.map((f) => [f, readFileSync(join("packages/mose-scanner/src", f), "utf8")]),
   );
-  expect(actual).toBe("sha256:6c9e634eb8644adc7daff0358a831df6d1790cf5b5238b57f3e8fb0fc90753bc");
+  expect(actual).toBe("sha256:a5d9ac2445759ba68de4e92c616ff945a42116ebd44912be06f228c6e3929a5f");
 });
 it("scanner authority has no network, financial actions, randomness or private upstream imports", () => {
   const src = readdirSync("packages/mose-scanner/src")

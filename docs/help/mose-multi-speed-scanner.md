@@ -26,7 +26,9 @@ terminal, network market feed, credentials or wall-clock timer is required.
    owner evidence must be immutable serializable data as produced by accepted owners. Native
    repository Result envelopes are structural: supported array, inherited and null-prototype
    representations are not rejected merely for their representation. Accessor exceptions/malformed
-   envelopes fail closed.
+   envelopes fail closed. Native JSON payloads are copied from own data descriptors into an inert
+   snapshot before serialization; inherited toJSON/index callbacks never select evidence. Sparse
+   array lengths, key bytes and nested data are bounded before allocation/serialization.
 5. Initialize `MultiSpeedScannerRuntime`. `createPlan(id, plan)` binds immutable subscriptions and
    an acyclic dependency graph. `transition(id, "START")` starts scanner scheduling; it does not
    start or authorize the MOSE session. START/PAUSE/RESUME repeats preserve logical state; exact

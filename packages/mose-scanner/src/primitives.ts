@@ -13,7 +13,7 @@ export function frozen<T>(value: T): T {
 export function boundedClone(raw: unknown, maxBytes: number, maxDepth: number): unknown {
   const seen = new Set<object>();
   let remaining = maxBytes;
-  const inspect = (value: unknown, depth: number): void => {
+  const inspect = (value: unknown, depth: number): unknown => {
     if (depth > maxDepth) throw Error("INPUT_DEPTH");
     if (--remaining < 0) throw Error("INPUT_BOUNDS");
     if (typeof value === "string") {
@@ -23,21 +23,42 @@ export function boundedClone(raw: unknown, maxBytes: number, maxDepth: number): 
     if (value && typeof value === "object") {
       if (types.isProxy(value) || seen.has(value)) throw Error("INVALID_INPUT");
       seen.add(value);
+      const array = Array.isArray(value);
+      const length = array
+        ? (Object.getOwnPropertyDescriptor(value, "length")!.value as number)
+        : 0;
+      if (array && length > maxBytes) throw Error("INPUT_BOUNDS");
+      // Serialize a descriptor snapshot, never the caller's prototype or toJSON method.
+      const copy: object = array
+        ? Object.setPrototypeOf(new Array(length), null)
+        : Object.create(null);
       for (const key of Reflect.ownKeys(value)) {
+        if (array && key === "length") continue;
         if (typeof key !== "string" || ["__proto__", "prototype", "constructor"].includes(key))
           throw Error("INVALID_INPUT");
+        remaining -= Buffer.byteLength(key);
+        if (remaining < 0) throw Error("INPUT_BOUNDS");
         const d = Object.getOwnPropertyDescriptor(value, key)!;
         if (d.get || d.set) throw Error("INVALID_INPUT");
-        inspect(d.value, depth + 1);
+        const child = inspect(d.value, depth + 1);
+        Object.defineProperty(copy, key, {
+          value: child,
+          enumerable: d.enumerable === true,
+          configurable: true,
+          writable: true,
+        });
       }
       seen.delete(value);
-    } else if (value !== null && !["string", "number", "boolean"].includes(typeof value))
+      return copy;
+    }
+    if (value !== null && !["string", "number", "boolean"].includes(typeof value))
       throw Error("INVALID_INPUT");
+    return value;
   };
-  inspect(raw, 0);
+  const snapshot = inspect(raw, 0);
   let text: string;
   try {
-    text = JSON.stringify(raw);
+    text = JSON.stringify(snapshot);
   } catch {
     throw Error("INVALID_INPUT");
   }

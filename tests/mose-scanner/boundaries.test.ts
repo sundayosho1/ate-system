@@ -490,3 +490,39 @@ it("history array accessors cannot bypass recovery limits", async () => {
   expect((await s.initialize()).ok).toBe(false);
   expect(reads).toBe(0);
 });
+
+it("native own evidence cannot be substituted by inherited toJSON callback", () => {
+  let calls = 0;
+  const raw = Object.assign(
+    Object.create({
+      toJSON() {
+        calls++;
+        return { evidence: "substituted" };
+      },
+    }),
+    { evidence: "original" },
+  );
+  const actual = boundedClone(raw, 1024, 8);
+  expect(calls).toBe(0);
+  expect(actual).toEqual({ evidence: "original" });
+});
+it("native sparse array cannot execute inherited indexed getter", () => {
+  let calls = 0;
+  const proto = Object.create(Array.prototype);
+  Object.defineProperty(proto, "0", {
+    get() {
+      calls++;
+      return "substituted";
+    },
+  });
+  const raw = Array(1);
+  Object.setPrototypeOf(raw, proto);
+  const actual = boundedClone(raw, 1024, 8);
+  expect(calls).toBe(0);
+  expect(actual).toEqual([null]);
+});
+
+it("sparse array declared length is bounded before serialization", () => {
+  expect(boundedClone([], 2, 1)).toEqual([]);
+  expect(() => boundedClone(new Array(1000000), 1024, 8)).toThrow("INPUT_BOUNDS");
+});
