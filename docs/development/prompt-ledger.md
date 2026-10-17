@@ -828,3 +828,42 @@ report. Earlier ledger entries remain historical; no acceptance is inferred from
 **Prompt 25 technical and governance acceptance: PENDING. Prompt 26: NOT AUTHORIZED.** No live
 connectivity, credentials, broker integration, execution, strategy signals, opportunity ranking,
 financial risk/portfolio decisions, trading or production deployment is authorized.
+
+## Prompt 25 — CODEX-010N owner-authorized conditional governance acceptance
+
+Sunday Osho, ATE Project Owner and Development Governance Approver, explicitly ACCEPTED conditional
+governance on 17 October 2026, as project owner responsible for development governance, technical
+milestones, approved baselines and phase progression. Accepted implementation
+`d90ccbaf14df5b677ddba077a8995ad74c2a24a0`, @ate/mose-core `0.25.0-mose-core.1`; accepted P24
+ancestor `2dec78d50c8ffa9ed325513306324bbc4bc81c9b` remains unchanged. Acceptance covers bounded
+offline historical/synthetic research only, subject to successful committed-source verification and
+publication. This appendix supersedes only the earlier pending Prompt 25 acceptance status; all
+prior ledger bytes and decisions remain historical and unchanged.
+
+M technical verdict: PASSED WITH QUALIFICATIONS. Nine findings A25-H01, A25-M01, A25-M02, A25C-H01,
+A25E-H01, A25G-M01, H-NAMESPACE, A25I-H01 and A25K-H01 are closed only in the audited bounded scope.
+M observed 2,556 tests/127 files, zero failed/skipped permanent tests; 239 conservative novel
+scenarios and 38 passing separately authored legacy safety counterparts. Historical failed
+audits/unsafe-observation assertions, generator corrections, original K44 21/23 and I272 263/9
+remain separate failed evidence, never retrospectively passed. Reviewer
+implementation/remediation/audit participation is disclosed; no organizational independence claimed.
+
+All 25 inherited qualifications remain verbatim in the acceptance document. C-Q01/C-Q02,
+M-Q01/M-Q02, included-zero-event and missing-native-envelope limits remain binding. Recovered
+genuine and malformed historical negatives cannot gain new authority; historical
+VERIFIED/coverage/ACK identity is not current permission. Explicit current
+restrictions/coverage/source axes must be inspected. A separately governed new universe does not
+repair old provenance. No Windows, production throughput/power-loss, broker/live connectivity,
+financial execution, strategy validation or trading approval. LIVE_ELIGIBLE/ACTIVE remain prohibited
+and non-operational.
+
+The owner explicitly accepted every qualification, historical failed evidence and reviewer
+participation and authorized Stage B publication, as a direct successor on
+codex/prompt-25-governance-acceptance modifying only this append and
+docs/development/prompt-25-conditional-acceptance.md. Full unchanged two-worker
+verification/security gates, remote agreement and clean tree are mandatory before publication. M
+index SHA256 `fc89b7e3194a17ad23947a9d3985edf1c1dcb3d16748bfee0fb02f56a4514293`. Reopen on blocking
+contrary evidence or loss of required controls.
+
+**Prompt 25 CONDITIONALLY ACCEPTED for bounded offline research under these conditions. Prompt 26
+NOT AUTHORIZED.**
