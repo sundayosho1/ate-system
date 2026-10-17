@@ -640,3 +640,52 @@ likewise not retrospective proof of the missing envelope. No replacement histori
 automatic migration is introduced. The stronger envelope-validation guarantee applies to publication
 through the corrected, authenticated implementation. All inherited offline-only, trust,
 single-writer, Windows and physical durability qualifications remain mandatory.
+
+## Legacy negative provenance and new publication authority
+
+A retained `INSTRUMENT_INELIGIBLE` reason proves what the journal recorded. It does not prove that
+the missing native Result had a boolean discriminator and `NONE` commitment. Genuine old negatives
+and formerly accepted malformed negatives can have identical physical bytes. They are not
+automatically corrupt or fraudulent; their stronger operational provenance is unestablished.
+
+MOSE therefore separates immutable historical classification from new publication authority.
+Historical generations, command IDs, full fingerprints, as-of views and exact command replay are
+unchanged. A repeated historical command returns its original ACK without a new generation.
+Historical `VERIFIED`, `coverageComplete` and `CONFIRMED_EXCLUSION` remain explicitly scoped to
+recorded publication facts; they are not current negative-provenance certificates.
+
+For current use, inspect `negativeProvenanceObligations` in diagnostics. Each obligation identifies
+the exact session, instrument and universe fingerprint. An affected runtime reports `NOT_READY` and
+`DEGRADED`; a current summary reports `currentNegativeProvenance: UNESTABLISHED`,
+`currentPublicationAuthority: RESTRICTED` and `currentCoverageComplete: false`. These fields do not
+rewrite the historical classification. Other sources' health cannot clear a negative-provenance
+obligation. These are evidence restrictions, not fabricated MOSE repository-write UNKNOWN debts.
+
+New START, COMPLETE, PAUSE, RECEIVE, PROCESS, global STOP publication and a new CREATE naming an
+affected predecessor are refused before repository publication. Local shutdown remains available
+subject to the existing pending-work and genuine storage-uncertainty rules. Exact historical replay
+and bounded historical reads remain available under the unchanged configuration and lifecycle gates.
+
+There is no historical reconciliation certificate or migration. A fresh positive or negative owner
+answer is not retrospective proof of an old envelope. Use a separately governed CREATE with
+`previousUniverse: null` and a new session identity to obtain fresh evidence through accepted
+owners. This independent universe does not repair the old one or remove its diagnostic restriction.
+Its own commands can proceed when their existing authority, source, policy and capacity checks pass.
+
+A current negative is operationally established in the creating runtime only after corrected native
+validation, governed universe construction and a genuine matching repository ACK. NONE does not
+grant an acknowledged universe; UNKNOWN and lost ACK retain their genuine recovery obligations.
+Evidence is scoped to the exact immutable universe and is not transferred between sessions or
+instruments.
+
+This evidence is deliberately volatile: the unchanged checkpoint format does not retain the native
+negative envelope, including for newly created negatives. Fresh recovery therefore restricts every
+recovered confirmed negative whose native provenance cannot be established from retained evidence. A
+valid current owner cannot silently lift that restriction; a separate governed universe is the
+supported fresh-authority path. No persistent-format or accepted upstream-owner contract is changed.
+
+All 25 inherited qualifications, T01, M02, O-C01/O-C02, C-Q01/C-Q02, the included-zero-event
+limitation, Windows and production durability restrictions remain mandatory. Source-health checks
+still use current accepted owners. This is bounded offline historical/synthetic research only.
+Prompt 25 technical and governance acceptance remain pending independent review; Prompt 26 is
+unauthorized.

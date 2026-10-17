@@ -223,7 +223,8 @@ for (const mode of supported)
         unresolvedEligibility: 0,
         expectedObligations: mode === "valid-success" ? 3 : 0,
       });
-      expect(take(await s.health()).health).toBe("HEALTHY");
+      expect(take(await s.health()).health).toBe(mode === "valid-success" ? "HEALTHY" : "DEGRADED");
+      expect(s.diagnostics().readiness).toBe(mode === "valid-success" ? "READY" : "NOT_READY");
     }
   });
 for (const mode of [
@@ -387,7 +388,8 @@ for (const prior of ["genuine-negative", "indistinguishable-malformed-negative"]
     const s = new MOSECoreRuntime(first.runtimeId, f.ports),
       before = disk(path);
     take(await s.initialize());
-    expect(take(await s.health()).health).toBe("HEALTHY");
+    expect(take(await s.health()).health).toBe("DEGRADED");
+    expect(s.diagnostics().readiness).toBe("NOT_READY");
     // Compatibility preserves recorded negative facts. The absent native envelope cannot be
     // re-authenticated: both genuine and historically malformed outcomes have identical bytes.
     expect(take(s.getSessionSummary("session-A"))).toMatchObject({

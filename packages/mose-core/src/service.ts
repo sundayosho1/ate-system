@@ -72,6 +72,7 @@ import {
 } from "./canonical.js";
 import { validateTransition } from "./structural.js";
 import { readEligibilityResult } from "./eligibility-result.js";
+import { negativeAuthorityScope, unestablishedNegatives } from "./negative-authority.js";
 import { readPolicy } from "./configuration.js";
 export type ReplayOwnerEvidence = Readonly<{
   specification: ReplaySessionSpecification;
@@ -136,6 +137,21 @@ export class MOSECoreRuntime {
   // Immutable historical authentication is separate from fresh availability/permission axes.
   private readonly verifiedPlans = new Set<string>();
   private readonly pendingPlanVerification = new Map<string, Reason>();
+  private readonly authenticatedNegativeExclusions = new Set<string>();
+  private negativeProvenance(u: Universe) {
+    return unestablishedNegatives(u, this.authenticatedNegativeExclusions);
+  }
+  private requireNegativeAuthority(a: Command) {
+    // Independent governed CREATE is the supported fresh-authority path, never an implicit
+    // reconciliation of an old universe. A historical predecessor must itself be established.
+    const affected = this.state.sessions.filter((s) =>
+      a.kind === "CREATE"
+        ? a.previousUniverse === s.universe.fingerprint
+        : a.kind === "STOP" || a.sessionId === s.universe.sessionId,
+    );
+    if (affected.some((s) => this.negativeProvenance(s.universe).length))
+      throw Error("PROVENANCE_INCOMPLETE");
+  }
   private refusedAPIAttempts = 0;
   private planScope(u: Universe, instrumentId: string) {
     return u.fingerprint + ":" + instrumentId;
@@ -1083,6 +1099,7 @@ export class MOSECoreRuntime {
         if (fingerprint(previous.command) !== fingerprint(a)) throw Error("IDEMPOTENCY_CONFLICT");
         return ok(previous);
       }
+      this.requireNegativeAuthority(a);
       // A recovered journal with unresolved semantic authentication is readable evidence,
       // not authority for any new publication (including no-op PROCESS, PAUSE or STOP).
       for (const s of this.state.sessions)
@@ -1287,6 +1304,8 @@ export class MOSECoreRuntime {
             this.verifiedPlans.add(this.planScope(u, m.instrumentId));
             this.currentSources.set(sourceScope(u.sessionId, m.instrumentId), true);
           } else if (unresolvedMember(m)) this.seedUnresolvedHealth(u, m);
+          else if (classifyMember(m) === "CONFIRMED_EXCLUSION")
+            this.authenticatedNegativeExclusions.add(negativeAuthorityScope(u, m.instrumentId));
         }
       }
       this.obligation = null;
@@ -1356,6 +1375,9 @@ export class MOSECoreRuntime {
         n + s.observations.filter((o) => ["PENDING", "DEFERRED"].includes(o.outcome)).length,
       0,
     );
+    const negativeProvenanceObligations = this.state.sessions.flatMap((s) =>
+      this.negativeProvenance(s.universe),
+    );
     return freeze({
       lifecycle: this.lifecycle,
       readiness:
@@ -1364,6 +1386,7 @@ export class MOSECoreRuntime {
         !this.obligation &&
         !this.stopRequested &&
         this.pendingPlanVerification.size === 0 &&
+        negativeProvenanceObligations.length === 0 &&
         ["READY", "RUNNING", "PAUSED"].includes(this.lifecycle)
           ? "READY"
           : "NOT_READY",
@@ -1371,11 +1394,15 @@ export class MOSECoreRuntime {
         valid &&
         !this.obligation &&
         ["READY", "RUNNING", "PAUSED"].includes(this.lifecycle) &&
+        negativeProvenanceObligations.length === 0 &&
         ![...this.currentSources.values()].includes(false)
           ? "HEALTHY"
           : "DEGRADED",
       researchOnly: true,
       tradingAuthority: false,
+      negativeProvenanceObligations,
+      negativeProvenanceMeaning:
+        "Historical classification is unchanged; missing native evidence cannot authorize new publication. Independent governed CREATE is required.",
       memberClassifications: this.state.sessions.flatMap((s) =>
         s.universe.members.map((m) => ({
           sessionId: s.universe.sessionId,
@@ -1572,6 +1599,14 @@ export class MOSECoreRuntime {
       admitted = outcomes.filter((o) => o.outcome === "ADMITTED").length;
     return {
       eligibilityScope: "UNIVERSE_PUBLICATION_NOT_CURRENT_AUTHORITY",
+      currentNegativeProvenance:
+        this.negativeProvenance(s.universe).length > 0 ? "UNESTABLISHED" : "NO_RESTRICTION",
+      currentPublicationAuthority:
+        this.negativeProvenance(s.universe).length > 0
+          ? "RESTRICTED"
+          : "SUBJECT_TO_OTHER_GOVERNED_CHECKS",
+      currentCoverageComplete:
+        this.negativeProvenance(s.universe).length === 0 && !unknown && completed === expected,
       sessionStatus: s.status,
       configured: s.universe.members.length,
       eligible: s.universe.members.filter((m) => m.eligible).length,
