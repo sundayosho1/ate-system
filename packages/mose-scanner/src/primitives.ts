@@ -30,8 +30,8 @@ export function boundedClone(raw: unknown, maxBytes: number, maxDepth: number): 
       if (array && length > maxBytes) throw Error("INPUT_BOUNDS");
       // Serialize a descriptor snapshot, never the caller's prototype or toJSON method.
       const copy: object = array
-        ? Object.setPrototypeOf(new Array(length), null)
-        : Object.create(null);
+        ? (Object.setPrototypeOf(new Array(length), null) as object)
+        : (Object.create(null) as object);
       for (const key of Reflect.ownKeys(value)) {
         if (array && key === "length") continue;
         if (typeof key !== "string" || ["__proto__", "prototype", "constructor"].includes(key))

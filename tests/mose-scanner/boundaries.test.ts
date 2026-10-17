@@ -499,7 +499,7 @@ it("native own evidence cannot be substituted by inherited toJSON callback", () 
         calls++;
         return { evidence: "substituted" };
       },
-    }),
+    }) as object,
     { evidence: "original" },
   );
   const actual = boundedClone(raw, 1024, 8);
@@ -508,7 +508,7 @@ it("native own evidence cannot be substituted by inherited toJSON callback", () 
 });
 it("native sparse array cannot execute inherited indexed getter", () => {
   let calls = 0;
-  const proto = Object.create(Array.prototype);
+  const proto = Object.create(Array.prototype as object) as object;
   Object.defineProperty(proto, "0", {
     get() {
       calls++;
