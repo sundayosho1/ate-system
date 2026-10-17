@@ -71,6 +71,7 @@ import {
   unresolvedMember,
 } from "./canonical.js";
 import { validateTransition } from "./structural.js";
+import { readEligibilityResult } from "./eligibility-result.js";
 import { readPolicy } from "./configuration.js";
 export type ReplayOwnerEvidence = Readonly<{
   specification: ReplaySessionSpecification;
@@ -346,14 +347,14 @@ export class MOSECoreRuntime {
     observe?: (a: Assessment) => void,
     confirmedExclusion?: () => void,
   ) {
-    const r = await this.ports.eligibility.getEligibility(instrumentId);
+    const r = readEligibilityResult(await this.ports.eligibility.getEligibility(instrumentId));
     if (
       r.ok &&
       (r.value.current.evaluatedAt > this.now() || r.value.recorded.decisionAt > this.now())
     )
       throw Error("TEMPORAL_INCONSISTENCY");
     if (!r.ok) {
-      if (r.error.code === "RECORD_NOT_FOUND") {
+      if (r.error.commitment === "NONE" && r.error.code === "RECORD_NOT_FOUND") {
         confirmedExclusion?.();
         throw Error("INSTRUMENT_INELIGIBLE");
       }

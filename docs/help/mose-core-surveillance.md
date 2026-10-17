@@ -597,3 +597,46 @@ remains unauthorized.
 Health diagnostic scope strings encode the session/instrument tuple unambiguously. They are opaque
 identifiers: a verified peer cannot overwrite another session’s unresolved health obligation,
 including when identifiers contain colons. This changes no retained checkpoint identity or body.
+
+## Native eligibility Result integrity
+
+MOSE validates the accepted P24 Result envelope before interpreting exclusion authority. `ok` must
+be the literal boolean `true` or `false`. A negative requires an error object with a string `code`
+and commitment `NONE` or `UNKNOWN`. Only a valid `RECORD_NOT_FOUND` result with commitment `NONE`
+can establish the existing trusted negative exclusion. Other errors and valid `UNKNOWN` responses
+remain unresolved; UNKNOWN is never normalized to NONE. Required fields are read once into a
+consistent envelope snapshot. Existing success-subject, context, assessment, time and capability
+checks still apply.
+
+Missing, non-boolean or malformed discriminators, invalid error fields and contradictory populated
+success/failure fields become unresolved evidence. Unrelated metadata is not forbidden. The accepted
+contract is structural: a representation is not refused merely because fields are inherited or
+attached to an array. This is not a new plain-object-only owner contract. Native exceptions follow
+the same fail-closed path; they cannot manufacture a trusted negative.
+
+A malformed or unresolved result does not remove the configured member from the unknown coverage
+denominator. CREATE and START retain bounded partial semantics, but a new direct or JSON COMPLETE is
+refused before publication. A genuine peer may still admit its three real observations without
+certifying the unresolved whole universe. Fresh and repeated recovery preserve the recorded
+uncertainty. A dependency query's UNKNOWN is retained as unresolved member evidence; it is not an
+invented MOSE repository-write obligation. MOSE's own NONE, UNKNOWN, acknowledged-publication and
+lost-ACK recovery rules remain separate and unchanged.
+
+### Historical negative-result qualification
+
+The native Result envelope was not retained in old checkpoints. CODEX-010I demonstrated that an old
+malformed negative and a genuine trusted negative could produce identical acknowledged bytes,
+including generation and full fingerprint. This correction cannot retrospectively distinguish them.
+No history is rewritten, deleted, migrated or re-signed. Genuine historical exclusions remain
+readable under the existing trusted-journal compatibility policy, and an exact historical command
+replay returns the original receipt without a new write.
+
+For such pre-correction histories, a recorded confirmed exclusion and a computed `VERIFIED`
+canonical summary describe the retained facts, not re-authentication of the missing native Result.
+The old native negative provenance remains unestablished without separately available trustworthy
+evidence. Treat these roots conservatively as qualified historical research evidence; do not claim
+that this fix certifies an old exclusion or repairs a false old completion. Recovered `HEALTHY` is
+likewise not retrospective proof of the missing envelope. No replacement historical authority or
+automatic migration is introduced. The stronger envelope-validation guarantee applies to publication
+through the corrected, authenticated implementation. All inherited offline-only, trust,
+single-writer, Windows and physical durability qualifications remain mandatory.
