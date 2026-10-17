@@ -60,22 +60,22 @@ export function parsePolicyJson(raw: string): unknown {
   const value: unknown = JSON.parse(raw),
     stack: { object: boolean; key: boolean; seen: Set<string> }[] = [];
   for (const match of raw.matchAll(/"(?:\\.|[^"\\])*"|\{|\}|\[|\]|:|,/gu)) {
-    const token = match[0];
-    if (token === "{" || token === "[") {
-      stack.push({ object: token === "{", key: token === "{", seen: new Set() });
+    const lexeme = match[0];
+    if (lexeme === "{" || lexeme === "[") {
+      stack.push({ object: lexeme === "{", key: lexeme === "{", seen: new Set() });
       continue;
     }
-    if (token === "}" || token === "]") {
+    if (lexeme === "}" || lexeme === "]") {
       stack.pop();
       continue;
     }
     const scope = stack.at(-1);
-    if (token === ",") {
+    if (lexeme === ",") {
       if (scope?.object) scope.key = true;
       continue;
     }
-    if (token.startsWith('"') && scope?.object && scope.key) {
-      const key = JSON.parse(token) as string;
+    if (lexeme.startsWith('"') && scope?.object && scope.key) {
+      const key = JSON.parse(lexeme) as string;
       if (scope.seen.has(key)) throw Error("DUPLICATE_JSON_KEY");
       scope.seen.add(key);
       scope.key = false;
