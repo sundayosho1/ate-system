@@ -892,3 +892,46 @@ byte and historical decision remains unchanged.
 **Prompt26 CONDITIONALLY ACCEPTED for bounded offline research, subject to successful
 committed-source verification/publication and every qualification. Prompt27 NOT AUTHORIZED. No live
 connectivity, broker integration, financial execution or production deployment.**
+
+## Prompt 27 — CODEX-013F conditional governance acceptance — owner-authorized acceptance
+
+**OWNER-AUTHORIZED CONDITIONAL ACCEPTANCE**, subject to successful committed-source verification and
+publication. Decision: A. ACCEPT. Authorized signatory: Sunday Osho. Role/designation: ATE Project
+Owner and Development Governance Approver. Capacity/authority: ATE Project Owner responsible for
+approving development milestones, technical acceptance decisions, governance baselines and
+progression between development phases. Approval/effective date: 18 October 2026. The owner
+explicitly accepts every reviewed qualification/restriction, preserved historical failure, original
+assertion, separate harness correction and approved compatibility exception; acknowledges reviewer
+implementation/audit participation without organizational independence; and authorizes only reviewed
+pending-field finalization and two-file documentation-only direct-successor publication on
+codex/prompt-27-governance-acceptance after every committed-source gate passes.
+
+Approved immutable implementation `315adbab4413bdee7941c0034c5450cacda440ca`, @ate/mose-attention
+version0.27.0-adaptive-surveillance.1, direct parent `841c9b075e2ac2cd11b9049d48725773c4cf6d04`,
+accepted Prompt26 governance ancestor `873888c652c402b926fd625fe94cdd90616d27d1`. Bounded offline
+historical/synthetic research only. A27-H01/H02/M01 and A27C-M01 are technically CLOSED within the
+audited contracts; E recommends qualified separate governance review. E observed3,170 tests/144
+files, zero failed/skipped, 252 counted new passing scenarios,353 A and299 C scenarios passing,24
+journeys represented, 33 architecture tests, nine source mutations and19 protected owners; security
+gates passed with zero vulnerabilities. These are authenticated E observations, not fresh F Stage A
+executions.
+
+All25 inherited qualifications, every accepted Prompt25/26 addition, OPEN A26-Q01/A26C-L01 and
+qualified V-R01–V-R08 design risks remain binding, reproduced in the associated acceptance record.
+Historical failures, separate harness corrections, narrow compatibility approvals and reviewer
+implementation/audit participation remain disclosed without organizational independence. Historical
+ACK and receipt existence are not current eligibility/readiness; UNKNOWN remains an obligation.
+Submission/dispatch stay disabled by default, require genuine authority and do not grant financial
+execution. AC01–AC08 remain mandatory; no universal fairness, complete concurrent snapshot,
+profitability, Windows or production qualification is inferred.
+
+Upon successful publication after exact committed-source gates, this appendix supersedes only
+earlier pending Prompt27 governance status. Every prior ledger byte and historical decision remains
+unchanged. This decision grants no subsequent development authorization. See
+docs/development/prompt-27-conditional-acceptance.md and external CODEX-013F approval/evidence
+package; E index SHA2560b0e61bd4843dc1e1e30e0a732189e3fe956eb768444ad53efc3433e2acb0fb1.
+
+**Prompt27 CONDITIONALLY ACCEPTED for bounded offline research, subject to successful
+committed-source verification/publication and every qualification. Prompts28–30 NOT AUTHORIZED. No
+live broker connectivity, trading, financial execution or production deployment. STOP after Stage B
+reporting.**
