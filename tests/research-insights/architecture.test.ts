@@ -49,7 +49,7 @@ const sources = [
   "packages/research-insights/src/status-overlay.ts",
   "packages/research-insights/src/traceability.ts",
 ];
-const expected = "5b2dd7de9b7673d97af0182383ad3c0fee6aeaf724bceeea4b5ea4158c642a44";
+const expected = "cd1e085c7164e37f5672a44f01ca9db22a6348356ed531987762f9e8eefc804a";
 const hash = (root: string) =>
   createHash("sha256")
     .update(JSON.stringify(sources.map((p) => [p, readFileSync(join(root, p), "utf8")])))

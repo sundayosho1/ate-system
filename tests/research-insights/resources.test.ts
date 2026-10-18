@@ -141,3 +141,22 @@ it("serialization cancellation value rejects without executing hooks", () => {
   if (!r.ok) expect(r.issues[0]!.code).toBe("INSIGHT_CANCELLED");
   expect(calls).toBe(0);
 });
+
+it("export preserves cyclic and accessor rejection reasons", () => {
+  const cyclic: Record<string, unknown> = {};
+  cyclic.self = cyclic;
+  const getter = {
+    get value() {
+      throw Error("unsafe");
+    },
+  };
+  for (const [raw, code] of [
+    [cyclic, "INSIGHT_CYCLIC_INPUT"],
+    [getter, "INSIGHT_ACCESSOR_REJECTED"],
+    [undefined, "INSIGHT_SCHEMA_INVALID"],
+  ] as const) {
+    const r = I.canonicalInsightBytes(raw, "EXPORT");
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.issues[0]!.code).toBe(code);
+  }
+});

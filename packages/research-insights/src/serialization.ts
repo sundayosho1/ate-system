@@ -139,7 +139,10 @@ export function canonicalInsightBytes(
     scope === "DESCRIPTOR" || scope === "ENTRY" ? 10000 : 10000 * 10000,
     cancelled,
   );
-  if (!r.ok) return scope === "EXPORT" ? issue("INSIGHT_EXPORT_LIMIT_EXCEEDED") : r;
+  if (!r.ok)
+    return scope === "EXPORT" && r.issues.some((problem) => problem.code === "INSIGHT_INPUT_BOUNDS")
+      ? issue("INSIGHT_EXPORT_LIMIT_EXCEEDED")
+      : r;
   return ok(Buffer.from(JSON.stringify(r.value), "utf8"));
 }
 export function insightFingerprint(
