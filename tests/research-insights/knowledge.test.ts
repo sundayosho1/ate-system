@@ -91,3 +91,23 @@ it("getter descriptor is not invoked", () => {
   expect(I.createKnowledgeCatalogue(v).ok).toBe(false);
   expect(calls).toBe(0);
 });
+
+it("alreadycancelled corpus is not inspected", () => {
+  let scans = 0;
+  const entries = new Proxy([], {
+    ownKeys() {
+      scans++;
+      throw Error("must not inspect");
+    },
+  });
+  const r = I.createKnowledgeCatalogue({
+    entries,
+    sourceManifest: fixture.manifest,
+    qualificationIds: [],
+    generatedAt: fixture.generatedAt,
+    cancelled: true,
+  });
+  expect(r.ok).toBe(false);
+  if (!r.ok) expect(r.issues[0]!.code).toBe("INSIGHT_CANCELLED");
+  expect(scans).toBe(0);
+});

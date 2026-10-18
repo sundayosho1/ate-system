@@ -59,3 +59,18 @@ it("real current overlay labels unavailable authority", () => {
   ) as SourceManifest;
   expect(I.createStatusOverlay(v, m).ok).toBe(true);
 });
+
+for (const field of ["baseline", "sha256"])
+  it(`malformed manifest ${field} is contained without coercion`, () => {
+    const m = structuredClone(fixture.manifest) as unknown as {
+      baseline: unknown;
+      sources: Record<string, { sha256: unknown }>;
+    };
+    if (field === "baseline") m.baseline = { toString: 0 };
+    else m.sources["README.md:1"]!.sha256 = { toString: 0 };
+    const state: { result?: ReturnType<typeof I.createStatusOverlay> } = {};
+    expect(() => {
+      state.result = I.createStatusOverlay(status(), m as unknown as SourceManifest);
+    }).not.toThrow();
+    expect(state.result?.ok).toBe(false);
+  });

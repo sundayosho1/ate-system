@@ -36,6 +36,7 @@ export function snapshot(
       return null;
     }
     if (typeof v === "string") {
+      if (/[\uD800-\uDFFF]/u.test(v)) throw Error("INSIGHT_SCHEMA_INVALID");
       if (Buffer.byteLength(v, "utf8") > maxBytes) throw Error("INSIGHT_INPUT_BOUNDS");
       add(Buffer.byteLength(JSON.stringify(v)));
       return v;
@@ -55,6 +56,16 @@ export function snapshot(
       const proto: unknown = Object.getPrototypeOf(v);
       if (!Array.isArray(v) && proto !== Object.prototype && proto !== null)
         throw Error("INSIGHT_SCHEMA_INVALID");
+      if (Array.isArray(v)) {
+        const declared: unknown = Object.getOwnPropertyDescriptor(v, "length")?.value;
+        if (
+          typeof declared !== "number" ||
+          !Number.isSafeInteger(declared) ||
+          declared < 0 ||
+          declared > maxNodes - nodes
+        )
+          throw Error("INSIGHT_INPUT_BOUNDS");
+      }
       const keys = Reflect.ownKeys(v);
       if (keys.length > maxNodes - nodes + 1) throw Error("INSIGHT_INPUT_BOUNDS");
       if (
@@ -155,7 +166,6 @@ export function insightFingerprint(
     const v = c.value as Record<string, JsonValue>;
     if (
       !(raw instanceof Uint8Array) ||
-      raw.byteLength > 16777216 ||
       !v ||
       Object.keys(v).sort().join(",") !== "contractVersion,projectionVersion,sourceCommit" ||
       typeof v.contractVersion !== "string" ||
@@ -164,6 +174,17 @@ export function insightFingerprint(
       !v.projectionVersion ||
       typeof v.sourceCommit !== "string" ||
       !/^[a-f0-9]{40}$/.test(v.sourceCommit)
+    )
+      return issue("INSIGHT_INPUT_BOUNDS");
+    const byteLength: unknown = Object.getOwnPropertyDescriptor(
+      Object.getPrototypeOf(Uint8Array.prototype) as object,
+      "byteLength",
+    )?.get?.call(raw);
+    if (
+      typeof byteLength !== "number" ||
+      byteLength > 16777216 ||
+      Buffer.byteLength(v.contractVersion) > 256 ||
+      Buffer.byteLength(v.projectionVersion) > 256
     )
       return issue("INSIGHT_INPUT_BOUNDS");
     return ok(
@@ -179,11 +200,7 @@ export function insightFingerprint(
 export function corpusRows(raw: unknown): DomainResult<readonly unknown[]> {
   try {
     if (!Array.isArray(raw)) return issue("INSIGHT_INPUT_BOUNDS");
-    const ds = Object.getOwnPropertyDescriptors(raw) as unknown as Record<
-        PropertyKey,
-        PropertyDescriptor
-      >,
-      len: unknown = ds.length?.value;
+    const len: unknown = Object.getOwnPropertyDescriptor(raw, "length")?.value;
     if (
       typeof len !== "number" ||
       !Number.isSafeInteger(len) ||
@@ -191,10 +208,10 @@ export function corpusRows(raw: unknown): DomainResult<readonly unknown[]> {
       len > R1.knowledge.maxEntries
     )
       return issue("INSIGHT_INPUT_BOUNDS");
-    if (Reflect.ownKeys(ds).length !== len + 1) return issue("INSIGHT_SCHEMA_INVALID");
+    if (Reflect.ownKeys(raw).length !== len + 1) return issue("INSIGHT_SCHEMA_INVALID");
     const result: unknown[] = [];
     for (let i = 0; i < len; i++) {
-      const cell = ds[String(i)];
+      const cell = Object.getOwnPropertyDescriptor(raw, String(i));
       if (!cell || !("value" in cell) || !cell.enumerable)
         return issue("INSIGHT_ACCESSOR_REJECTED");
       result.push(cell.value);

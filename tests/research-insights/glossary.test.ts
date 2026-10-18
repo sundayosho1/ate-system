@@ -76,3 +76,11 @@ it("custom glossary iterator cannot exceed declared corpuslength", () => {
   expect(I.validateGlossary(rows, fixture.manifest).ok).toBe(false);
   expect(calls).toBe(0);
 });
+
+it("glossary recognizedmetadata doesnot admit arbitrary nested objects", () =>
+  expect(
+    I.validateGlossary(
+      [{ ...row(), originalDefinition: { privatePayload: "invalid" } }],
+      fixture.manifest,
+    ).ok,
+  ).toBe(false));

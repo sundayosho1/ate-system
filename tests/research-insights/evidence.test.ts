@@ -62,3 +62,22 @@ it("numerator cannot exceed denominator", () => {
   v.denominator = known(1);
   expect(C.validateInsightRecord("CoverageStatement", v).ok).toBe(false);
 });
+
+it("schema descriptors are deeply immutable", () => {
+  expect(Object.isFrozen(C.contractDefinitions)).toBe(true);
+  for (const descriptor of Object.values(C.contractDefinitions)) {
+    expect(Object.isFrozen(descriptor)).toBe(true);
+    expect(Object.isFrozen(descriptor[1])).toBe(true);
+  }
+});
+it("reason identity cannot contradict its namespace fields", () => {
+  const v = rec("ReasonReference");
+  v.id = "misattributed";
+  expect(C.validateInsightRecord("ReasonReference", v).ok).toBe(false);
+});
+it("fully exported facets require observation references", () => {
+  const v = rec("ReportManifest");
+  v.requestedFacets = ["health"];
+  v.exportStatus = "REQUESTED_FACETS_EXPORTED";
+  expect(C.validateInsightRecord("ReportManifest", v).ok).toBe(false);
+});

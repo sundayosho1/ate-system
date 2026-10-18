@@ -1,7 +1,7 @@
 import { ok, fail, domainIssue, parseUtcTimestamp, type DomainResult } from "@ate/domain";
 import type { InsightRecord, JsonValue } from "./facts.js";
 import { R1 } from "./resource-profile.js";
-export const contractDefinitions = {
+export const contractDefinitions = frozen({
   EvidenceReference: [
     "evidence",
     {
@@ -195,7 +195,7 @@ export const contractDefinitions = {
       supersedes: "fact",
     },
   ],
-} as const;
+} as const);
 export type InsightKind = "Fact" | keyof typeof contractDefinitions;
 const enums: Record<string, readonly string[]> = {
   mode: ["STATIC_SOURCE_METADATA", "HISTORICAL_IMMUTABLE_EVIDENCE", "OWNER_SCOPED_OBSERVATION"],
@@ -260,6 +260,7 @@ export function snapshot(
       return null;
     }
     if (typeof v === "string") {
+      if (/[\uD800-\uDFFF]/u.test(v)) throw Error("INSIGHT_SCHEMA_INVALID");
       if (Buffer.byteLength(v, "utf8") > maxBytes) throw Error("INSIGHT_INPUT_BOUNDS");
       add(Buffer.byteLength(JSON.stringify(v)));
       return v;
@@ -279,6 +280,16 @@ export function snapshot(
       const proto: unknown = Object.getPrototypeOf(v);
       if (!Array.isArray(v) && proto !== Object.prototype && proto !== null)
         throw Error("INSIGHT_SCHEMA_INVALID");
+      if (Array.isArray(v)) {
+        const declared: unknown = Object.getOwnPropertyDescriptor(v, "length")?.value;
+        if (
+          typeof declared !== "number" ||
+          !Number.isSafeInteger(declared) ||
+          declared < 0 ||
+          declared > maxNodes - nodes
+        )
+          throw Error("INSIGHT_INPUT_BOUNDS");
+      }
       const keys = Reflect.ownKeys(v);
       if (keys.length > maxNodes - nodes + 1) throw Error("INSIGHT_INPUT_BOUNDS");
       if (
@@ -476,7 +487,23 @@ export function validateInsightRecord(
     if (v.claim === "OWNER_DECLARED_ONLY" && (d.kind !== "KNOWN" || n.kind !== "KNOWN"))
       return issue("INSIGHT_COVERAGE_UNESTABLISHED");
   }
+  if (kind === "ReasonReference") {
+    const identity = [v.owner, v.nativeCode, v.schemaVersion, v.operation, v.phase]
+      .map((part) => encodeURIComponent(part as string))
+      .join("/");
+    if (v.id !== identity)
+      return issue(
+        "INSIGHT_SCHEMA_INVALID",
+        "Reason identity must bind owner/code/version/operation/phase",
+      );
+  }
   if (kind === "ReportManifest") {
+    if (
+      v.exportStatus === "REQUESTED_FACETS_EXPORTED" &&
+      (v.requestedFacets as readonly JsonValue[]).length > 0 &&
+      (v.sourceObservationIds as readonly JsonValue[]).length === 0
+    )
+      return issue("INSIGHT_EVIDENCE_UNESTABLISHED");
     if (
       (v.exactEvidenceVector as JsonValue[]).length > 1000 ||
       (v.requestedFacets as JsonValue[]).length > 2000

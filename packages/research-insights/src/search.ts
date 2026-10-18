@@ -1,4 +1,4 @@
-import { ok, type DomainResult } from "@ate/domain";
+import { ok, parseUtcTimestamp, type DomainResult } from "@ate/domain";
 import {
   validateInsightRecord,
   type JsonValue,
@@ -42,6 +42,16 @@ export function searchKnowledge(
     cat.entries.length > 10000
   )
     return issue("INSIGHT_SCHEMA_INVALID");
+  const timestamp = parseUtcTimestamp(cat.generatedAt);
+  if (
+    typeof cat.baseline !== "string" ||
+    !/^[a-f0-9]{40}$/.test(cat.baseline) ||
+    !timestamp.ok ||
+    timestamp.value !== cat.generatedAt ||
+    Object.keys(cat).sort().join(",") !== "baseline,entries,generatedAt,schema"
+  )
+    return issue("INSIGHT_SCHEMA_INVALID");
+  const identities = new Set<string>();
   const matches: KnowledgeEntry[] = [];
   for (const e of cat.entries as readonly KnowledgeEntry[]) {
     const validated = validateInsightRecord("KnowledgeEntry", e);
@@ -52,6 +62,9 @@ export function searchKnowledge(
       typeof e.revision !== "number"
     )
       return issue("INSIGHT_SCHEMA_INVALID");
+    const identity = e.id + ":" + String(e.revision);
+    if (identities.has(identity)) return issue("INSIGHT_DUPLICATE_IDENTITY");
+    identities.add(identity);
     if (tokens.every((t) => fold(String(e.id) + " " + e.definition).includes(t))) matches.push(e);
   }
   matches.sort((a, b) =>

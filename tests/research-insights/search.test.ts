@@ -57,3 +57,14 @@ it("caller cast cannot bypass entryvalidation", () => {
   delete c.entries[0]!.sourceRefs;
   expect(I.searchKnowledge(c as unknown as I.KnowledgeCatalogue, { query: "" }).ok).toBe(false);
 });
+
+it("invalid catalogue metadata cannot be cast into a search", () => {
+  const c = { ...take(build()), generatedAt: "invalid" };
+  expect(I.searchKnowledge(c, { query: "" }).ok).toBe(false);
+});
+it("duplicate catalogue identities cannot inflate hit counts", () => {
+  const c = take(build());
+  expect(I.searchKnowledge({ ...c, entries: [...c.entries, ...c.entries] }, { query: "" }).ok).toBe(
+    false,
+  );
+});

@@ -133,3 +133,20 @@ it("array cell getter is not executed", () => {
   ).toBe(false);
   expect(calls).toBe(0);
 });
+
+it("ill-formed Unicode is rejected without coercion", () => {
+  expect(I.canonicalInsightBytes("\uD800").ok).toBe(false);
+  expect(I.canonicalInsightBytes("😀").ok).toBe(true);
+});
+
+it("oversized array rejected before enumerating its cells", () => {
+  let scans = 0;
+  const raw = new Proxy(new Array(10001), {
+    ownKeys(target) {
+      scans++;
+      return Reflect.ownKeys(target);
+    },
+  });
+  expect(I.canonicalInsightBytes(raw).ok).toBe(false);
+  expect(scans).toBe(0);
+});

@@ -2545,5 +2545,13 @@
     "UTF8/depth/node budgets require runtime checks",
     "Schema validates projection shape, not source truth, owner authority or semantic cutoffs",
     "No server, URI resolution or native owner parser implemented"
+  ],
+  "semanticRules": [
+    "ReasonReference.id uses percent-encoded owner/code/schemaVersion/operation/phase segments",
+    "Requested facets cannot be marked fully exported without observation references",
+    "Schema descriptors and resource policy are deeply immutable",
+    "Source manifest baseline/digest must be strings; no coercion",
+    "Native typed-array byte length, not an own property, enforces hash byte budget",
+    "Search revalidates catalogue metadata and duplicate revision identities"
   ]
 }

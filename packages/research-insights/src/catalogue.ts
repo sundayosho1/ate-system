@@ -42,6 +42,9 @@ export function createKnowledgeCatalogue(
       generatedAt: ds.generatedAt?.value as string,
       ...(ds.cancelled ? { cancelled: ds.cancelled.value as boolean } : {}),
     };
+    if (input.cancelled !== undefined && typeof input.cancelled !== "boolean")
+      return issue("INSIGHT_SCHEMA_INVALID");
+    if (input.cancelled === true) return issue("INSIGHT_CANCELLED");
     const descriptor = snapshot({
       generatedAt: input.generatedAt,
       qualificationIds: input.qualificationIds,
@@ -59,7 +62,6 @@ export function createKnowledgeCatalogue(
     };
     const corpus = corpusRows(input.entries);
     if (!corpus.ok) return corpus;
-    if (input.cancelled === true) return issue("INSIGHT_CANCELLED");
     const time = parseUtcTimestamp(input.generatedAt);
     if (!time.ok || time.value !== input.generatedAt)
       return issue("INSIGHT_TEMPORAL_INCONSISTENCY");

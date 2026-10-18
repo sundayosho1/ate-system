@@ -66,6 +66,19 @@ export function validateGlossary(
         v.aliases.some((x) => !x || Buffer.byteLength(x) > 256)
       )
         return issue("INSIGHT_SCHEMA_INVALID");
+      if (
+        ["originalDefinition", "sourceState", "qualifiedCurrentExplanation"].some(
+          (k) =>
+            v[k] !== undefined && (typeof v[k] !== "string" || Buffer.byteLength(v[k]) > 32768),
+        )
+      )
+        return issue("INSIGHT_SCHEMA_INVALID");
+      if (
+        v.applicableSourceCommit !== undefined &&
+        (typeof v.applicableSourceCommit !== "string" ||
+          !/^[a-f0-9]{40}$/.test(v.applicableSourceCommit))
+      )
+        return issue("INSIGHT_SCHEMA_INVALID");
       if (seen.has(v.id)) return issue("INSIGHT_DUPLICATE_IDENTITY");
       seen.add(v.id);
       bytes += Buffer.byteLength(JSON.stringify(v)) + 1;

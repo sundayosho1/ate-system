@@ -160,3 +160,15 @@ it("export preserves cyclic and accessor rejection reasons", () => {
     if (!r.ok) expect(r.issues[0]!.code).toBe(code);
   }
 });
+
+it("shadowed typed-array byteLength cannot raise hash limit", () => {
+  const raw = new Uint8Array(16777217);
+  Object.defineProperty(raw, "byteLength", { value: 0 });
+  expect(
+    I.insightFingerprint(raw, {
+      contractVersion: "ate.insights/1",
+      sourceCommit: fixture.manifest.baseline,
+      projectionVersion: "1",
+    }).ok,
+  ).toBe(false);
+});

@@ -17,6 +17,7 @@ export function validateSourceManifest(raw: unknown): DomainResult<SourceManifes
     !m.sources ||
     typeof m.sources !== "object" ||
     Array.isArray(m.sources) ||
+    typeof m.baseline !== "string" ||
     !/^[a-f0-9]{40}$/.test(m.baseline)
   )
     return issue("INSIGHT_SOURCE_REFERENCE_INVALID");
@@ -27,6 +28,7 @@ export function validateSourceManifest(raw: unknown): DomainResult<SourceManifes
       Array.isArray(s) ||
       Object.keys(s).sort().join(",") !== "line,path,sha256" ||
       !id ||
+      Buffer.byteLength(id) > 256 ||
       typeof s.path !== "string" ||
       s.path.startsWith("/") ||
       s.path.includes("\\") ||
@@ -34,6 +36,7 @@ export function validateSourceManifest(raw: unknown): DomainResult<SourceManifes
       s.path.includes(":") ||
       !Number.isSafeInteger(s.line) ||
       s.line < 1 ||
+      typeof s.sha256 !== "string" ||
       !/^sha256:[a-f0-9]{64}$/.test(s.sha256)
     )
       return issue("INSIGHT_SOURCE_REFERENCE_INVALID");
