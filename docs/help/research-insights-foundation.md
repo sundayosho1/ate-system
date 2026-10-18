@@ -60,3 +60,31 @@ canonicalInsightBytes accepts an optional cancellation boolean after the explici
 is a pure cancellation intent value, never a callback or a guarantee that an event-loop event can
 interrupt synchronous work. Validation checks it before/after traversal and at256-node checkpoints;
 no owner operation or storage commitment is affected.
+
+## Foundation integrity remediation
+
+Source-manifest hashes identify bytes at the manifest's declared accepted baseline, including
+historical architecture tests that have since changed. Authenticate maintenance inputs against that
+exact Git commit and line identity; a well-formed manifest alone remains supplied metadata, not a
+filesystem resolver or external trust anchor. The permanent integrity regressions perform this
+explicit offline check without adding operational owner calls to the library.
+
+Traceability dimensions have field-specific types: owner and row identities are bounded identifiers;
+contract/documentation references and glossary terms are nonempty string arrays; coverage,
+configuration, diagnostic and readiness descriptions are bounded text. Explicit qualified UNKNOWN or
+UNSUPPORTED descriptions remain valid metadata. Null, nested objects and numeric substitutes cannot
+stand in for mandatory dimensions. A successful validation does not authenticate an owner record.
+
+Catalogue relationships refer to entry IDs rather than a particular revision. All retained revisions
+contribute outgoing edges for that ID; none is silently chosen as current. Self-references and
+directed cycles, including cycles across revisions, reject the whole build. Iterative traversal
+visits each ID and deduplicated edge once within the already bounded corpus, avoiding recursive
+stack exhaustion or revision cross-product expansion. Output retains the original relationships and
+exact revisions. Cancellation remains cooperative: already-cancelled work rejects, and periodic
+graph checks do not promise synchronous event-loop preemption.
+
+Ordering compares namespace, entry type and ID separately using deterministic JavaScript string
+comparison, then numeric revision. Delimiters in components cannot collapse distinct tuples. This
+corrects collection ordering for affected inputs; historical source and canonical artifacts remain
+unchanged. Backtest, Rollback Request, Backpressure and Known-good rollback now have term-specific
+current explanations while their original source definitions remain preserved.

@@ -98,11 +98,47 @@ export function createKnowledgeCatalogue(
     for (const e of entries)
       if (!e.relatedEntryIds.every((id) => knownIds.has(id)))
         return issue("INSIGHT_REFERENCE_UNRESOLVED");
-    entries.sort((a, b) => {
-      const x = [a.namespace, a.type, a.id, String(a.revision)].join("/"),
-        y = [b.namespace, b.type, b.id, String(b.revision)].join("/");
-      return x < y ? -1 : x > y ? 1 : 0;
-    });
+    // References name entry IDs, not revisions. Union the outgoing relationships of
+    // every retained revision under that ID; do not silently choose a latest revision.
+    // Iterative three-colour DFS visits each ID and deduplicated edge once. Its
+    // graph is bounded by the already checked 10000-entry/16MiB corpus; no recursion
+    // or revision cross-product expansion can escape those bounds.
+    const graph = new Map<string, Set<string>>();
+    for (const entry of entries) {
+      const edges = graph.get(entry.id) ?? new Set<string>();
+      for (const target of entry.relatedEntryIds) edges.add(target);
+      graph.set(entry.id, edges);
+    }
+    const colour = new Map<string, number>();
+    let steps = 0;
+    for (const id of graph.keys()) {
+      if (colour.has(id)) continue;
+      colour.set(id, 1);
+      const stack = [{ id, edges: graph.get(id)!.values() }];
+      while (stack.length) {
+        if (steps++ % R1.cancellation.serializationBatchNodes === 0 && input.cancelled)
+          return issue("INSIGHT_CANCELLED");
+        const frame = stack[stack.length - 1]!,
+          next = frame.edges.next();
+        if (next.done) {
+          colour.set(frame.id, 2);
+          stack.pop();
+        } else if (colour.get(next.value) === 1) {
+          return issue("INSIGHT_CYCLIC_INPUT");
+        } else if (!colour.has(next.value)) {
+          colour.set(next.value, 1);
+          stack.push({ id: next.value, edges: graph.get(next.value)!.values() });
+        }
+      }
+    }
+    const compare = (x: string, y: string) => (x < y ? -1 : x > y ? 1 : 0);
+    entries.sort(
+      (a, b) =>
+        compare(a.namespace, b.namespace) ||
+        compare(a.type, b.type) ||
+        compare(a.id, b.id) ||
+        a.revision - b.revision,
+    );
     const result = {
       schema: "ate.insights.catalogue/1" as const,
       generatedAt: time.value,

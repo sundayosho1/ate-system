@@ -5809,7 +5809,7 @@
     "tests/instrument-eligibility/architecture-guard-remediation.test.ts:13": {
       "path": "tests/instrument-eligibility/architecture-guard-remediation.test.ts",
       "line": 13,
-      "sha256": "sha256:d932feee482f0d4167851798c6ce36e052f0e8155416a772e1046f4a8e71bad3"
+      "sha256": "sha256:8409cc54b9189c2994bb1517f733f4ab5973424d5dacc266864a2dec7d1200fd"
     },
     "tests/instrument-eligibility/attestations.test.ts:196": {
       "path": "tests/instrument-eligibility/attestations.test.ts",
@@ -6419,7 +6419,7 @@
     "tests/mose-attention/architecture.test.ts:74": {
       "path": "tests/mose-attention/architecture.test.ts",
       "line": 74,
-      "sha256": "sha256:97a65a548cca335e04e22ac7019c6689ca1bced4cd9bfba2f7e28525a92e5ecf"
+      "sha256": "sha256:d9ddd0ece45438677aa120d94a0060ef30c405c0e7afd23a624e04c459b8f99a"
     },
     "packages/historical-data/src/repository.ts:119": {
       "path": "packages/historical-data/src/repository.ts",
@@ -6529,7 +6529,7 @@
     "tests/mose-attention/architecture.test.ts:81": {
       "path": "tests/mose-attention/architecture.test.ts",
       "line": 81,
-      "sha256": "sha256:97a65a548cca335e04e22ac7019c6689ca1bced4cd9bfba2f7e28525a92e5ecf"
+      "sha256": "sha256:d9ddd0ece45438677aa120d94a0060ef30c405c0e7afd23a624e04c459b8f99a"
     },
     "config/capabilities.json:1": {
       "path": "config/capabilities.json",

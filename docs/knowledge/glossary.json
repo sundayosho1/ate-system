@@ -443,7 +443,7 @@
     "originalDefinition": "Deterministic historical evaluation against versioned data and configuration.",
     "sourceState": "EXISTING_CENTRAL_DEFINITION",
     "applicableSourceCommit": "6307f53d4febe2bd731e00d73d429546fc29d5ee",
-    "qualifiedCurrentExplanation": "Historical acknowledgement identifies an original owner publication, not current source authority, readiness or permission for a new operation."
+    "qualifiedCurrentExplanation": "Deterministic historical research evaluation against versioned data, configuration and parameters; a reproducible backtest does not establish profitability, independent validation or execution authority."
   },
   {
     "id": "glossary/035",
@@ -1696,7 +1696,7 @@
     "originalDefinition": "Prompt 12 immutable request to restore an exact known-good configuration without rewriting history.",
     "sourceState": "EXISTING_CENTRAL_DEFINITION",
     "applicableSourceCommit": "6307f53d4febe2bd731e00d73d429546fc29d5ee",
-    "qualifiedCurrentExplanation": "Historical acknowledgement identifies an original owner publication, not current source authority, readiness or permission for a new operation."
+    "qualifiedCurrentExplanation": "A Prompt 12 immutable request to restore an exact known-good configuration; the applicable governed review and release controls remain authoritative, and the request alone does not prove rollback execution."
   },
   {
     "id": "glossary/131",
@@ -1854,7 +1854,7 @@
     "originalDefinition": "Bounded delivery/intake behavior under capacity pressure; never permission to drop obligations silently.",
     "sourceState": "MISSING_EXACT_CENTRAL_TERM; MODULE/CONTRACT_SOURCE_EXISTS",
     "applicableSourceCommit": "6307f53d4febe2bd731e00d73d429546fc29d5ee",
-    "qualifiedCurrentExplanation": "Historical acknowledgement identifies an original owner publication, not current source authority, readiness or permission for a new operation."
+    "qualifiedCurrentExplanation": "Bounded event delivery and intake under capacity pressure; preserve explicit delivery loss and pending obligations rather than treating capacity pressure as permission to silently drop them."
   },
   {
     "id": "glossary/143",
@@ -2117,7 +2117,7 @@
     "originalDefinition": "Governed restoration of an exact verified configuration state without rewriting history.",
     "sourceState": "MISSING_EXACT_CENTRAL_TERM; MODULE/CONTRACT_SOURCE_EXISTS",
     "applicableSourceCommit": "6307f53d4febe2bd731e00d73d429546fc29d5ee",
-    "qualifiedCurrentExplanation": "Historical acknowledgement identifies an original owner publication, not current source authority, readiness or permission for a new operation."
+    "qualifiedCurrentExplanation": "Governed restoration of an exact verified known-good configuration state under Prompt 12 approval and release controls; preserve immutable history and distinguish a requested rollback from its applied result."
   },
   {
     "id": "glossary/163",

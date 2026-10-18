@@ -8,19 +8,34 @@ const classes = [
   "BLOCKED_MISSING_PUBLIC_EVIDENCE_OR_AUTHORITY",
   "NOT_IMPLEMENTED_OR_OUTSIDE_APPROVED_SCOPE",
 ];
-const fields = [
-  "owner",
-  "authoritativeContract",
-  "documentation",
-  "documentationCoverage",
-  "glossaryTerms",
-  "glossaryCoverage",
-  "configurationGuidance",
-  "diagnosticEvidence",
-  "reportingReadiness",
-  "improvementIntegration",
-  "frontendReadiness",
-];
+// These are projection metadata types, never effective owner values or authority.
+const dimensions = {
+  owner: "id",
+  authoritativeContract: "references",
+  documentation: "references",
+  documentationCoverage: "text",
+  glossaryTerms: "terms",
+  glossaryCoverage: "text",
+  configurationGuidance: "text",
+  diagnosticEvidence: "text",
+  reportingReadiness: "text",
+  improvementIntegration: "text",
+  frontendReadiness: "text",
+} as const;
+const boundedText = (value: JsonValue | undefined, maxBytes: number): value is string =>
+  typeof value === "string" && value.trim().length > 0 && Buffer.byteLength(value) <= maxBytes;
+function dimension(type: string, value: JsonValue | undefined): boolean {
+  if (type === "id") return boundedText(value, 256);
+  if (type === "text") return boundedText(value, 32768);
+  return (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value.length <= 10000 &&
+    (value as readonly JsonValue[]).every((item) =>
+      boundedText(item, type === "terms" ? 256 : 32768),
+    )
+  );
+}
 export function validateCapabilityTraceability(
   raw: unknown,
   baselineIds: readonly string[],
@@ -41,13 +56,10 @@ export function validateCapabilityTraceability(
       const v = r.value as Record<string, JsonValue>;
       if (
         !v ||
-        typeof v.id !== "string" ||
-        !v.id ||
+        !boundedText(v.id, 256) ||
         typeof v.classification !== "string" ||
         !classes.includes(v.classification) ||
-        fields.some(
-          (f) => v[f] === undefined || v[f] === "" || (Array.isArray(v[f]) && !v[f].length),
-        )
+        Object.entries(dimensions).some(([field, type]) => !dimension(type, v[field]))
       )
         return issue("INSIGHT_SCHEMA_INVALID");
       if (
