@@ -14,6 +14,7 @@ const args = (base: string) => [
   ":(exclude)packages/mose-attention",
   ":(exclude)packages/research-insight-contracts",
   ":(exclude)packages/research-insights",
+  ":(exclude)packages/research-reporting",
 ];
 const owners = readdirSync("packages", { withFileTypes: true })
   .filter(
@@ -21,7 +22,8 @@ const owners = readdirSync("packages", { withFileTypes: true })
       d.isDirectory() &&
       d.name !== "mose-attention" &&
       d.name !== "research-insight-contracts" &&
-      d.name !== "research-insights",
+      d.name !== "research-insights" &&
+      d.name !== "research-reporting",
   )
   .map((d) => d.name)
   .sort();
@@ -116,9 +118,11 @@ it("governance, capabilities, root version and dependency versions preserved", (
     "node_modules/@ate/mose-attention",
     "node_modules/@ate/research-insight-contracts",
     "node_modules/@ate/research-insights",
+    "node_modules/@ate/research-reporting",
     "packages/mose-attention",
     "packages/research-insight-contracts",
     "packages/research-insights",
+    "packages/research-reporting",
   ]);
 });
 

@@ -139,8 +139,10 @@ it("onlyfourworkspacekeysandoldentriesexact", () => {
   expect(Object.keys(current.packages).filter((k) => !(k in old.packages))).toEqual([
     "node_modules/@ate/research-insight-contracts",
     "node_modules/@ate/research-insights",
+    "node_modules/@ate/research-reporting",
     "packages/research-insight-contracts",
     "packages/research-insights",
+    "packages/research-reporting",
   ]);
 });
 it("all49qualificationrowsand12riskrestrictionsretained", () => {
