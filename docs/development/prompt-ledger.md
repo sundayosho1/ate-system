@@ -935,3 +935,24 @@ package; E index SHA2560b0e61bd4843dc1e1e30e0a732189e3fe956eb768444ad53efc3433e2
 committed-source verification/publication and every qualification. Prompts28–30 NOT AUTHORIZED. No
 live broker connectivity, trading, financial execution or production deployment. STOP after Stage B
 reporting.**
+
+## CODEX-014C-D — P1–P27 insights foundation governance appendix
+
+Owner APPROVED conditional acceptance on 18 October 2026, subject to final committed-source gates
+and authorized Stage B publication.
+
+Candidate: `216f26d10eea057b62d14ec009d4c56d6f27993b`; both foundation packages
+`0.1.0-insights-foundation.1`. Technical basis: CODEX-014C-C PASSED WITH QUALIFICATIONS; five
+findings CLOSED within bounded static metadata scope. Owner decision: ACCEPT — CONDITIONAL
+GOVERNANCE ACCEPTANCE; signatory Sunday Osho; role ATE Project Owner and Development Governance
+Approver; authority ATE Project Owner responsible for development milestones, technical acceptance,
+governance baselines and progression between development phases.; effective date 18 October 2026;
+publication Owner-approved conditional acceptance; effective subject to successful final
+committed-source verification and Stage B publication..
+
+See `p1-p27-insights-foundation-conditional-acceptance.md` for complete 49-row preservation
+register, twelve B-R risks, C-Q01–04, OPEN C-OP01, historical failures/IA0309 and reviewer
+disclosure. A26-Q01/A26C-L01 remain OPEN. No prior status or historical record is rewritten.
+Acceptance is bounded offline historical/synthetic research and static foundation metadata only; no
+authenticated running-owner reporting, operational diagnostics, frontend or trading authority.
+CODEX-014D/E and Prompts 28–30 remain NOT AUTHORIZED.
