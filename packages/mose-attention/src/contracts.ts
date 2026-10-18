@@ -1,6 +1,13 @@
 import { z } from "zod";
 import { planSchema as mosePlanSchema } from "@ate/mose-core";
-import { identifier, digest, timestamp, triggerSchema } from "@ate/mose-scanner";
+import {
+  identifier,
+  digest,
+  timestamp,
+  triggerSchema,
+  dispositions,
+  checkpointSchema as scannerCheckpointSchema,
+} from "@ate/mose-scanner";
 export { identifier, digest, timestamp };
 export const tiers = Object.freeze(["MINIMAL", "LOW", "STANDARD", "ELEVATED", "HIGH"] as const);
 export const weights = Object.freeze([1, 2, 4, 6, 8] as const);
@@ -131,6 +138,26 @@ export const floorSchema = z
     reservation: digest.nullable(),
   })
   .strict();
+export const scannerReceiptSchema = z
+  .object({
+    trigger: triggerSchema,
+    workKey: z.string().nullable(),
+    disposition: z.enum(dispositions),
+    reason: z.string(),
+  })
+  .strict();
+export const outcomeSchema = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("ACK"), receipt: scannerReceiptSchema }).strict(),
+  z
+    .object({
+      kind: z.literal("NEGATIVE"),
+      code: z.string(),
+      commitment: z.enum(["NONE", "UNKNOWN"]),
+    })
+    .strict(),
+  z.object({ kind: z.literal("UNCERTAIN"), code: identifier }).strict(),
+]);
+export type SubmissionOutcome = z.infer<typeof outcomeSchema>;
 export const recommendationSchema = z
   .object({
     id: digest,
@@ -150,6 +177,8 @@ export const recommendationSchema = z
       "RECOMMENDATION_ONLY",
     ]),
     attempts: z.number().int().nonnegative(),
+    intentCommandId: identifier.optional(),
+    outcome: outcomeSchema.optional(),
     reason: identifier,
     receiptId: identifier.nullable(),
     receiptFingerprint: digest.nullable(),
@@ -171,6 +200,7 @@ export const ledgerSchema = z
     barrierId: identifier.nullable(),
   })
   .strict();
+export const dispatchResultSchema = scannerCheckpointSchema.shape.state.shape.work;
 export const stateSchema = z
   .object({
     phase: z.enum(["READY", "RUNNING", "PAUSED", "STOPPED"]),
@@ -183,6 +213,7 @@ export const stateSchema = z
         .object({
           id: identifier,
           status: z.enum(["INTENT", "ACKNOWLEDGED", "UNRESOLVED"]),
+          limit: z.number().int().positive().optional(),
           result: z.unknown(),
         })
         .strict(),

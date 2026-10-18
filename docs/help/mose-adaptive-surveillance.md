@@ -176,3 +176,53 @@ unavailable peer does not erase a healthy source's evidence, and remains unresol
 coverage. Recorded global owner health and selected-source health are distinct. Assessment records
 include producer/version, reason codes, effective time and cooldown boundary. A trusted read barrier
 remains necessary to claim cross-owner consistency; these fields do not provide a global lock.
+
+### Outcome-integrity remediation (CODEX-013B; acceptance pending)
+
+`maxAttemptRetries=2` means **two total scanner submission attempts**, including the initial call.
+The persisted sum is keyed by the original floor obligation, whose identity already binds its
+instrument/session/universe and epoch. New recommendation or ALLOCATE IDs, NONE refunds,
+pause/resume and repeated recovery cannot reset it. `OBLIGATION_RETRY_EXHAUSTED` rejects before
+another scanner call. A discretionary proposal without a floor retains its own bounded
+recommendation allowance; this does not create a second entitlement against an existing floor.
+Proposal quota and refundable floor credit remain separate accounts. Exact unserved debt remains
+after exhaustion; no later receipt implicitly coalesces it. Hot policy/configuration migration
+remains unsupported and rejected.
+
+Every submitted intent records its original command identity. Its outcome stores either the full
+selected native scanner receipt, the exact structured negative commitment, or explicit uncertainty.
+A native success must supply the complete trigger, valid disposition, reason string and workKey
+(string or null). Required fields are captured once; arrays, inherited and null-prototype structural
+representations are permitted. Unrelated metadata does not become authority. Invalid payloads or
+getters retain the original intent as UNCERTAIN/UNRESOLVED; no new RequestId retry or false floor
+settlement is permitted. Fingerprints refer to the canonical selected contract fields.
+
+Recovery derives the exact lawful status, attempt, reservation, credit and settlement changes from
+the predecessor and recorded outcome. It does not copy balances from a resulting snapshot. NONE
+refunds precisely one reserved floor credit, UNKNOWN retains it, and only qualifying exact receipts
+settle the original obligation. COALESCED/SKIPPED and other nonservice dispositions remain recorded
+RECOMMENDATION_ONLY receipts with their actual disposition; they do not imply fresh service.
+
+ACK histories additionally require bounded public scanner receipt readback. A self-consistent local
+hash chain cannot authenticate an invented external publication. Exact found immutable receipts
+prove existence; missing pages, absent records or unavailable owner evidence never prove NONE.
+`RECEIPT_EVIDENCE_UNESTABLISHED`, `RECEIPT_IDENTITY_CONFLICT`, `OUTCOME_DELTA_INTEGRITY` and
+`OUTCOME_EVIDENCE_MISSING` fence recovery without deleting or rewriting journals. Owner availability
+and the existing query/page/call budgets therefore constrain recovery. Legacy outcome histories
+without the required complete evidence are readable as repository artifacts but are not silently
+migrated into operational authority. No arbitrary historical ACK is re-certified.
+
+If STOP races a callback, STOPPING may prevent the local outcome publication even when the callback
+returned NONE. The durable original intent then remains unresolved. Do not infer noncommitment from
+absence, reset the RequestId or treat local knowledge as durable evidence. Use supported exact
+readback/reconciliation; if no accepted owner proof exists, keep the service fenced. A failed
+initialization also prevents successful shutdown from concealing the invalid recovery state. All
+F05/F06/T01, current-versus-historical authority, A26-Q01 and A26C-L01 restrictions still apply.
+
+A qualifying live scanner ACK is also checked against exact immutable public request readback; a
+structurally valid invented callback value cannot settle debt without that publication evidence.
+Optional dispatch outcomes retain their original command/batch limit and validate the accepted
+public work-result shape. A negative or malformed batch response remains UNRESOLVED, even when one
+inner operation reports NONE. There is still no supported automatic reconciliation of uncertain
+whole batches and no batch-wide cancellation/noncommitment certificate. No new dispatch authority is
+added.

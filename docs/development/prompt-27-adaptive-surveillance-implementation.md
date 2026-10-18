@@ -63,3 +63,29 @@ preserve producer/version, reason codes, effective time and cooldown. Tests addi
 real P18 H4 revision unavailable at an earlier cutoff, real bounded P26 continuation and a failed
 lexical-first periodic admission followed by a genuine admitted periodic peer. These controls retain
 A26-Q01 and never change the installed plan.
+
+## CODEX-013B controlled integrity remediation (not acceptance)
+
+P27 now records canonical selected native outcome evidence and the original intent command ID. Pure
+status-specific derivation validates both live publication and recovered state, including the exact
+NONE refund, retained UNKNOWN reservation, receipt fingerprint and bound floor settlement.
+Successful values are structurally validated with one read of each required property. Recovered ACKs
+require bounded exact public P26 receipt readback; an invented full receipt in a rehashed journal is
+insufficient. Missing owner evidence or legacy incomplete outcomes fail closed without rewriting
+historical journals. Aggregate original-floor attempt counts enforce two total calls, including the
+initial attempt; new recommendations cannot reset them. Failed initialization cannot be concealed by
+a successful repeated stop.
+
+All nineteen upstream owners, versions, dependencies, capabilities and governance remain unchanged.
+Only the separately authorized source-hash literal may refresh in the existing architecture test;
+its hashing logic, nine protected files and all assertions remain. At least60 new permanent
+regressions cover physical recovery, structural receipts, aggregate retries, cross-finding effects,
+positive controls and boundaries. Exact final results and original-probe replay accounting belong in
+the external CODEX-013B report. Reporting/glossary/frontend projection gaps remain future read-only
+CODEX-014A inputs; no Knowledge Center, Continuous Improvement Engine or future prompt is added.
+
+Live qualifying ACKs use exact public P26 readback as well. Supported execution outcomes validate
+original command identity, unchanged batch limit and the public P26 work-result schema, preserving
+UNRESOLVED for invalid/negative results. This is same-domain outcome integrity; it does not add a
+batch-wide noncommitment authority. The new permanent regression inventory is65 cases, including
+five supported execution-outcome corruption checks, with no existing test removed or relaxed.

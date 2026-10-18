@@ -7,8 +7,10 @@ import {
   type Evidence,
   type Subject,
   type Recommendation,
+  type SubmissionOutcome,
+  outcomeSchema,
 } from "./contracts.js";
-import { fingerprint, clone } from "./primitives.js";
+import { fingerprint, clone, errorCode, readScanReceipt } from "./primitives.js";
 export const epochAt = (at: string, p: AttentionPolicy) => {
   const n = Math.floor((Date.parse(at) - Date.parse(p.anchor)) / p.epochMs);
   if (!Number.isSafeInteger(n) || n < 0) throw Error("EPOCH_INVALID");
@@ -331,4 +333,96 @@ export function validateState(s: AttentionState, p: AttentionPolicy): void {
       !s.recommendations.some((r) => r.id === f.reservation && r.floorId === f.id)
     )
       throw Error("FLOOR_CONFLICT");
+}
+
+/** maxAttemptRetries is the fixed total admitted-call-attempt allowance, including initial call. */
+export function obligationAttempts(s: AttentionState, r: Recommendation): number {
+  return s.recommendations
+    .filter((x) => (r.floorId !== null ? x.floorId === r.floorId : x.id === r.id))
+    .reduce((n, x) => n + x.attempts, 0);
+}
+export function deriveIntent(
+  before: AttentionState,
+  id: string,
+  payload: Recommendation["payload"],
+  commandId: string,
+  p: AttentionPolicy,
+): AttentionState {
+  const s = clone(before),
+    r = s.recommendations.find((x) => x.id === id);
+  if (!r || !["PROPOSED", "REJECTED"].includes(r.status) || !payload)
+    throw Error("INTENT_INTEGRITY");
+  if (obligationAttempts(s, r) >= p.maxAttemptRetries) throw Error("OBLIGATION_RETRY_EXHAUSTED");
+  if (
+    payload.id !== "attention-" + r.id.slice(7) ||
+    payload.subscriptionId !== r.subscriptionId ||
+    (r.payload && fingerprint(r.payload) !== fingerprint(payload))
+  )
+    throw Error("PAYLOAD_REWRITTEN");
+  if (r.floorId) {
+    const f = s.floors.find((x) => x.id === r.floorId);
+    if (
+      !f ||
+      f.settledBy ||
+      (f.reservation !== null && f.reservation !== r.id) ||
+      epochAt(payload.boundary, p) !== f.epoch
+    )
+      throw Error("FLOOR_CONFLICT");
+    if (f.reservation === null) {
+      const l = s.ledgers.find((x) => x.epoch === r.epoch);
+      if (!l) throw Error("BUDGET_INTEGRITY");
+      f.reservation = r.id;
+      l.credits[r.instrumentKey] = Math.max(0, (l.credits[r.instrumentKey] ?? 0) - 1);
+    }
+  }
+  r.payload = clone(payload);
+  r.status = "INTENT";
+  r.attempts++;
+  r.intentCommandId = commandId;
+  delete r.outcome;
+  return s;
+}
+/** Pure derivation makes live mutation and recovery compare the same exact lawful delta. */
+export function deriveOutcome(
+  before: AttentionState,
+  id: string,
+  raw: SubmissionOutcome,
+  p: AttentionPolicy,
+): AttentionState {
+  const s = clone(before),
+    r = s.recommendations.find((x) => x.id === id),
+    outcome = outcomeSchema.parse(raw);
+  if (!r || !r.payload || !r.intentCommandId || !["INTENT", "UNRESOLVED"].includes(r.status))
+    throw Error("OUTCOME_INTEGRITY");
+  if (r.status === "UNRESOLVED" && outcome.kind !== "ACK")
+    throw Error("RECONCILIATION_EVIDENCE_MISSING");
+  if (outcome.kind === "ACK") {
+    const receipt = readScanReceipt(outcome.receipt, r.payload, p.maxCheckpointBytes);
+    settle(
+      s,
+      r,
+      {
+        id: receipt.trigger.id,
+        fingerprint: fingerprint(receipt),
+        disposition: receipt.disposition,
+      },
+      p,
+    );
+    r.outcome = { kind: "ACK", receipt };
+  } else {
+    r.receiptId = null;
+    r.receiptFingerprint = null;
+    r.status =
+      outcome.kind === "NEGATIVE" && outcome.commitment === "NONE" ? "REJECTED" : "UNRESOLVED";
+    r.reason = outcome.kind === "UNCERTAIN" ? outcome.code : errorCode(Error(outcome.code));
+    r.outcome = outcome;
+    if (r.status === "REJECTED" && r.floorId) {
+      const f = s.floors.find((x) => x.id === r.floorId),
+        l = s.ledgers.find((x) => x.epoch === r.epoch);
+      if (!f || !l || f.reservation !== r.id || f.settledBy !== null) throw Error("FLOOR_CONFLICT");
+      f.reservation = null;
+      l.credits[r.instrumentKey] = Math.min(p.creditCap, (l.credits[r.instrumentKey] ?? 0) + 1);
+    }
+  }
+  return s;
 }

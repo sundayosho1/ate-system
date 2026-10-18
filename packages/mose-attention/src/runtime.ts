@@ -8,6 +8,7 @@ import { triggerSchema } from "@ate/mose-scanner";
 import { universeSchema } from "@ate/mose-core";
 import {
   commandSchema,
+  dispatchResultSchema,
   checkpointSchema,
   subjectSchema,
   emptyState,
@@ -23,8 +24,16 @@ import {
 import { readAttentionPolicy } from "./policy.js";
 import { ownerEvidence, type EvidencePorts } from "./evidence.js";
 import { assess, allocate, epochAt, validateState } from "./engine.js";
-import { fingerprint, clone, frozen, errorCode, unwrap, readResult } from "./primitives.js";
-import { settle } from "./engine.js";
+import {
+  fingerprint,
+  clone,
+  frozen,
+  errorCode,
+  unwrap,
+  readResult,
+  readScanReceipt,
+} from "./primitives.js";
+import { deriveIntent, deriveOutcome, obligationAttempts } from "./engine.js";
 /** Trusted offline composition lease. Caller must actually exclude relevant writers;
  * this is NOT a newly implemented owner lock or a generation-pinned query API. */
 export interface QuiescentRead {
@@ -163,6 +172,59 @@ export class AdaptiveSurveillanceRuntime {
         }
         prior = cp;
         this.history.push(frozen(cp));
+      }
+      // A locally rehashed fabricated ACK is not an authoritative scanner publication.
+      const required = new Map<string, string>();
+      for (const cp of this.history)
+        for (const r of cp.state.recommendations) {
+          if (r.outcome?.kind === "ACK") {
+            const receipt = readScanReceipt(
+                r.outcome.receipt,
+                r.payload,
+                c.policy.maxCheckpointBytes,
+              ),
+              id = receipt.trigger.id,
+              hash = fingerprint(receipt);
+            if (required.has(id) && required.get(id) !== hash)
+              throw Error("RECEIPT_IDENTITY_CONFLICT");
+            required.set(id, hash);
+          }
+        }
+      if (required.size) {
+        const size = Math.min(c.policy.maxQueryResults, c.scannerPolicy.maxQueryResults);
+        this.calls = 0;
+        const seen = new Set<string>();
+        let total: number | null = null;
+        for (let page = 0; page < c.policy.maxQueryPages && required.size; page++) {
+          this.call();
+          const raw = clone(
+            unwrap(this.ports.scanner.query(page * size, size)),
+            c.policy.maxCheckpointBytes,
+          ) as { requests: unknown[]; totalRequests: number };
+          if (
+            !Array.isArray(raw.requests) ||
+            raw.requests.length > size ||
+            !Number.isSafeInteger(raw.totalRequests) ||
+            raw.totalRequests < 0 ||
+            (total !== null && total !== raw.totalRequests)
+          )
+            throw Error("CONSISTENCY_UNESTABLISHED");
+          total = raw.totalRequests;
+          for (const value of raw.requests) {
+            const candidate = value as ScanRequest,
+              receipt = readScanReceipt(value, candidate?.trigger, c.policy.maxCheckpointBytes),
+              id = receipt.trigger.id;
+            if (seen.has(id)) throw Error("ENUMERATION_INCOMPLETE");
+            seen.add(id);
+            if (required.has(id)) {
+              if (required.get(id) !== fingerprint(receipt))
+                throw Error("RECEIPT_IDENTITY_CONFLICT");
+              required.delete(id);
+            }
+          }
+          if (!raw.requests.length || seen.size >= total) break;
+        }
+        if (required.size) throw Error("RECEIPT_EVIDENCE_UNESTABLISHED");
       }
       if (prior) this.state = clone(prior.state);
       this.initialized = true;
@@ -338,7 +400,8 @@ export class AdaptiveSurveillanceRuntime {
           if (!r) throw Error("RECOMMENDATION_MISSING");
           if (r.status !== "PROPOSED" && r.status !== "REJECTED")
             throw Error("RECOMMENDATION_NOT_SUBMITTABLE");
-          if (r.attempts >= p.maxAttemptRetries) throw Error("RETRY_LIMIT");
+          if (obligationAttempts(s, r) >= p.maxAttemptRetries)
+            throw Error("OBLIGATION_RETRY_EXHAUSTED");
           const a = s.assessments.find((a) => a.id === r.assessmentId)!;
           if (a.expiresAt <= this.ports.clock.now()) throw Error("ASSESSMENT_EXPIRED");
           const latest = s.assessments.filter((x) => x.subjectKey === a.subjectKey).at(-1);
@@ -388,59 +451,25 @@ export class AdaptiveSurveillanceRuntime {
             throw Error("FLOOR_EPOCH_MISMATCH");
           if (r.payload && fingerprint(r.payload) !== fingerprint(payload))
             throw Error("PAYLOAD_SUPERSEDED");
-          if (r.floorId) {
-            const floor = s.floors.find((f) => f.id === r.floorId)!;
-            if (floor.settledBy || (floor.reservation !== null && floor.reservation !== r.id))
-              throw Error("FLOOR_CONFLICT");
-            if (floor.reservation === null) {
-              floor.reservation = r.id;
-              const ledger = s.ledgers.find((l) => l.epoch === r.epoch)!;
-              ledger.credits[r.instrumentKey] = Math.max(
-                0,
-                (ledger.credits[r.instrumentKey] ?? 0) - 1,
-              );
-            }
-          }
-          r.payload = payload;
-          r.status = "INTENT";
-          r.attempts++;
+          Object.assign(s, deriveIntent(s, r.id, payload, command.id, p));
           await this.save(command, s);
-          // Exact intent is durable before touching another owner.
-          const outcome = clone(this.state),
-            record = outcome.recommendations.find((x) => x.id === r.id)!;
+          let outcome: AttentionState;
           try {
             this.call();
             const response = readResult(await this.ports.scanner.request(payload));
             if (response.ok) {
-              const receipt = response.value as ScanRequest;
-              if (fingerprint(receipt.trigger) !== fingerprint(payload))
-                throw Error("SCANNER_ACK_MISMATCH");
-              settle(
-                outcome,
-                record,
-                {
-                  id: receipt.trigger.id,
-                  fingerprint: fingerprint(receipt),
-                  disposition: receipt.disposition,
-                },
-                p,
-              );
-            } else {
-              record.status = response.error.commitment === "UNKNOWN" ? "UNRESOLVED" : "REJECTED";
-              record.reason = response.error.code;
-              if (response.error.commitment === "NONE" && record.floorId) {
-                const f = outcome.floors.find((f) => f.id === record.floorId)!;
-                f.reservation = null;
-                const l = outcome.ledgers.find((l) => l.epoch === record.epoch)!;
-                l.credits[record.instrumentKey] = Math.min(
-                  p.creditCap,
-                  (l.credits[record.instrumentKey] ?? 0) + 1,
+              const receipt = readScanReceipt(response.value, payload, p.maxCheckpointBytes),
+                published = this.findReceipt(
+                  this.state.recommendations.find((x) => x.id === r.id)!,
+                  p,
                 );
-              }
-            }
+              if (!published || fingerprint(published) !== fingerprint(receipt))
+                throw Error("RECEIPT_EVIDENCE_UNESTABLISHED");
+              outcome = deriveOutcome(this.state, r.id, { kind: "ACK", receipt }, p);
+            } else
+              outcome = deriveOutcome(this.state, r.id, { kind: "NEGATIVE", ...response.error }, p);
           } catch (e) {
-            record.status = "UNRESOLVED";
-            record.reason = errorCode(e);
+            outcome = deriveOutcome(this.state, r.id, { kind: "UNCERTAIN", code: errorCode(e) }, p);
           }
           return ok(await this.save({ ...command, id: command.id + ".outcome" }, outcome));
         } else if (command.kind === "RECONCILE") {
@@ -455,13 +484,12 @@ export class AdaptiveSurveillanceRuntime {
             throw Error(
               result.consistent ? "RECEIPT_ABSENCE_NOT_NONCOMMITMENT" : "CONSISTENCY_UNESTABLISHED",
             );
-          settle(
+          s = deriveOutcome(
             s,
-            r,
+            r.id,
             {
-              id: result.value.trigger.id,
-              fingerprint: fingerprint(result.value),
-              disposition: result.value.disposition,
+              kind: "ACK",
+              receipt: readScanReceipt(result.value, r.payload, p.maxCheckpointBytes),
             },
             p,
           );
@@ -504,7 +532,12 @@ export class AdaptiveSurveillanceRuntime {
               () => this.call(),
             );
           }
-          s.executions.push({ id: command.id, status: "INTENT", result: null });
+          s.executions.push({
+            id: command.id,
+            status: "INTENT",
+            result: null,
+            limit: command.limit,
+          });
           await this.save(command, s);
           const outcome = clone(this.state),
             execution = outcome.executions.find((x) => x.id === command.id)!;
@@ -515,7 +548,12 @@ export class AdaptiveSurveillanceRuntime {
             );
             execution.result = clone(returned, p.maxCheckpointBytes);
             execution.status =
-              returned.ok && Array.isArray(returned.value) ? "ACKNOWLEDGED" : "UNRESOLVED";
+              returned.ok &&
+              Array.isArray(returned.value) &&
+              returned.value.length <= command.limit &&
+              dispatchResultSchema.safeParse(returned.value).success
+                ? "ACKNOWLEDGED"
+                : "UNRESOLVED";
           } catch (e) {
             execution.status = "UNRESOLVED";
             execution.result = { code: errorCode(e) };
@@ -560,7 +598,7 @@ export class AdaptiveSurveillanceRuntime {
         if (receipt.trigger.id === r.payload!.id) {
           if (fingerprint(receipt.trigger) !== fingerprint(r.payload))
             throw Error("SCANNER_IDENTITY_CONFLICT");
-          return receipt;
+          return readScanReceipt(receipt, r.payload, p.maxCheckpointBytes);
         }
       }
       if (seen.size === total) return null;
@@ -735,6 +773,7 @@ export class AdaptiveSurveillanceRuntime {
     await Promise.resolve();
     this.stopping = true;
     if (
+      (!this.initialized && this.failure !== null) ||
       this.busy ||
       this.obligation ||
       this.state.recommendations.some((r) => ["INTENT", "UNRESOLVED"].includes(r.status)) ||
