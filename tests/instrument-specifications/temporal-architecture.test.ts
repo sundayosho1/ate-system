@@ -162,6 +162,7 @@ it("unchanged upstream packages retain their exact baseline bytes", () => {
         ":(exclude)packages/instrument-eligibility",
         ":(exclude)packages/mose-core",
         ":(exclude)packages/mose-scanner",
+        ":(exclude)packages/mose-attention",
       ],
       { encoding: "utf8" },
     ),

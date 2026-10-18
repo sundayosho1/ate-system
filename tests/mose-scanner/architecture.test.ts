@@ -5,9 +5,16 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { fingerprint } from "@ate/mose-scanner";
 const baseline = "c93bd4ef1100b33641d9e57d725e664ca711fa49";
-const args = (base: string) => ["diff", base, "--", "packages", ":(exclude)packages/mose-scanner"];
+const args = (base: string) => [
+  "diff",
+  base,
+  "--",
+  "packages",
+  ":(exclude)packages/mose-scanner",
+  ":(exclude)packages/mose-attention",
+];
 const owners = readdirSync("packages", { withFileTypes: true })
-  .filter((d) => d.isDirectory() && d.name !== "mose-scanner")
+  .filter((d) => d.isDirectory() && d.name !== "mose-scanner" && d.name !== "mose-attention")
   .map((d) => d.name)
   .sort();
 it("all eighteen accepted owners including MOSE remain byte-identical", () => {

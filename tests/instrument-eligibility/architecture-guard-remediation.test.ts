@@ -21,6 +21,7 @@ const acceptedOwners = (base: string) => [
   ":(exclude)packages/instrument-eligibility",
   ":(exclude)packages/mose-core",
   ":(exclude)packages/mose-scanner",
+  ":(exclude)packages/mose-attention",
 ];
 it("A24-M02 all sixteen accepted upstream owners, including P23, retain exact bytes", () => {
   expect(
