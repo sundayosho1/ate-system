@@ -89,3 +89,17 @@ original command identity, unchanged batch limit and the public P26 work-result 
 UNRESOLVED for invalid/negative results. This is same-domain outcome integrity; it does not add a
 batch-wide noncommitment authority. The new permanent regression inventory is65 cases, including
 five supported execution-outcome corruption checks, with no existing test removed or relaxed.
+
+## CODEX-013D bounded readback remediation (acceptance pending)
+
+Live SUBMIT, RECONCILE and recovery share one complete selected receipt-page validator. It enforces
+requested/configured page size, exact offset/total slice relationships, stable bounded totals,
+complete receipt validation, unique identities and bounded selected bytes/depth before any early
+match can establish authority. Oversized pages are rejected rather than truncated. Original native
+ACK identity, NONE/UNKNOWN, same-floor attempt conservation, actor/configuration/current-evidence
+gates and immutable P26 plans remain unchanged. No accepted owner or resource default is modified.
+The separately required source-fingerprint approval and final verification/publication status belong
+in the external CODEX-013D evidence; this document does not pre-assert completion or acceptance. New
+permanent tests cover physical live/recovery parity, malformed pages, honest final-page limits,
+interrupted outcomes, native getter snapshots and original retry/debt guarantees. See the help's
+bounded receipt-page investigation procedure. No future reporting engine or prompt is implemented.

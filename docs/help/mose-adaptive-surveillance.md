@@ -226,3 +226,39 @@ public work-result shape. A negative or malformed batch response remains UNRESOL
 inner operation reports NONE. There is still no supported automatic reconciliation of uncertain
 whole batches and no batch-wide cancellation/noncommitment certificate. No new dispatch authority is
 added.
+
+### Bounded receipt pages (CODEX-013D; acceptance pending)
+
+SUBMIT, RECONCILE and initialization use the same complete-page validation. Each public Result and
+its selected `requests` / `totalRequests` fields are captured before receipt authority is used. A
+page must contain an array, at most the requested number of receipts, and exactly the slice length
+implied by the explicit offset, requested size and total. Totals must be safe nonnegative integers
+within the accepted scanner request cap and remain consistent across pages. All records on a page
+must be valid, with no duplicate/conflicting RequestId within or across pages, even when the desired
+receipt appears first. Oversized pages are rejected, never truncated. Native structural receipt
+fields are snapshotted once; raw array iterators and unrelated metadata do not supply authority.
+Selected canonical page bytes/depth remain bounded by the configured checkpoint/input limits.
+
+`RECEIPT_PAGE_BOUNDS` identifies an oversized page; `INVALID_RECEIPT_PAGE` identifies an invalid
+page/array representation. `CONSISTENCY_UNESTABLISHED`, `ENUMERATION_INCOMPLETE`, `INPUT_BOUNDS` and
+`INPUT_DEPTH` fence inconsistent totals, incomplete/duplicate pages and excessive selected evidence.
+The public P26 work-only `nextOffset` is still not a receipt cursor: use explicit offsets and
+`totalRequests`. P26 does not return a receipt-offset field; the requested offset is generated and
+validated by P27. Unrelated metadata cannot redefine that offset or authorize completeness.
+
+After malformed readback, SUBMIT retains its original durable intent as an acknowledged local
+UNRESOLVED outcome. RECONCILE does not publish a settlement, and failed recovery remains fenced. An
+empty or missing page never proves noncommitment. Reconcile the original RequestId after restoring
+honest owner access; do not allocate a replacement ID to bypass uncertainty. Genuine receipt
+existence alone does not establish that the evidence was obtained within the governed verification
+budget. A receipt beyond the final permitted page remains unresolved. Within unchanged limits and
+immutable source state, a genuinely accepted receipt must remain verifiable on honest recovery.
+
+For investigation, retain the exact P27 predecessor/outcome and original RequestId, inspect the
+requested offset/size, actual page length/total, duplicate identities and selected evidence limits,
+then verify public P26 evidence through supported interfaces. Restore the owner and use a fresh
+service after failed recovery/STOPPING. Do not rewrite checkpoints, suppress errors or increase
+budgets to declare success. These checks add no owner timeout/cancellation guarantee: synchronous
+owner faults or unsupported Promise-shaped query responses remain uncertain, and honest terminating
+owners remain required by T01. Uncertain optional batches still have no automatic noncommitment
+certificate. All previous qualifications, resource defaults and offline-only restrictions remain.

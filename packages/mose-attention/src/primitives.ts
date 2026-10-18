@@ -44,7 +44,7 @@ export function clone<T>(raw: T, maxBytes = 1048576, maxDepth = 20): T {
 }
 
 /** Snapshot selected required fields once. Structural/inherited representations are legal. */
-export function readScanReceipt(raw: unknown, payload: unknown, maxBytes = 1048576) {
+export function snapshotScanReceipt(raw: unknown, maxBytes = 1048576, maxDepth = 20) {
   if (raw === null || !["object", "function"].includes(typeof raw))
     throw Error("INVALID_SCANNER_RECEIPT");
   const value = raw as Record<string, unknown>;
@@ -65,8 +65,16 @@ export function readScanReceipt(raw: unknown, payload: unknown, maxBytes = 10485
     evidence: t.evidence,
   };
   const receipt = scannerReceiptSchema.parse(
-    clone({ trigger: triggerSchema.parse(selected), workKey, disposition, reason }, maxBytes),
+    clone(
+      { trigger: triggerSchema.parse(selected), workKey, disposition, reason },
+      maxBytes,
+      maxDepth,
+    ),
   );
+  return receipt;
+}
+export function readScanReceipt(raw: unknown, payload: unknown, maxBytes = 1048576, maxDepth = 20) {
+  const receipt = snapshotScanReceipt(raw, maxBytes, maxDepth);
   if (fingerprint(receipt.trigger) !== fingerprint(payload)) throw Error("SCANNER_ACK_MISMATCH");
   return receipt;
 }

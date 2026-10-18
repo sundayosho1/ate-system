@@ -1,4 +1,5 @@
 import { validateDelta } from "./recovery.js";
+import { types } from "node:util";
 import type { Clock } from "@ate/time";
 import type { EffectiveConfiguration } from "@ate/configuration";
 import type { StateAuthorityRegistry } from "@ate/persistence";
@@ -32,6 +33,7 @@ import {
   unwrap,
   readResult,
   readScanReceipt,
+  snapshotScanReceipt,
 } from "./primitives.js";
 import { deriveIntent, deriveOutcome, obligationAttempts } from "./engine.js";
 /** Trusted offline composition lease. Caller must actually exclude relevant writers;
@@ -196,33 +198,17 @@ export class AdaptiveSurveillanceRuntime {
         const seen = new Set<string>();
         let total: number | null = null;
         for (let page = 0; page < c.policy.maxQueryPages && required.size; page++) {
-          this.call();
-          const raw = clone(
-            unwrap(this.ports.scanner.query(page * size, size)),
-            c.policy.maxCheckpointBytes,
-          ) as { requests: unknown[]; totalRequests: number };
-          if (
-            !Array.isArray(raw.requests) ||
-            raw.requests.length > size ||
-            !Number.isSafeInteger(raw.totalRequests) ||
-            raw.totalRequests < 0 ||
-            (total !== null && total !== raw.totalRequests)
-          )
-            throw Error("CONSISTENCY_UNESTABLISHED");
-          total = raw.totalRequests;
-          for (const value of raw.requests) {
-            const candidate = value as ScanRequest,
-              receipt = readScanReceipt(value, candidate?.trigger, c.policy.maxCheckpointBytes),
-              id = receipt.trigger.id;
-            if (seen.has(id)) throw Error("ENUMERATION_INCOMPLETE");
-            seen.add(id);
+          const snapshot = this.receiptPage(page * size, size, total, seen);
+          total = snapshot.totalRequests;
+          for (const receipt of snapshot.requests) {
+            const id = receipt.trigger.id;
             if (required.has(id)) {
               if (required.get(id) !== fingerprint(receipt))
                 throw Error("RECEIPT_IDENTITY_CONFLICT");
               required.delete(id);
             }
           }
-          if (!raw.requests.length || seen.size >= total) break;
+          if (!snapshot.requests.length || seen.size >= total) break;
         }
         if (required.size) throw Error("RECEIPT_EVIDENCE_UNESTABLISHED");
       }
@@ -575,26 +561,69 @@ export class AdaptiveSurveillanceRuntime {
       this.busy = false;
     }
   }
+  /** Validate the entire selected public page before any receipt can establish authority. */
+  private receiptPage(offset: number, size: number, priorTotal: number | null, seen: Set<string>) {
+    const p = this.policy!,
+      scanner = this.gate().scannerPolicy;
+    if (
+      !Number.isSafeInteger(offset) ||
+      offset < 0 ||
+      !Number.isSafeInteger(size) ||
+      size < 1 ||
+      size > Math.min(p.maxQueryResults, scanner.maxQueryResults)
+    )
+      throw Error("QUERY_BOUNDS");
+    this.call();
+    const raw = unwrap(this.ports.scanner.query(offset, size));
+    if (raw === null || !["object", "function"].includes(typeof raw))
+      throw Error("INVALID_RECEIPT_PAGE");
+    const value = raw as { requests: unknown; totalRequests: unknown },
+      requests = value.requests,
+      total = value.totalRequests;
+    if (!Array.isArray(requests) || types.isProxy(requests)) throw Error("INVALID_RECEIPT_PAGE");
+    const length = requests.length;
+    if (length > size) throw Error("RECEIPT_PAGE_BOUNDS");
+    if (
+      typeof total !== "number" ||
+      !Number.isSafeInteger(total) ||
+      total < 0 ||
+      total > scanner.maxRequests ||
+      (priorTotal !== null && total !== priorTotal)
+    )
+      throw Error("CONSISTENCY_UNESTABLISHED");
+    // P26 returns an exact array slice. Its work-only nextOffset is not a receipt cursor.
+    if (length !== Math.min(size, Math.max(0, total - offset)))
+      throw Error("ENUMERATION_INCOMPLETE");
+    const receipts: ScanRequest[] = [],
+      ids = new Set<string>();
+    let remaining =
+      p.maxCheckpointBytes -
+      Buffer.byteLength(JSON.stringify({ requests: [], totalRequests: total }));
+    for (let index = 0; index < length; index++) {
+      const receipt = snapshotScanReceipt(requests[index], remaining, p.maxInputDepth),
+        id = receipt.trigger.id;
+      remaining -= Buffer.byteLength(JSON.stringify(receipt)) + (index === 0 ? 0 : 1);
+      if (remaining < 0) throw Error("INPUT_BOUNDS");
+      if (ids.has(id) || seen.has(id)) throw Error("ENUMERATION_INCOMPLETE");
+      ids.add(id);
+      receipts.push(receipt);
+    }
+    const snapshot = clone(
+      { requests: receipts, totalRequests: total },
+      p.maxCheckpointBytes,
+      p.maxInputDepth,
+    );
+    for (const id of ids) seen.add(id);
+    return snapshot;
+  }
   private findReceipt(r: Recommendation, p: AttentionPolicy): ScanRequest | null {
     let total: number | null = null;
     const seen = new Set<string>();
     const pageSize = Math.min(p.maxQueryResults, this.gate().scannerPolicy.maxQueryResults);
     for (let page = 0, offset = 0; page < p.maxQueryPages; page++, offset += pageSize) {
-      this.call();
-      const v = unwrap(this.ports.scanner.query(offset, pageSize)) as {
-        requests: ScanRequest[];
-        totalRequests: number;
-      };
-      if (
-        !Number.isSafeInteger(v.totalRequests) ||
-        v.totalRequests < 0 ||
-        (total !== null && total !== v.totalRequests)
-      )
-        throw Error("CONSISTENCY_UNESTABLISHED");
+      const v = this.receiptPage(offset, pageSize, total, seen);
       total = v.totalRequests;
       for (const receipt of v.requests) {
-        if (seen.has(receipt.trigger.id)) throw Error("ENUMERATION_INCOMPLETE");
-        seen.add(receipt.trigger.id);
         if (receipt.trigger.id === r.payload!.id) {
           if (fingerprint(receipt.trigger) !== fingerprint(r.payload))
             throw Error("SCANNER_IDENTITY_CONFLICT");

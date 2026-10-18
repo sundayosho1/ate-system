@@ -21,7 +21,7 @@ const sourceRoot = "packages/mose-attention/src";
 const sourceFiles = readdirSync(sourceRoot)
   .filter((n) => n.endsWith(".ts"))
   .sort();
-const expected = "sha256:4943771a15e0abb136a51f8e9d8c402e7a125095dceccd09c27c957b4fb8a3e0";
+const expected = "sha256:61342e5cb2284bd5724c881e22edf6a70a3af3855c2325814973c5cf5fa41cab";
 const sourceHash = (root: string) =>
   fingerprint(sourceFiles.map((n) => [n, readFileSync(join(root, n), "utf8")]));
 function assertIntegrity(root: string) {
