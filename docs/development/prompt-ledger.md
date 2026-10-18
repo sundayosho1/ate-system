@@ -867,3 +867,28 @@ contrary evidence or loss of required controls.
 
 **Prompt 25 CONDITIONALLY ACCEPTED for bounded offline research under these conditions. Prompt 26
 NOT AUTHORIZED.**
+
+## Prompt 26 — CODEX-011D conditional governance acceptance — owner-authorized conditional acceptance
+
+Sunday Osho explicitly ACCEPTED conditional governance on 18 October 2026 as ATE Project Owner and
+Development Governance Approver, responsible for development milestones, technical acceptance
+decisions, governance baselines and phase progression. Implementation
+`5d5494fca719c0e32a6d0940ba16facb53f59d0a`, @ate/mose-scanner 0.26.0-multi-speed-scanner.1. Accepted
+bounded offline historical/synthetic research scope only; H01/M01 technically closed by B and
+confirmed by C. C observed 2,847 tests/135 files, zero failed/skipped, 234 conservatively new
+passing scenarios, seven unchanged defect probes passing and all20 journeys represented; security
+gates zero vulnerabilities. Historical failures, approved one-literal guard update and reviewer
+implementation/audit participation remain disclosed. All25 inherited and every Prompt25 additional
+qualification remain binding, reproduced unchanged in the proposed acceptance record. A26-Q01
+admission fairness and A26C-L01 pagination remain OPEN, explicitly accepted as operational
+restrictions, not resolved: no global admission-progress guarantee; inspect Results/debt, fix
+cutoff/reconcile failures/restore source or explicitly admit peers; use totalRequests and explicit
+offsets rather than null nextOffset to exhaust receipts. Historical ACK/current authority
+distinctions persist. The explicit owner ACCEPT authorizes only the reviewed two-file
+documentation-only direct-successor publication after complete unchanged two-worker/security gates.
+This appendix supersedes only the earlier pending Prompt26 acceptance status; every prior ledger
+byte and historical decision remains unchanged.
+
+**Prompt26 CONDITIONALLY ACCEPTED for bounded offline research, subject to successful
+committed-source verification/publication and every qualification. Prompt27 NOT AUTHORIZED. No live
+connectivity, broker integration, financial execution or production deployment.**
