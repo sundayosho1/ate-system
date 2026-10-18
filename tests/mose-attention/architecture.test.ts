@@ -78,9 +78,22 @@ it("governance, capabilities, root version and dependency versions preserved", (
     "docs/development/prompt-ledger.md",
     "docs/development/prompt-26-conditional-acceptance.md",
   ]) {
-    expect(readFileSync(p, "utf8")).toBe(
-      execFileSync("git", ["show", baseline + ":" + p], { encoding: "utf8" }),
-    );
+    if (p === "docs/development/prompt-ledger.md") {
+      const approved = "f2dcad7a52d059e91b092ad52ef3098e3ad75e24",
+        historical = execFileSync("git", ["show", baseline + ":" + p]),
+        authorized = execFileSync("git", ["show", approved + ":" + p]),
+        current = readFileSync(p),
+        record = "docs/development/prompt-27-conditional-acceptance.md";
+      expect(authorized.subarray(0, historical.length)).toEqual(historical);
+      expect(authorized.length).toBeGreaterThan(historical.length);
+      expect(current.subarray(0, historical.length)).toEqual(historical);
+      expect(current.subarray(historical.length)).toEqual(authorized.subarray(historical.length));
+      expect(readFileSync(record)).toEqual(execFileSync("git", ["show", approved + ":" + record]));
+    } else {
+      expect(readFileSync(p, "utf8")).toBe(
+        execFileSync("git", ["show", baseline + ":" + p], { encoding: "utf8" }),
+      );
+    }
   }
   const old = JSON.parse(
     execFileSync("git", ["show", baseline + ":package-lock.json"], { encoding: "utf8" }),
