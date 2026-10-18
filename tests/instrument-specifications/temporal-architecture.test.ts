@@ -163,6 +163,8 @@ it("unchanged upstream packages retain their exact baseline bytes", () => {
         ":(exclude)packages/mose-core",
         ":(exclude)packages/mose-scanner",
         ":(exclude)packages/mose-attention",
+        ":(exclude)packages/research-insight-contracts",
+        ":(exclude)packages/research-insights",
       ],
       { encoding: "utf8" },
     ),

@@ -12,6 +12,8 @@ const ownerDiff = (base: string) => [
   ":(exclude)packages/mose-core",
   ":(exclude)packages/mose-scanner",
   ":(exclude)packages/mose-attention",
+  ":(exclude)packages/research-insight-contracts",
+  ":(exclude)packages/research-insights",
 ];
 it("all17 accepted owner packages including P24 retain exact bytes", () => {
   expect(execFileSync("git", ownerDiff(baseline), { encoding: "utf8" })).toBe("");
@@ -82,7 +84,9 @@ const owners = readdirSync("packages", { withFileTypes: true })
       d.isDirectory() &&
       d.name !== "mose-core" &&
       d.name !== "mose-scanner" &&
-      d.name !== "mose-attention",
+      d.name !== "mose-attention" &&
+      d.name !== "research-insight-contracts" &&
+      d.name !== "research-insights",
   )
   .map((d) => d.name);
 expect(owners).toHaveLength(17);

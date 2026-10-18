@@ -1,0 +1,12 @@
+{
+  "baseline": "6307f53d4febe2bd731e00d73d429546fc29d5ee",
+  "ownerRecords": [
+    "docs/development/prompt-27-conditional-acceptance.md",
+    "docs/development/prompt-ledger.md"
+  ],
+  "sourceSHA256": {
+    "docs/development/prompt-27-conditional-acceptance.md": "3fa3a9dbf6cf9486a981c130d45c76d8d581a12dcbea13fc4ff7d1710310c232",
+    "docs/development/prompt-ledger.md": "7cd25790a3a610ebd33aa8a5d1b247e39304495953faac8cccfc6a1bdfc8bbf5"
+  },
+  "decision": "Existing Prompt27conditionally accepted offline, no current data authority or newfoundationacceptance."
+}

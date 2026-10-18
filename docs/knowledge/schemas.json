@@ -1,0 +1,2549 @@
+{
+  "family": "ate.insights/1",
+  "contractFamilies": [
+    "Fact",
+    "EvidenceReference",
+    "OwnerReadObservation",
+    "NativeResultEvidence",
+    "ConsistencyEvidence",
+    "DiagnosticFacet",
+    "ReasonReference",
+    "ObligationReference",
+    "CoverageStatement",
+    "ReportManifest",
+    "KnowledgeEntry",
+    "ConfigurationGuide",
+    "ImprovementProposal"
+  ],
+  "source": "packages/research-insight-contracts/src/validation.ts",
+  "invariants": "Runtime field descriptors and public typed records are authoritative for projection shape; semantic source authority remains with accepted owners. Shape validation is not authentication.",
+  "resourceProfile": {
+    "id": "R1",
+    "revision": 1,
+    "status": "CONDITIONALLY_APPROVED_FOR_PLANNING_NOT_RUNTIME_QUALIFIED",
+    "byteUnit": "UTF8 bytes; KiB=1024, MiB=1048576",
+    "ownerCalls": {
+      "total": 64,
+      "perOwner": 8
+    },
+    "pages": {
+      "total": 32,
+      "perOwner": 8,
+      "defaultResults": 20,
+      "maxResults": 50
+    },
+    "concurrency": 1,
+    "request": {
+      "maxBytes": 65536,
+      "maxDepth": 16,
+      "maxNodes": 10000
+    },
+    "nativeResponse": {
+      "maxBytes": 1048576,
+      "maxDepth": 32,
+      "maxNodes": 50000
+    },
+    "report": {
+      "maxBytes": 4194304,
+      "maxEvidenceRefs": 1000,
+      "maxFacets": 2000
+    },
+    "export": {
+      "maxBytes": 8388608,
+      "maxFiles": 100,
+      "recursiveDiscovery": false
+    },
+    "knowledge": {
+      "maxEntries": 10000,
+      "maxBytes": 16777216,
+      "maxEntryBytes": 32768
+    },
+    "search": {
+      "maxQueryBytes": 256,
+      "maxTokens": 20,
+      "maxHits": 100
+    },
+    "retention": {
+      "maxReports": 100,
+      "maxBytes": 268435456,
+      "automaticPurge": false
+    },
+    "refresh": {
+      "enabled": false,
+      "minIntervalMs": 60000
+    },
+    "cancellation": {
+      "checkBeforeAfterCallPage": true,
+      "serializationBatchNodes": 256
+    },
+    "wait": {
+      "maxMs": 5000,
+      "preemptsSynchronousOwner": false
+    },
+    "rule": "Minimum of frozen R1, genuine supported owner bound and remaining transaction budget; unavailable owner-cost bounds deny invocation. Retries never reset budgets.",
+    "CODEX014CEnabledFeatures": [
+      "Static catalogue validation/build/search",
+      "Projection schema/semantic validation",
+      "Source/approval/configuration guidance metadata"
+    ],
+    "CODEX014CDisabledFeatures": [
+      "Owner calls",
+      "Owner pagination",
+      "Owner refresh",
+      "Native Result interpretation from running service",
+      "Report persistence",
+      "Artefact filesystem resolver",
+      "Network listener",
+      "Command dispatch"
+    ],
+    "foundationInputScopes": {
+      "descriptor": "request caps apply to operation/query descriptor",
+      "catalogueCorpus": "10000 entries/16MiBtotal/32KiB perentry, supplied separately; cumulative across batches",
+      "derivedPerEntryValidation": "Depth16/10000nodes perentry, conservative additional planning restriction; subject to specification approval",
+      "cancellation": "Cooperative only, no synchronous event-loop preemption guarantee"
+    }
+  },
+  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
+  "schemas": {
+    "Fact": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["kind", "value", "evidenceIds"],
+          "properties": {
+            "kind": {
+              "const": "KNOWN"
+            },
+            "value": {},
+            "evidenceIds": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "x-maxUtf8Bytes": 256
+              },
+              "maxItems": 10000,
+              "minItems": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind", "reasonIds"],
+          "properties": {
+            "kind": {
+              "enum": ["UNKNOWN", "UNSUPPORTED"]
+            },
+            "reasonIds": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "x-maxUtf8Bytes": 256
+              },
+              "maxItems": 10000,
+              "minItems": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind", "justification"],
+          "properties": {
+            "kind": {
+              "const": "NOT_APPLICABLE"
+            },
+            "justification": {
+              "type": "string",
+              "minLength": 1,
+              "x-maxUtf8Bytes": 32768
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "EvidenceReference": {
+      "type": "object",
+      "required": [
+        "schema",
+        "id",
+        "owner",
+        "ownerVersion",
+        "sourceCommit",
+        "artifactType",
+        "nativeIdentity",
+        "nativeFingerprint",
+        "immutable",
+        "locator",
+        "accessScope",
+        "sourceTimes",
+        "policyRefs"
+      ],
+      "properties": {
+        "schema": {
+          "const": "ate.insights.evidence/1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "ownerVersion": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "sourceCommit": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "artifactType": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "nativeIdentity": {
+          "x-jsonOnly": true
+        },
+        "nativeFingerprint": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind", "value", "evidenceIds"],
+              "properties": {
+                "kind": {
+                  "const": "KNOWN"
+                },
+                "value": {
+                  "type": "string",
+                  "pattern": "^sha256:[a-f0-9]{64}$"
+                },
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "reasonIds"],
+              "properties": {
+                "kind": {
+                  "enum": ["UNKNOWN", "UNSUPPORTED"]
+                },
+                "reasonIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "justification"],
+              "properties": {
+                "kind": {
+                  "const": "NOT_APPLICABLE"
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1,
+                  "x-maxUtf8Bytes": 32768
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "immutable": {
+          "type": "boolean"
+        },
+        "locator": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind", "value", "evidenceIds"],
+              "properties": {
+                "kind": {
+                  "const": "KNOWN"
+                },
+                "value": {},
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "reasonIds"],
+              "properties": {
+                "kind": {
+                  "enum": ["UNKNOWN", "UNSUPPORTED"]
+                },
+                "reasonIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "justification"],
+              "properties": {
+                "kind": {
+                  "const": "NOT_APPLICABLE"
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1,
+                  "x-maxUtf8Bytes": 32768
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "accessScope": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "sourceTimes": {
+          "type": "object",
+          "additionalProperties": {
+            "oneOf": [
+              {
+                "type": "object",
+                "required": ["kind", "value", "evidenceIds"],
+                "properties": {
+                  "kind": {
+                    "const": "KNOWN"
+                  },
+                  "value": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "evidenceIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "x-maxUtf8Bytes": 256
+                    },
+                    "maxItems": 10000,
+                    "minItems": 1
+                  }
+                },
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "required": ["kind", "reasonIds"],
+                "properties": {
+                  "kind": {
+                    "enum": ["UNKNOWN", "UNSUPPORTED"]
+                  },
+                  "reasonIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "x-maxUtf8Bytes": 256
+                    },
+                    "maxItems": 10000,
+                    "minItems": 1
+                  }
+                },
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "required": ["kind", "justification"],
+                "properties": {
+                  "kind": {
+                    "const": "NOT_APPLICABLE"
+                  },
+                  "justification": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 32768
+                  }
+                },
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "policyRefs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "x-maxUtf8Bytes": 256
+          },
+          "maxItems": 10000
+        }
+      },
+      "additionalProperties": false
+    },
+    "OwnerReadObservation": {
+      "type": "object",
+      "required": [
+        "schema",
+        "id",
+        "adapterVersion",
+        "allowlistEntry",
+        "ownerContext",
+        "queryFingerprint",
+        "readStart",
+        "readEnd",
+        "mode",
+        "nativeResultRef",
+        "disposition",
+        "evidenceIds",
+        "qualifications",
+        "consistencyId"
+      ],
+      "properties": {
+        "schema": {
+          "const": "ate.insights.observation/1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "adapterVersion": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "allowlistEntry": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "ownerContext": {
+          "x-jsonOnly": true
+        },
+        "queryFingerprint": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "readStart": {
+          "type": "string",
+          "format": "date-time",
+          "x-owner": "@ate/domain parseUtcTimestamp; canonical equality required"
+        },
+        "readEnd": {
+          "type": "string",
+          "format": "date-time",
+          "x-owner": "@ate/domain parseUtcTimestamp; canonical equality required"
+        },
+        "mode": {
+          "enum": [
+            "STATIC_SOURCE_METADATA",
+            "HISTORICAL_IMMUTABLE_EVIDENCE",
+            "OWNER_SCOPED_OBSERVATION"
+          ]
+        },
+        "nativeResultRef": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind", "value", "evidenceIds"],
+              "properties": {
+                "kind": {
+                  "const": "KNOWN"
+                },
+                "value": {},
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "reasonIds"],
+              "properties": {
+                "kind": {
+                  "enum": ["UNKNOWN", "UNSUPPORTED"]
+                },
+                "reasonIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "justification"],
+              "properties": {
+                "kind": {
+                  "const": "NOT_APPLICABLE"
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1,
+                  "x-maxUtf8Bytes": 32768
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "disposition": {
+          "enum": [
+            "OBSERVED",
+            "OWNER_REJECTED",
+            "UNAVAILABLE",
+            "INVALID",
+            "OVER_BUDGET",
+            "CANCELLED"
+          ]
+        },
+        "evidenceIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "x-maxUtf8Bytes": 256
+          },
+          "maxItems": 10000
+        },
+        "qualifications": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "x-maxUtf8Bytes": 256
+          },
+          "maxItems": 10000
+        },
+        "consistencyId": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        }
+      },
+      "additionalProperties": false
+    },
+    "NativeResultEvidence": {
+      "type": "object",
+      "required": [
+        "schema",
+        "owner",
+        "schemaVersion",
+        "operation",
+        "phase",
+        "selectedDiscriminator",
+        "nativeCommitment",
+        "auditCorrelation",
+        "representationDigest"
+      ],
+      "properties": {
+        "schema": {
+          "const": "ate.insights.native-result/1"
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "schemaVersion": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "operation": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "phase": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "selectedDiscriminator": {
+          "type": "boolean"
+        },
+        "nativeCommitment": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind", "value", "evidenceIds"],
+              "properties": {
+                "kind": {
+                  "const": "KNOWN"
+                },
+                "value": {
+                  "enum": ["ACK", "NONE", "UNKNOWN"]
+                },
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "reasonIds"],
+              "properties": {
+                "kind": {
+                  "enum": ["UNKNOWN", "UNSUPPORTED"]
+                },
+                "reasonIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "justification"],
+              "properties": {
+                "kind": {
+                  "const": "NOT_APPLICABLE"
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1,
+                  "x-maxUtf8Bytes": 32768
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "auditCorrelation": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind", "value", "evidenceIds"],
+              "properties": {
+                "kind": {
+                  "const": "KNOWN"
+                },
+                "value": {},
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "reasonIds"],
+              "properties": {
+                "kind": {
+                  "enum": ["UNKNOWN", "UNSUPPORTED"]
+                },
+                "reasonIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "justification"],
+              "properties": {
+                "kind": {
+                  "const": "NOT_APPLICABLE"
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1,
+                  "x-maxUtf8Bytes": 32768
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "representationDigest": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind", "value", "evidenceIds"],
+              "properties": {
+                "kind": {
+                  "const": "KNOWN"
+                },
+                "value": {
+                  "type": "string",
+                  "pattern": "^sha256:[a-f0-9]{64}$"
+                },
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "reasonIds"],
+              "properties": {
+                "kind": {
+                  "enum": ["UNKNOWN", "UNSUPPORTED"]
+                },
+                "reasonIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "justification"],
+              "properties": {
+                "kind": {
+                  "const": "NOT_APPLICABLE"
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1,
+                  "x-maxUtf8Bytes": 32768
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "selectedValueRef": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind", "value", "evidenceIds"],
+              "properties": {
+                "kind": {
+                  "const": "KNOWN"
+                },
+                "value": {},
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "reasonIds"],
+              "properties": {
+                "kind": {
+                  "enum": ["UNKNOWN", "UNSUPPORTED"]
+                },
+                "reasonIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "justification"],
+              "properties": {
+                "kind": {
+                  "const": "NOT_APPLICABLE"
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1,
+                  "x-maxUtf8Bytes": 32768
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "selectedFailure": {
+          "type": "object",
+          "required": ["family", "code", "detail"],
+          "properties": {
+            "family": {
+              "type": "string",
+              "minLength": 1,
+              "x-maxUtf8Bytes": 256
+            },
+            "code": {
+              "type": "string",
+              "minLength": 1,
+              "x-maxUtf8Bytes": 256
+            },
+            "detail": {}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "properties": {
+            "selectedDiscriminator": {
+              "const": true
+            }
+          },
+          "required": ["selectedValueRef"],
+          "not": {
+            "required": ["selectedFailure"]
+          }
+        },
+        {
+          "properties": {
+            "selectedDiscriminator": {
+              "const": false
+            }
+          },
+          "required": ["selectedFailure"],
+          "not": {
+            "required": ["selectedValueRef"]
+          }
+        }
+      ]
+    },
+    "ConsistencyEvidence": {
+      "type": "object",
+      "required": [
+        "schema",
+        "id",
+        "scope",
+        "mode",
+        "identityVector",
+        "readInterval",
+        "completeness",
+        "reasons",
+        "barrierRef"
+      ],
+      "properties": {
+        "schema": {
+          "const": "ate.insights.consistency/1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "mode": {
+          "enum": [
+            "OWNER_IMMUTABLE_PIN",
+            "OWNER_SUPPORTED_BARRIER",
+            "SEQUENTIAL_UNESTABLISHED",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "identityVector": {
+          "type": "array",
+          "maxItems": 10000
+        },
+        "readInterval": {
+          "type": "object",
+          "required": ["start", "end"],
+          "properties": {
+            "start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "end": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "additionalProperties": false
+        },
+        "completeness": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind", "value", "evidenceIds"],
+              "properties": {
+                "kind": {
+                  "const": "KNOWN"
+                },
+                "value": {},
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "reasonIds"],
+              "properties": {
+                "kind": {
+                  "enum": ["UNKNOWN", "UNSUPPORTED"]
+                },
+                "reasonIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "justification"],
+              "properties": {
+                "kind": {
+                  "const": "NOT_APPLICABLE"
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1,
+                  "x-maxUtf8Bytes": 32768
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "x-maxUtf8Bytes": 256
+          },
+          "maxItems": 10000
+        },
+        "barrierRef": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind", "value", "evidenceIds"],
+              "properties": {
+                "kind": {
+                  "const": "KNOWN"
+                },
+                "value": {},
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "reasonIds"],
+              "properties": {
+                "kind": {
+                  "enum": ["UNKNOWN", "UNSUPPORTED"]
+                },
+                "reasonIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "justification"],
+              "properties": {
+                "kind": {
+                  "const": "NOT_APPLICABLE"
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1,
+                  "x-maxUtf8Bytes": 32768
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "DiagnosticFacet": {
+      "type": "object",
+      "required": [
+        "schema",
+        "id",
+        "owner",
+        "subjectTuple",
+        "axis",
+        "nativeStatus",
+        "observationId",
+        "temporalScope",
+        "currentAuthority",
+        "qualifications"
+      ],
+      "properties": {
+        "schema": {
+          "const": "ate.insights.diagnostic/1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "subjectTuple": {
+          "type": "array",
+          "maxItems": 10000
+        },
+        "axis": {
+          "enum": [
+            "LIFECYCLE",
+            "HEALTH",
+            "READINESS",
+            "QUALITY",
+            "AUTHORITY",
+            "COVERAGE",
+            "OBLIGATION"
+          ]
+        },
+        "nativeStatus": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind", "value", "evidenceIds"],
+              "properties": {
+                "kind": {
+                  "const": "KNOWN"
+                },
+                "value": {},
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "reasonIds"],
+              "properties": {
+                "kind": {
+                  "enum": ["UNKNOWN", "UNSUPPORTED"]
+                },
+                "reasonIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "justification"],
+              "properties": {
+                "kind": {
+                  "const": "NOT_APPLICABLE"
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1,
+                  "x-maxUtf8Bytes": 32768
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "observationId": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "temporalScope": {
+          "enum": ["CURRENT", "HISTORICAL", "UNESTABLISHED"]
+        },
+        "currentAuthority": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind", "value", "evidenceIds"],
+              "properties": {
+                "kind": {
+                  "const": "KNOWN"
+                },
+                "value": {},
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "reasonIds"],
+              "properties": {
+                "kind": {
+                  "enum": ["UNKNOWN", "UNSUPPORTED"]
+                },
+                "reasonIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "justification"],
+              "properties": {
+                "kind": {
+                  "const": "NOT_APPLICABLE"
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1,
+                  "x-maxUtf8Bytes": 32768
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "qualifications": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "x-maxUtf8Bytes": 256
+          },
+          "maxItems": 10000
+        }
+      },
+      "additionalProperties": false
+    },
+    "ReasonReference": {
+      "type": "object",
+      "required": [
+        "schema",
+        "id",
+        "owner",
+        "nativeCode",
+        "schemaVersion",
+        "operation",
+        "phase",
+        "severitySource",
+        "consequence",
+        "helpEntryId",
+        "safeNextStep",
+        "evidenceIds"
+      ],
+      "properties": {
+        "schema": {
+          "const": "ate.insights.reason/1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "nativeCode": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "schemaVersion": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "operation": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "phase": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "severitySource": {
+          "enum": ["OWNER", "AUDIT", "PROJECTION"]
+        },
+        "consequence": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 32768
+        },
+        "helpEntryId": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "safeNextStep": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 32768
+        },
+        "evidenceIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "x-maxUtf8Bytes": 256
+          },
+          "maxItems": 10000
+        }
+      },
+      "additionalProperties": false
+    },
+    "ObligationReference": {
+      "type": "object",
+      "required": [
+        "schema",
+        "owner",
+        "operation",
+        "originalIdentity",
+        "subjectTuple",
+        "originalPayloadFingerprint",
+        "nativeCommitment",
+        "state",
+        "historicalAckRefs",
+        "currentCheckRef"
+      ],
+      "properties": {
+        "schema": {
+          "const": "ate.insights.obligation/1"
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "operation": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "originalIdentity": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "subjectTuple": {
+          "type": "array",
+          "maxItems": 10000
+        },
+        "originalPayloadFingerprint": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind", "value", "evidenceIds"],
+              "properties": {
+                "kind": {
+                  "const": "KNOWN"
+                },
+                "value": {
+                  "type": "string",
+                  "pattern": "^sha256:[a-f0-9]{64}$"
+                },
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "reasonIds"],
+              "properties": {
+                "kind": {
+                  "enum": ["UNKNOWN", "UNSUPPORTED"]
+                },
+                "reasonIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "justification"],
+              "properties": {
+                "kind": {
+                  "const": "NOT_APPLICABLE"
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1,
+                  "x-maxUtf8Bytes": 32768
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "nativeCommitment": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind", "value", "evidenceIds"],
+              "properties": {
+                "kind": {
+                  "const": "KNOWN"
+                },
+                "value": {
+                  "enum": ["ACK", "NONE", "UNKNOWN"]
+                },
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "reasonIds"],
+              "properties": {
+                "kind": {
+                  "enum": ["UNKNOWN", "UNSUPPORTED"]
+                },
+                "reasonIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "justification"],
+              "properties": {
+                "kind": {
+                  "const": "NOT_APPLICABLE"
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1,
+                  "x-maxUtf8Bytes": 32768
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "state": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "historicalAckRefs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "x-maxUtf8Bytes": 256
+          },
+          "maxItems": 10000
+        },
+        "currentCheckRef": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind", "value", "evidenceIds"],
+              "properties": {
+                "kind": {
+                  "const": "KNOWN"
+                },
+                "value": {},
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "reasonIds"],
+              "properties": {
+                "kind": {
+                  "enum": ["UNKNOWN", "UNSUPPORTED"]
+                },
+                "reasonIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "justification"],
+              "properties": {
+                "kind": {
+                  "const": "NOT_APPLICABLE"
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1,
+                  "x-maxUtf8Bytes": 32768
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "CoverageStatement": {
+      "type": "object",
+      "required": [
+        "schema",
+        "owner",
+        "scope",
+        "numerator",
+        "denominator",
+        "unit",
+        "evidenceVector",
+        "suppression",
+        "consistencyId",
+        "temporalScope",
+        "claim"
+      ],
+      "properties": {
+        "schema": {
+          "const": "ate.insights.coverage/1"
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "numerator": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind", "value", "evidenceIds"],
+              "properties": {
+                "kind": {
+                  "const": "KNOWN"
+                },
+                "value": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "reasonIds"],
+              "properties": {
+                "kind": {
+                  "enum": ["UNKNOWN", "UNSUPPORTED"]
+                },
+                "reasonIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "justification"],
+              "properties": {
+                "kind": {
+                  "const": "NOT_APPLICABLE"
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1,
+                  "x-maxUtf8Bytes": 32768
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "denominator": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind", "value", "evidenceIds"],
+              "properties": {
+                "kind": {
+                  "const": "KNOWN"
+                },
+                "value": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "reasonIds"],
+              "properties": {
+                "kind": {
+                  "enum": ["UNKNOWN", "UNSUPPORTED"]
+                },
+                "reasonIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "justification"],
+              "properties": {
+                "kind": {
+                  "const": "NOT_APPLICABLE"
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1,
+                  "x-maxUtf8Bytes": 32768
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "evidenceVector": {
+          "type": "array",
+          "maxItems": 10000
+        },
+        "suppression": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind", "value", "evidenceIds"],
+              "properties": {
+                "kind": {
+                  "const": "KNOWN"
+                },
+                "value": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "reasonIds"],
+              "properties": {
+                "kind": {
+                  "enum": ["UNKNOWN", "UNSUPPORTED"]
+                },
+                "reasonIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "justification"],
+              "properties": {
+                "kind": {
+                  "const": "NOT_APPLICABLE"
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1,
+                  "x-maxUtf8Bytes": 32768
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "consistencyId": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "temporalScope": {
+          "enum": ["CURRENT", "HISTORICAL", "UNESTABLISHED"]
+        },
+        "claim": {
+          "enum": ["OWNER_DECLARED_ONLY", "QUALIFIED_PARTIAL", "UNESTABLISHED", "UNSUPPORTED"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "ReportManifest": {
+      "type": "object",
+      "required": [
+        "schema",
+        "id",
+        "baseline",
+        "projectionVersion",
+        "requestFingerprint",
+        "generatedAt",
+        "sourceObservationIds",
+        "exactEvidenceVector",
+        "requestedFacets",
+        "missingFacets",
+        "budgetUsage",
+        "qualifications",
+        "exportStatus",
+        "reportFingerprint"
+      ],
+      "properties": {
+        "schema": {
+          "const": "ate.insights.report/1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "baseline": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "projectionVersion": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "requestFingerprint": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "x-owner": "@ate/domain parseUtcTimestamp; canonical equality required"
+        },
+        "sourceObservationIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "x-maxUtf8Bytes": 256
+          },
+          "maxItems": 10000
+        },
+        "exactEvidenceVector": {
+          "type": "array",
+          "maxItems": 10000
+        },
+        "requestedFacets": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "x-maxUtf8Bytes": 256
+          },
+          "maxItems": 10000
+        },
+        "missingFacets": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "x-maxUtf8Bytes": 256
+          },
+          "maxItems": 10000
+        },
+        "budgetUsage": {
+          "x-jsonOnly": true
+        },
+        "qualifications": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "x-maxUtf8Bytes": 256
+          },
+          "maxItems": 10000
+        },
+        "exportStatus": {
+          "enum": ["REQUESTED_FACETS_EXPORTED", "PARTIAL", "BLOCKED"]
+        },
+        "reportFingerprint": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "KnowledgeEntry": {
+      "type": "object",
+      "required": [
+        "schema",
+        "id",
+        "type",
+        "namespace",
+        "revision",
+        "contentVersion",
+        "sourceRefs",
+        "temporalScope",
+        "definition",
+        "relatedEntryIds",
+        "qualifications",
+        "reviewStatus",
+        "personaTags"
+      ],
+      "properties": {
+        "schema": {
+          "const": "ate.insights.knowledge/1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "type": {
+          "enum": ["MODULE", "TERM", "TASK", "CONFIG", "REASON", "RUNBOOK", "STATUS"]
+        },
+        "namespace": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "contentVersion": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "sourceRefs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "x-maxUtf8Bytes": 256
+          },
+          "maxItems": 10000,
+          "minItems": 1
+        },
+        "temporalScope": {
+          "enum": ["CURRENT_EXPLANATION", "HISTORICAL_SOURCE", "FUTURE_RESERVED"]
+        },
+        "definition": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 32768
+        },
+        "relatedEntryIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "x-maxUtf8Bytes": 256
+          },
+          "maxItems": 10000
+        },
+        "qualifications": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "x-maxUtf8Bytes": 256
+          },
+          "maxItems": 10000
+        },
+        "reviewStatus": {
+          "enum": ["SOURCE_EXTRACTED", "SOURCE_REVIEWED", "OWNER_DECISION_REFERENCED"]
+        },
+        "personaTags": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": ["user", "administrator", "developer", "troubleshooting"]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "ConfigurationGuide": {
+      "type": "object",
+      "required": [
+        "schema",
+        "owner",
+        "key",
+        "schemaRef",
+        "fieldPath",
+        "type",
+        "unit",
+        "default",
+        "bounds",
+        "scope",
+        "overrides",
+        "dependencies",
+        "risk",
+        "restart",
+        "authority",
+        "activeVersion",
+        "sourceRefs"
+      ],
+      "properties": {
+        "schema": {
+          "const": "ate.insights.configuration/1"
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "schemaRef": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "fieldPath": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "default": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind", "value", "evidenceIds"],
+              "properties": {
+                "kind": {
+                  "const": "KNOWN"
+                },
+                "value": {},
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "reasonIds"],
+              "properties": {
+                "kind": {
+                  "enum": ["UNKNOWN", "UNSUPPORTED"]
+                },
+                "reasonIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "justification"],
+              "properties": {
+                "kind": {
+                  "const": "NOT_APPLICABLE"
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1,
+                  "x-maxUtf8Bytes": 32768
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "bounds": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind", "value", "evidenceIds"],
+              "properties": {
+                "kind": {
+                  "const": "KNOWN"
+                },
+                "value": {},
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "reasonIds"],
+              "properties": {
+                "kind": {
+                  "enum": ["UNKNOWN", "UNSUPPORTED"]
+                },
+                "reasonIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "justification"],
+              "properties": {
+                "kind": {
+                  "const": "NOT_APPLICABLE"
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1,
+                  "x-maxUtf8Bytes": 32768
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "scope": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "x-maxUtf8Bytes": 256
+          },
+          "maxItems": 10000
+        },
+        "overrides": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 32768
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "x-maxUtf8Bytes": 256
+          },
+          "maxItems": 10000
+        },
+        "risk": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 32768
+        },
+        "restart": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 32768
+        },
+        "authority": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 32768
+        },
+        "activeVersion": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind", "value", "evidenceIds"],
+              "properties": {
+                "kind": {
+                  "const": "KNOWN"
+                },
+                "value": {},
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "reasonIds"],
+              "properties": {
+                "kind": {
+                  "enum": ["UNKNOWN", "UNSUPPORTED"]
+                },
+                "reasonIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "justification"],
+              "properties": {
+                "kind": {
+                  "const": "NOT_APPLICABLE"
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1,
+                  "x-maxUtf8Bytes": 32768
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "sourceRefs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "x-maxUtf8Bytes": 256
+          },
+          "maxItems": 10000,
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "ImprovementProposal": {
+      "type": "object",
+      "required": [
+        "schema",
+        "id",
+        "revision",
+        "evidenceIds",
+        "affectedOwners",
+        "findingRefs",
+        "hypothesis",
+        "boundedChange",
+        "qualificationImpact",
+        "suggestedTests",
+        "workflowStatus",
+        "decisionRef",
+        "supersedes"
+      ],
+      "properties": {
+        "schema": {
+          "const": "ate.insights.improvement/1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 256
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "evidenceIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "x-maxUtf8Bytes": 256
+          },
+          "maxItems": 10000,
+          "minItems": 1
+        },
+        "affectedOwners": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "x-maxUtf8Bytes": 256
+          },
+          "maxItems": 10000,
+          "minItems": 1
+        },
+        "findingRefs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "x-maxUtf8Bytes": 256
+          },
+          "maxItems": 10000
+        },
+        "hypothesis": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 32768
+        },
+        "boundedChange": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 32768
+        },
+        "qualificationImpact": {
+          "type": "string",
+          "minLength": 1,
+          "x-maxUtf8Bytes": 32768
+        },
+        "suggestedTests": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "x-maxUtf8Bytes": 256
+          },
+          "maxItems": 10000,
+          "minItems": 1
+        },
+        "workflowStatus": {
+          "enum": [
+            "DRAFT",
+            "EVIDENCE_LINKED",
+            "OWNER_REVIEW_REQUESTED",
+            "OWNER_AUTHORIZED",
+            "DEFERRED",
+            "REJECTED",
+            "IMPLEMENTED_WITH_SOURCE_REF",
+            "TECHNICAL_RECOMMENDATION",
+            "GOVERNANCE_DISPOSITION"
+          ]
+        },
+        "decisionRef": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind", "value", "evidenceIds"],
+              "properties": {
+                "kind": {
+                  "const": "KNOWN"
+                },
+                "value": {},
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "reasonIds"],
+              "properties": {
+                "kind": {
+                  "enum": ["UNKNOWN", "UNSUPPORTED"]
+                },
+                "reasonIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "justification"],
+              "properties": {
+                "kind": {
+                  "const": "NOT_APPLICABLE"
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1,
+                  "x-maxUtf8Bytes": 32768
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "supersedes": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind", "value", "evidenceIds"],
+              "properties": {
+                "kind": {
+                  "const": "KNOWN"
+                },
+                "value": {},
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "reasonIds"],
+              "properties": {
+                "kind": {
+                  "enum": ["UNKNOWN", "UNSUPPORTED"]
+                },
+                "reasonIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "x-maxUtf8Bytes": 256
+                  },
+                  "maxItems": 10000,
+                  "minItems": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "justification"],
+              "properties": {
+                "kind": {
+                  "const": "NOT_APPLICABLE"
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1,
+                  "x-maxUtf8Bytes": 32768
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "limitations": [
+    "UTF8/depth/node budgets require runtime checks",
+    "Schema validates projection shape, not source truth, owner authority or semantic cutoffs",
+    "No server, URI resolution or native owner parser implemented"
+  ]
+}

@@ -1,0 +1,268 @@
+{
+  "provenance": "Synthetic projection fixtures; no actual native ACK or independent authentication claimed. Source manifest hashes real baseline file bytes.",
+  "samples": {
+    "EvidenceReference": {
+      "schema": "ate.insights.evidence/1",
+      "id": "synthetic/id",
+      "owner": "synthetic/id",
+      "ownerVersion": "synthetic/id",
+      "sourceCommit": "6307f53d4febe2bd731e00d73d429546fc29d5ee",
+      "artifactType": "synthetic/id",
+      "nativeIdentity": {},
+      "nativeFingerprint": {
+        "kind": "KNOWN",
+        "value": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "evidenceIds": ["synthetic/evidence"]
+      },
+      "immutable": false,
+      "locator": {
+        "kind": "UNKNOWN",
+        "reasonIds": ["synthetic/unknown"]
+      },
+      "accessScope": "synthetic/id",
+      "sourceTimes": {
+        "availableAt": {
+          "kind": "UNKNOWN",
+          "reasonIds": ["synthetic/unknown"]
+        }
+      },
+      "policyRefs": []
+    },
+    "OwnerReadObservation": {
+      "schema": "ate.insights.observation/1",
+      "id": "synthetic/id",
+      "adapterVersion": "synthetic/id",
+      "allowlistEntry": "synthetic/id",
+      "ownerContext": {},
+      "queryFingerprint": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "readStart": "2026-10-18T00:00:00.000Z",
+      "readEnd": "2026-10-18T00:00:00.000Z",
+      "mode": "STATIC_SOURCE_METADATA",
+      "nativeResultRef": {
+        "kind": "UNKNOWN",
+        "reasonIds": ["synthetic/unknown"]
+      },
+      "disposition": "UNAVAILABLE",
+      "evidenceIds": [],
+      "qualifications": [],
+      "consistencyId": "synthetic/id"
+    },
+    "NativeResultEvidence": {
+      "schema": "ate.insights.native-result/1",
+      "owner": "synthetic/id",
+      "schemaVersion": "synthetic/id",
+      "operation": "synthetic/id",
+      "phase": "synthetic/id",
+      "selectedDiscriminator": false,
+      "nativeCommitment": {
+        "kind": "KNOWN",
+        "value": "NONE",
+        "evidenceIds": ["synthetic/evidence"]
+      },
+      "auditCorrelation": {
+        "kind": "UNKNOWN",
+        "reasonIds": ["synthetic/unknown"]
+      },
+      "representationDigest": {
+        "kind": "KNOWN",
+        "value": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "evidenceIds": ["synthetic/evidence"]
+      },
+      "selectedFailure": {
+        "family": "synthetic/error",
+        "code": "RECORD_NOT_FOUND",
+        "detail": {
+          "synthetic": true
+        }
+      }
+    },
+    "ConsistencyEvidence": {
+      "schema": "ate.insights.consistency/1",
+      "id": "synthetic/id",
+      "scope": "synthetic/id",
+      "mode": "SEQUENTIAL_UNESTABLISHED",
+      "identityVector": [],
+      "readInterval": {
+        "start": "2026-10-18T00:00:00.000Z",
+        "end": "2026-10-18T00:00:00.000Z"
+      },
+      "completeness": {
+        "kind": "UNKNOWN",
+        "reasonIds": ["synthetic/unknown"]
+      },
+      "reasons": [],
+      "barrierRef": {
+        "kind": "UNKNOWN",
+        "reasonIds": ["synthetic/unknown"]
+      }
+    },
+    "DiagnosticFacet": {
+      "schema": "ate.insights.diagnostic/1",
+      "id": "synthetic/id",
+      "owner": "synthetic/id",
+      "subjectTuple": [],
+      "axis": "READINESS",
+      "nativeStatus": {
+        "kind": "UNKNOWN",
+        "reasonIds": ["synthetic/unknown"]
+      },
+      "observationId": "synthetic/id",
+      "temporalScope": "HISTORICAL",
+      "currentAuthority": {
+        "kind": "UNKNOWN",
+        "reasonIds": ["synthetic/unknown"]
+      },
+      "qualifications": []
+    },
+    "ReasonReference": {
+      "schema": "ate.insights.reason/1",
+      "id": "synthetic/id",
+      "owner": "synthetic/id",
+      "nativeCode": "synthetic/id",
+      "schemaVersion": "synthetic/id",
+      "operation": "synthetic/id",
+      "phase": "synthetic/id",
+      "severitySource": "PROJECTION",
+      "consequence": "Explicit synthetic explanatory text, not authenticated source authority.",
+      "helpEntryId": "synthetic/id",
+      "safeNextStep": "Explicit synthetic explanatory text, not authenticated source authority.",
+      "evidenceIds": []
+    },
+    "ObligationReference": {
+      "schema": "ate.insights.obligation/1",
+      "owner": "synthetic/id",
+      "operation": "synthetic/id",
+      "originalIdentity": "synthetic/id",
+      "subjectTuple": [],
+      "originalPayloadFingerprint": {
+        "kind": "KNOWN",
+        "value": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "evidenceIds": ["synthetic/evidence"]
+      },
+      "nativeCommitment": {
+        "kind": "KNOWN",
+        "value": "NONE",
+        "evidenceIds": ["synthetic/evidence"]
+      },
+      "state": "synthetic/id",
+      "historicalAckRefs": [],
+      "currentCheckRef": {
+        "kind": "UNKNOWN",
+        "reasonIds": ["synthetic/unknown"]
+      }
+    },
+    "CoverageStatement": {
+      "schema": "ate.insights.coverage/1",
+      "owner": "synthetic/id",
+      "scope": "synthetic/id",
+      "numerator": {
+        "kind": "UNKNOWN",
+        "reasonIds": ["synthetic/unknown"]
+      },
+      "denominator": {
+        "kind": "UNKNOWN",
+        "reasonIds": ["synthetic/unknown"]
+      },
+      "unit": "synthetic/id",
+      "evidenceVector": [],
+      "suppression": {
+        "kind": "UNKNOWN",
+        "reasonIds": ["synthetic/unknown"]
+      },
+      "consistencyId": "synthetic/id",
+      "temporalScope": "HISTORICAL",
+      "claim": "UNESTABLISHED"
+    },
+    "ReportManifest": {
+      "schema": "ate.insights.report/1",
+      "id": "synthetic/id",
+      "baseline": "6307f53d4febe2bd731e00d73d429546fc29d5ee",
+      "projectionVersion": "synthetic/id",
+      "requestFingerprint": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "generatedAt": "2026-10-18T00:00:00.000Z",
+      "sourceObservationIds": [],
+      "exactEvidenceVector": [],
+      "requestedFacets": [],
+      "missingFacets": [],
+      "budgetUsage": {},
+      "qualifications": [],
+      "exportStatus": "PARTIAL",
+      "reportFingerprint": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "KnowledgeEntry": {
+      "schema": "ate.insights.knowledge/1",
+      "id": "term/a",
+      "type": "TERM",
+      "namespace": "synthetic/id",
+      "revision": 1,
+      "contentVersion": "synthetic/id",
+      "sourceRefs": ["README.md:1"],
+      "temporalScope": "CURRENT_EXPLANATION",
+      "definition": "Explicit synthetic explanatory text, not authenticated source authority.",
+      "relatedEntryIds": [],
+      "qualifications": [],
+      "reviewStatus": "SOURCE_EXTRACTED",
+      "personaTags": ["user", "administrator", "developer", "troubleshooting"]
+    },
+    "ConfigurationGuide": {
+      "schema": "ate.insights.configuration/1",
+      "owner": "synthetic/id",
+      "key": "synthetic/id",
+      "schemaRef": "synthetic/id",
+      "fieldPath": "synthetic/id",
+      "type": "synthetic/id",
+      "unit": "synthetic/id",
+      "default": {
+        "kind": "UNKNOWN",
+        "reasonIds": ["synthetic/unknown"]
+      },
+      "bounds": {
+        "kind": "UNKNOWN",
+        "reasonIds": ["synthetic/unknown"]
+      },
+      "scope": [],
+      "overrides": "Explicit synthetic explanatory text, not authenticated source authority.",
+      "dependencies": [],
+      "risk": "Explicit synthetic explanatory text, not authenticated source authority.",
+      "restart": "Explicit synthetic explanatory text, not authenticated source authority.",
+      "authority": "Explicit synthetic explanatory text, not authenticated source authority.",
+      "activeVersion": {
+        "kind": "UNKNOWN",
+        "reasonIds": ["synthetic/unknown"]
+      },
+      "sourceRefs": ["README.md:1"]
+    },
+    "ImprovementProposal": {
+      "schema": "ate.insights.improvement/1",
+      "id": "synthetic/id",
+      "revision": 1,
+      "evidenceIds": ["README.md:1"],
+      "affectedOwners": ["README.md:1"],
+      "findingRefs": [],
+      "hypothesis": "Explicit synthetic explanatory text, not authenticated source authority.",
+      "boundedChange": "Explicit synthetic explanatory text, not authenticated source authority.",
+      "qualificationImpact": "Explicit synthetic explanatory text, not authenticated source authority.",
+      "suggestedTests": ["README.md:1"],
+      "workflowStatus": "DRAFT",
+      "decisionRef": {
+        "kind": "UNKNOWN",
+        "reasonIds": ["synthetic/unknown"]
+      },
+      "supersedes": {
+        "kind": "UNKNOWN",
+        "reasonIds": ["synthetic/unknown"]
+      }
+    }
+  },
+  "manifest": {
+    "baseline": "6307f53d4febe2bd731e00d73d429546fc29d5ee",
+    "sources": {
+      "README.md:1": {
+        "path": "README.md",
+        "line": 1,
+        "sha256": "sha256:93cabdfce5e2aa0cc10d6aaec18ae28115524e48cc98f7476018172781829da9"
+      }
+    }
+  },
+  "generatedAt": "2026-10-18T00:00:00.000Z"
+}

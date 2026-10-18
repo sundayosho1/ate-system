@@ -12,9 +12,18 @@ const args = (base: string) => [
   "packages",
   ":(exclude)packages/mose-scanner",
   ":(exclude)packages/mose-attention",
+  ":(exclude)packages/research-insight-contracts",
+  ":(exclude)packages/research-insights",
 ];
 const owners = readdirSync("packages", { withFileTypes: true })
-  .filter((d) => d.isDirectory() && d.name !== "mose-scanner" && d.name !== "mose-attention")
+  .filter(
+    (d) =>
+      d.isDirectory() &&
+      d.name !== "mose-scanner" &&
+      d.name !== "mose-attention" &&
+      d.name !== "research-insight-contracts" &&
+      d.name !== "research-insights",
+  )
   .map((d) => d.name)
   .sort();
 it("all eighteen accepted owners including MOSE remain byte-identical", () => {

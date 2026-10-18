@@ -1,0 +1,34 @@
+{
+  "provenance": "Native representation examples only, not runtime owner adapters.",
+  "domainSuccess": {
+    "ok": true,
+    "value": 0
+  },
+  "domainFailure": {
+    "ok": false,
+    "issues": [
+      {
+        "code": "synthetic",
+        "message": "example"
+      }
+    ]
+  },
+  "negativeNone": {
+    "ok": false,
+    "error": {
+      "code": "RECORD_NOT_FOUND",
+      "commitment": "NONE"
+    }
+  },
+  "negativeUnknown": {
+    "ok": false,
+    "error": {
+      "code": "RECORD_NOT_FOUND",
+      "commitment": "UNKNOWN"
+    }
+  },
+  "malformed": {
+    "ok": false
+  },
+  "historicalMeaning": "Native result family, owner and selected branch cannot be inferred from shape validity of projection evidence."
+}

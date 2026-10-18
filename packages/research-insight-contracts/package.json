@@ -1,0 +1,15 @@
+{
+  "name": "@ate/research-insight-contracts",
+  "version": "0.1.0-insights-foundation.1",
+  "private": true,
+  "description": "Bounded offline static knowledge and projection contracts; no operational authority.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@ate/domain": "0.13.0-market-data-contracts.1"
+  }
+}

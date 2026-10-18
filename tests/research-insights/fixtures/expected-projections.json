@@ -1,0 +1,535 @@
+{
+  "canonicalExample": "{\"a\":1,\"b\":2}",
+  "journeys": [
+    {
+      "id": "J01",
+      "title": "Clean clone and onboarding",
+      "sourceRefs": [
+        "package.json:9",
+        ".github/workflows/ci.yml:16",
+        "tests/mose-attention/architecture.test.ts:74"
+      ],
+      "input": "Explicit immutable owner-produced captured record where genuine evidence is asserted; otherwise labeled synthetic example of {'commit': '6307f53d4febe2bd731e00d73d429546fc29d5ee', 'historyAnchors': ['873888c652c402b926fd625fe94cdd90616d27d1', 'f2dcad7a52d059e91b092ad52ef3098e3ad75e24'], 'workers': 2}",
+      "implementationBinding": "Static catalogue entry/source manifest + ate.insights/1 evidence validator and expected projection fixture",
+      "expectedInvariant": "Current source/build/governance identities shown separately; historic rootmanifest remains P25; accepted profile executable only after history prerequisites.",
+      "adverseVariants": [
+        {
+          "id": "J01-1",
+          "inputMutation": "SHALLOW_HISTORY",
+          "expectedInvariant": "Missing required object",
+          "reason": "BLOCKED_HISTORY_PREREQUISITE; no skipped architecture assertion"
+        },
+        {
+          "id": "J01-2",
+          "inputMutation": "ARCHIVE_MISSING",
+          "expectedInvariant": "Raw external evidence unavailable",
+          "reason": "Evidence portability missing; no audit-proven claim"
+        },
+        {
+          "id": "J01-3",
+          "inputMutation": "WRONG_BASELINE",
+          "expectedInvariant": "Checkout another SHA",
+          "reason": "Stop before interpreting acceptance"
+        }
+      ],
+      "phaseControls": [
+        "Explicit offline fixture generation/capture before projection (if needed)",
+        "Authenticate identity, native fingerprint and source binding, record authority limitations",
+        "Snapshot setup-call counters",
+        "Run bounded foundation projection only",
+        "Assert zero owner call delta; no accepted source/fixture mutation",
+        "Check expected facts/unknowns/current-vs-historical and qualification refs",
+        "Compare deterministic bytes with golden projection and validate output bounds"
+      ],
+      "notImplemented": "No live owner adapter, operation, recovery engine or global current-authority evaluator",
+      "auditEvidence": "Raw test result, exact input/output identities, phase counters, source/version/cutoff and byte counters",
+      "reasonHelpRequirement": "All native owner/phase codes preserved; projection issues in insights namespace; valid help/ref links"
+    },
+    {
+      "id": "J02",
+      "title": "Historical artifact quality and catalogue",
+      "sourceRefs": [
+        "packages/historical-data/src/repository.ts:119",
+        "packages/data-quality/src/repository.ts:109",
+        "packages/dataset-catalogue/src/service.ts:233"
+      ],
+      "input": "Explicit immutable owner-produced captured record where genuine evidence is asserted; otherwise labeled synthetic example of {'datasetId': 'fixture-dataset-A', 'version': 'v1', 'qualityReport': 'fixture-quality-A', 'catalogueVersion': 'v1', 'asOf': '2026-10-18T00:00:00.000Z'}",
+      "implementationBinding": "Static catalogue entry/source manifest + ate.insights/1 evidence validator and expected projection fixture",
+      "expectedInvariant": "Exact dataset/report/catalogue identity vector, suppression and eligibility preserved; native1970 snapshot sentinel notcapturetime.",
+      "adverseVariants": [
+        {
+          "id": "J02-1",
+          "inputMutation": "REPORT_UNAVAILABLE",
+          "expectedInvariant": "Manifest exists but linked quality report missing",
+          "reason": "PARTIAL; quality UNKNOWN not zero findings"
+        },
+        {
+          "id": "J02-2",
+          "inputMutation": "QUALITY_SUPPRESSED",
+          "expectedInvariant": "Quality evidence suppresses records",
+          "reason": "Expose owner suppression count and policy, no completequality claim"
+        },
+        {
+          "id": "J02-3",
+          "inputMutation": "LINEAGE_DIFFERENT",
+          "expectedInvariant": "Same family, different dataset fingerprint",
+          "reason": "Reject join, preserve mismatched evidence"
+        }
+      ],
+      "phaseControls": [
+        "Explicit offline fixture generation/capture before projection (if needed)",
+        "Authenticate identity, native fingerprint and source binding, record authority limitations",
+        "Snapshot setup-call counters",
+        "Run bounded foundation projection only",
+        "Assert zero owner call delta; no accepted source/fixture mutation",
+        "Check expected facts/unknowns/current-vs-historical and qualification refs",
+        "Compare deterministic bytes with golden projection and validate output bounds"
+      ],
+      "notImplemented": "No live owner adapter, operation, recovery engine or global current-authority evaluator",
+      "auditEvidence": "Raw test result, exact input/output identities, phase counters, source/version/cutoff and byte counters",
+      "reasonHelpRequirement": "All native owner/phase codes preserved; projection issues in insights namespace; valid help/ref links"
+    },
+    {
+      "id": "J03",
+      "title": "Capture aggregation replay",
+      "sourceRefs": [
+        "packages/realtime-data/src/service.ts:1186",
+        "packages/multitimeframe/src/engine.ts:1479",
+        "packages/market-replay/src/controller.ts:109"
+      ],
+      "input": "Explicit immutable owner-produced captured record where genuine evidence is asserted; otherwise labeled synthetic example of {'capture': 'fixture-cap-A', 'aggregateRevision': 2, 'replayGeneration': 4, 'availabilityCutoff': '2026-10-18T00:00:00.000Z'}",
+      "implementationBinding": "Static catalogue entry/source manifest + ate.insights/1 evidence validator and expected projection fixture",
+      "expectedInvariant": "Capture cleanup obligation/consumer loss, aggregate finality/revision and replay historical identity separate; only available revisions included.",
+      "adverseVariants": [
+        {
+          "id": "J03-1",
+          "inputMutation": "CAPTURE_UNKNOWN",
+          "expectedInvariant": "Creation or cleanup commitment UNKNOWN",
+          "reason": "Unresolved evidence retained, no clean shutdown certification"
+        },
+        {
+          "id": "J03-2",
+          "inputMutation": "LATE_CORRECTION",
+          "expectedInvariant": "Revision3 available after cutoff",
+          "reason": "Exclude from earlier decision, label later appendix"
+        },
+        {
+          "id": "J03-3",
+          "inputMutation": "CONSUMER_LOSS",
+          "expectedInvariant": "Unreconciled consumer loss",
+          "reason": "Source integrity partial/fenced, notfresh complete"
+        }
+      ],
+      "phaseControls": [
+        "Explicit offline fixture generation/capture before projection (if needed)",
+        "Authenticate identity, native fingerprint and source binding, record authority limitations",
+        "Snapshot setup-call counters",
+        "Run bounded foundation projection only",
+        "Assert zero owner call delta; no accepted source/fixture mutation",
+        "Check expected facts/unknowns/current-vs-historical and qualification refs",
+        "Compare deterministic bytes with golden projection and validate output bounds"
+      ],
+      "notImplemented": "No live owner adapter, operation, recovery engine or global current-authority evaluator",
+      "auditEvidence": "Raw test result, exact input/output identities, phase counters, source/version/cutoff and byte counters",
+      "reasonHelpRequirement": "All native owner/phase codes preserved; projection issues in insights namespace; valid help/ref links"
+    },
+    {
+      "id": "J04",
+      "title": "Identity catalogue mapping",
+      "sourceRefs": [
+        "packages/instrument-registry/src/service.ts:747",
+        "packages/broker-symbol-catalogue/src/service.ts:777",
+        "packages/canonical-symbol-mapping/src/service.ts:456"
+      ],
+      "input": "Explicit immutable owner-produced captured record where genuine evidence is asserted; otherwise labeled synthetic example of {'canonicalId': 'fixture-canonical-A', 'catalogueGeneration': 2, 'mappingSet': 'fixture-mapping-A', 'scope': 'offline-synthetic'}",
+      "implementationBinding": "Static catalogue entry/source manifest + ate.insights/1 evidence validator and expected projection fixture",
+      "expectedInvariant": "Canonical identity distinct from native source declaration and whole-observation qualified mapping; no real-broker certification.",
+      "adverseVariants": [
+        {
+          "id": "J04-1",
+          "inputMutation": "AMBIGUOUS_ALIAS",
+          "expectedInvariant": "Two scoped alias matches",
+          "reason": "Show ambiguity, no autochoose"
+        },
+        {
+          "id": "J04-2",
+          "inputMutation": "APPROVAL_REVOKED",
+          "expectedInvariant": "Historical mapping approved, current gate revoked",
+          "reason": "Historical fact only, current approval unavailable/denied"
+        },
+        {
+          "id": "J04-3",
+          "inputMutation": "DEPENDENT_CLAIMS",
+          "expectedInvariant": "Two normalized IDs same underlying witness",
+          "reason": "No independent witness claim"
+        }
+      ],
+      "phaseControls": [
+        "Explicit offline fixture generation/capture before projection (if needed)",
+        "Authenticate identity, native fingerprint and source binding, record authority limitations",
+        "Snapshot setup-call counters",
+        "Run bounded foundation projection only",
+        "Assert zero owner call delta; no accepted source/fixture mutation",
+        "Check expected facts/unknowns/current-vs-historical and qualification refs",
+        "Compare deterministic bytes with golden projection and validate output bounds"
+      ],
+      "notImplemented": "No live owner adapter, operation, recovery engine or global current-authority evaluator",
+      "auditEvidence": "Raw test result, exact input/output identities, phase counters, source/version/cutoff and byte counters",
+      "reasonHelpRequirement": "All native owner/phase codes preserved; projection issues in insights namespace; valid help/ref links"
+    },
+    {
+      "id": "J05",
+      "title": "Specification eligibility attestation",
+      "sourceRefs": [
+        "packages/instrument-specifications/src/service.ts:537",
+        "packages/instrument-eligibility/src/service.ts:796",
+        "packages/instrument-eligibility/src/service.ts:879"
+      ],
+      "input": "Explicit immutable owner-produced captured record where genuine evidence is asserted; otherwise labeled synthetic example of {'instrument': 'fixture-canonical-A', 'specificationRevision': 2, 'attestation': 'fixture-attest-A', 'stage': 'RESEARCH'}",
+      "implementationBinding": "Static catalogue entry/source manifest + ate.insights/1 evidence validator and expected projection fixture",
+      "expectedInvariant": "Declared/absent/contradictory fields displayed; VALIDATED only genuine governed attestation, replay reproducibility separate.",
+      "adverseVariants": [
+        {
+          "id": "J05-1",
+          "inputMutation": "EXPIRED_ATTESTATION",
+          "expectedInvariant": "Passed declaration expires beforeasOf",
+          "reason": "Cannot display current validation eligibility"
+        },
+        {
+          "id": "J05-2",
+          "inputMutation": "FORGED_ISSUER",
+          "expectedInvariant": "Caller says PASSED, unverified authority",
+          "reason": "Blocked attestation; not independentlyvalidated"
+        },
+        {
+          "id": "J05-3",
+          "inputMutation": "LIVE_STAGE",
+          "expectedInvariant": "Requested LIVE_ELIGIBLE or ACTIVE",
+          "reason": "Unsupported prohibited transition"
+        }
+      ],
+      "phaseControls": [
+        "Explicit offline fixture generation/capture before projection (if needed)",
+        "Authenticate identity, native fingerprint and source binding, record authority limitations",
+        "Snapshot setup-call counters",
+        "Run bounded foundation projection only",
+        "Assert zero owner call delta; no accepted source/fixture mutation",
+        "Check expected facts/unknowns/current-vs-historical and qualification refs",
+        "Compare deterministic bytes with golden projection and validate output bounds"
+      ],
+      "notImplemented": "No live owner adapter, operation, recovery engine or global current-authority evaluator",
+      "auditEvidence": "Raw test result, exact input/output identities, phase counters, source/version/cutoff and byte counters",
+      "reasonHelpRequirement": "All native owner/phase codes preserved; projection issues in insights namespace; valid help/ref links"
+    },
+    {
+      "id": "J06",
+      "title": "Replay comparison",
+      "sourceRefs": [
+        "packages/market-replay/src/controller.ts:109",
+        "packages/market-replay/src/runtime-service.ts:301"
+      ],
+      "input": "Explicit immutable owner-produced captured record where genuine evidence is asserted; otherwise labeled synthetic example of {'parentCheckpoint': 'fixture-parent', 'childCheckpoint': 'fixture-child', 'referenceCheckpoint': 'fixture-reference', 'changedPolicy': 'fixture-policy-v2'}",
+      "implementationBinding": "Static catalogue entry/source manifest + ate.insights/1 evidence validator and expected projection fixture",
+      "expectedInvariant": "Read existing comparison/checkpoint evidence; all participants qualified before meaningful classification. Comparison command not called by projector.",
+      "adverseVariants": [
+        {
+          "id": "J06-1",
+          "inputMutation": "HELD_REFERENCE",
+          "expectedInvariant": "Reference read still pending",
+          "reason": "INCOMPARABLE/UNESTABLISHED, neverEXPECTED_DIFFERENCE"
+        },
+        {
+          "id": "J06-2",
+          "inputMutation": "MISMATCH_BOUNDARY",
+          "expectedInvariant": "Equal records, different logical cursor/cohort",
+          "reason": "Not comparable; no artificial policy explanation"
+        },
+        {
+          "id": "J06-3",
+          "inputMutation": "RECOVERY_REFERENCE",
+          "expectedInvariant": "Reference recovery required",
+          "reason": "Unqualified evidence even ifhash readable"
+        }
+      ],
+      "phaseControls": [
+        "Explicit offline fixture generation/capture before projection (if needed)",
+        "Authenticate identity, native fingerprint and source binding, record authority limitations",
+        "Snapshot setup-call counters",
+        "Run bounded foundation projection only",
+        "Assert zero owner call delta; no accepted source/fixture mutation",
+        "Check expected facts/unknowns/current-vs-historical and qualification refs",
+        "Compare deterministic bytes with golden projection and validate output bounds"
+      ],
+      "notImplemented": "No live owner adapter, operation, recovery engine or global current-authority evaluator",
+      "auditEvidence": "Raw test result, exact input/output identities, phase counters, source/version/cutoff and byte counters",
+      "reasonHelpRequirement": "All native owner/phase codes preserved; projection issues in insights namespace; valid help/ref links"
+    },
+    {
+      "id": "J07",
+      "title": "MOSE universe source integrity",
+      "sourceRefs": [
+        "packages/mose-core/src/service.ts:1365",
+        "packages/mose-core/src/service.ts:1466",
+        "packages/mose-core/src/service.ts:1503"
+      ],
+      "input": "Explicit immutable owner-produced captured record where genuine evidence is asserted; otherwise labeled synthetic example of {'session': 'fixture-session-A', 'healthySource': 'A', 'negativePeer': 'B', 'observations': 3}",
+      "implementationBinding": "Static catalogue entry/source manifest + ate.insights/1 evidence validator and expected projection fixture",
+      "expectedInvariant": "Native trusted negative/NONE distinct from malformed/unresolved/legacy; historical COMPLETE ACK does not authorize fresh COMPLETE or establish current readiness.",
+      "adverseVariants": [
+        {
+          "id": "J07-1",
+          "inputMutation": "MALFORMED_NEGATIVE",
+          "expectedInvariant": "False discriminator plus missing errorcommitment",
+          "reason": "UNVERIFIED unresolved peer, unknown obligations, notcomplete"
+        },
+        {
+          "id": "J07-2",
+          "inputMutation": "LEGACY_NEGATIVE",
+          "expectedInvariant": "Historical bytes cannotprove native response",
+          "reason": "Show negative provenance limitation and current NOT_READY"
+        },
+        {
+          "id": "J07-3",
+          "inputMutation": "OUTAGE",
+          "expectedInvariant": "Owner unavailable aftercreate",
+          "reason": "Historical sourcefacts retained, current health degraded/unestablished"
+        }
+      ],
+      "phaseControls": [
+        "Explicit offline fixture generation/capture before projection (if needed)",
+        "Authenticate identity, native fingerprint and source binding, record authority limitations",
+        "Snapshot setup-call counters",
+        "Run bounded foundation projection only",
+        "Assert zero owner call delta; no accepted source/fixture mutation",
+        "Check expected facts/unknowns/current-vs-historical and qualification refs",
+        "Compare deterministic bytes with golden projection and validate output bounds"
+      ],
+      "notImplemented": "No live owner adapter, operation, recovery engine or global current-authority evaluator",
+      "auditEvidence": "Raw test result, exact input/output identities, phase counters, source/version/cutoff and byte counters",
+      "reasonHelpRequirement": "All native owner/phase codes preserved; projection issues in insights namespace; valid help/ref links"
+    },
+    {
+      "id": "J08",
+      "title": "Scanner cadence and request pagination",
+      "sourceRefs": [
+        "packages/mose-scanner/src/runtime.ts:1589",
+        "packages/mose-scanner/src/runtime.ts:1662",
+        "packages/mose-scanner/src/runtime.ts:1719"
+      ],
+      "input": "Explicit immutable owner-produced captured record where genuine evidence is asserted; otherwise labeled synthetic example of {'totalWork': 0, 'totalRequests': 3, 'offset': 0, 'limit': 1, 'nextOffset': None}",
+      "implementationBinding": "Static catalogue entry/source manifest + ate.insights/1 evidence validator and expected projection fixture",
+      "expectedInvariant": "Offsets0,1,2 request pages considered under budget despite work nextOffsetnull; no global denominator, cadence debt explicit.",
+      "adverseVariants": [
+        {
+          "id": "J08-1",
+          "inputMutation": "CHANGING_TOTAL",
+          "expectedInvariant": "Requests totals3then4",
+          "reason": "CONSISTENCY_UNESTABLISHED; retry consumes samebudget"
+        },
+        {
+          "id": "J08-2",
+          "inputMutation": "ADVANCING_TIME",
+          "expectedInvariant": "Firstsubscription repeatednonprogress",
+          "reason": "A26-Q01 OPEN; no fairness guarantee"
+        },
+        {
+          "id": "J08-3",
+          "inputMutation": "ANCHOR_DEBT",
+          "expectedInvariant": "Noinclusive anchor obligation yet",
+          "reason": "No successful STOP claim from projection"
+        }
+      ],
+      "phaseControls": [
+        "Explicit offline fixture generation/capture before projection (if needed)",
+        "Authenticate identity, native fingerprint and source binding, record authority limitations",
+        "Snapshot setup-call counters",
+        "Run bounded foundation projection only",
+        "Assert zero owner call delta; no accepted source/fixture mutation",
+        "Check expected facts/unknowns/current-vs-historical and qualification refs",
+        "Compare deterministic bytes with golden projection and validate output bounds"
+      ],
+      "notImplemented": "No live owner adapter, operation, recovery engine or global current-authority evaluator",
+      "auditEvidence": "Raw test result, exact input/output identities, phase counters, source/version/cutoff and byte counters",
+      "reasonHelpRequirement": "All native owner/phase codes preserved; projection issues in insights namespace; valid help/ref links"
+    },
+    {
+      "id": "J09",
+      "title": "Attention receipt reconciliation",
+      "sourceRefs": [
+        "packages/mose-attention/src/runtime.ts:671",
+        "packages/mose-attention/src/runtime.ts:698",
+        "packages/mose-attention/src/runtime.ts:720"
+      ],
+      "input": "Explicit immutable owner-produced captured record where genuine evidence is asserted; otherwise labeled synthetic example of {'floorId': 'fixture-floor-1', 'receiptId': 'fixture-receipt-1', 'originalAttemptCount': 2, 'limit': 1}",
+      "implementationBinding": "Static catalogue entry/source manifest + ate.insights/1 evidence validator and expected projection fixture",
+      "expectedInvariant": "Display original identities/credits/attempts/debt; one receipt cannot settle multiple floors; P27 coveragefalse and denominatornull preserved.",
+      "adverseVariants": [
+        {
+          "id": "J09-1",
+          "inputMutation": "OVERSIZED_PAGE",
+          "expectedInvariant": "Requested1, page returns4",
+          "reason": "Reject entire page/no settlement proof"
+        },
+        {
+          "id": "J09-2",
+          "inputMutation": "MALFORMED_ACK",
+          "expectedInvariant": "Success branch missingnative identity",
+          "reason": "No ADMITTED inference; unresolved"
+        },
+        {
+          "id": "J09-3",
+          "inputMutation": "RETRY_BUDGET",
+          "expectedInvariant": "Newallocation tries resetattempts",
+          "reason": "Report original-floor attempts; no budgetreset"
+        }
+      ],
+      "phaseControls": [
+        "Explicit offline fixture generation/capture before projection (if needed)",
+        "Authenticate identity, native fingerprint and source binding, record authority limitations",
+        "Snapshot setup-call counters",
+        "Run bounded foundation projection only",
+        "Assert zero owner call delta; no accepted source/fixture mutation",
+        "Check expected facts/unknowns/current-vs-historical and qualification refs",
+        "Compare deterministic bytes with golden projection and validate output bounds"
+      ],
+      "notImplemented": "No live owner adapter, operation, recovery engine or global current-authority evaluator",
+      "auditEvidence": "Raw test result, exact input/output identities, phase counters, source/version/cutoff and byte counters",
+      "reasonHelpRequirement": "All native owner/phase codes preserved; projection issues in insights namespace; valid help/ref links"
+    },
+    {
+      "id": "J10",
+      "title": "Configuration administration",
+      "sourceRefs": [
+        "packages/configuration/src/resolver.ts:87",
+        "packages/configuration/src/approval-service.ts:459",
+        "packages/configuration/src/release-service.ts:509"
+      ],
+      "input": "Explicit immutable owner-produced captured record where genuine evidence is asserted; otherwise labeled synthetic example of {'candidate': 'v2', 'active': 'v1', 'approvalVersion': 'v2', 'restartPending': True}",
+      "implementationBinding": "Static catalogue entry/source manifest + ate.insights/1 evidence validator and expected projection fixture",
+      "expectedInvariant": "Distinct candidate/approved/active/restart axes; exact actor/policy/version lineage. Explainports remain defaultdenied until exact effects review.",
+      "adverseVariants": [
+        {
+          "id": "J10-1",
+          "inputMutation": "WRONG_FINGERPRINT",
+          "expectedInvariant": "Approval bindsdifferentcandidate",
+          "reason": "No approval satisfied inference"
+        },
+        {
+          "id": "J10-2",
+          "inputMutation": "SELF_APPROVAL",
+          "expectedInvariant": "Makerattemptscheck",
+          "reason": "Show native denial; personaadmin doesnotgrant"
+        },
+        {
+          "id": "J10-3",
+          "inputMutation": "UNKNOWN_EFFECTIVE",
+          "expectedInvariant": "Nestedsetting notpublic",
+          "reason": "BLOCKED evidence; no private read"
+        }
+      ],
+      "phaseControls": [
+        "Explicit offline fixture generation/capture before projection (if needed)",
+        "Authenticate identity, native fingerprint and source binding, record authority limitations",
+        "Snapshot setup-call counters",
+        "Run bounded foundation projection only",
+        "Assert zero owner call delta; no accepted source/fixture mutation",
+        "Check expected facts/unknowns/current-vs-historical and qualification refs",
+        "Compare deterministic bytes with golden projection and validate output bounds"
+      ],
+      "notImplemented": "No live owner adapter, operation, recovery engine or global current-authority evaluator",
+      "auditEvidence": "Raw test result, exact input/output identities, phase counters, source/version/cutoff and byte counters",
+      "reasonHelpRequirement": "All native owner/phase codes preserved; projection issues in insights namespace; valid help/ref links"
+    },
+    {
+      "id": "J11",
+      "title": "Historical audit and governance chronology",
+      "sourceRefs": [
+        "docs/development/prompt-27-conditional-acceptance.md:1",
+        "docs/development/prompt-ledger.md:1",
+        "tests/mose-attention/architecture.test.ts:81"
+      ],
+      "input": "Explicit immutable owner-produced captured record where genuine evidence is asserted; otherwise labeled synthetic example of {'originalFailedRun': 'fixture-original', 'correctedRun': 'fixture-corrected', 'technicalRecommendation': 'qualified-pass', 'ownerDecision': 'explicit-conditional'}",
+      "implementationBinding": "Static catalogue entry/source manifest + ate.insights/1 evidence validator and expected projection fixture",
+      "expectedInvariant": "Original failures, harnesscorrections, reviewrecommendation, ownerdecision and actualpublication remain separate exact identities.",
+      "adverseVariants": [
+        {
+          "id": "J11-1",
+          "inputMutation": "MISSING_OWNER_DECISION",
+          "expectedInvariant": "Only developerclaimsclosed",
+          "reason": "Acceptance unestablished"
+        },
+        {
+          "id": "J11-2",
+          "inputMutation": "EXTRA_SUFFIX",
+          "expectedInvariant": "Ledgerprefixvalid extraneousappend",
+          "reason": "Unauthorized ledger difference blocked"
+        },
+        {
+          "id": "J11-3",
+          "inputMutation": "MATCHING_HASH_FORGERY",
+          "expectedInvariant": "Newselfauthregistryhashmatches",
+          "reason": "Integrity notauthority; rejectedtrustclaim"
+        }
+      ],
+      "phaseControls": [
+        "Explicit offline fixture generation/capture before projection (if needed)",
+        "Authenticate identity, native fingerprint and source binding, record authority limitations",
+        "Snapshot setup-call counters",
+        "Run bounded foundation projection only",
+        "Assert zero owner call delta; no accepted source/fixture mutation",
+        "Check expected facts/unknowns/current-vs-historical and qualification refs",
+        "Compare deterministic bytes with golden projection and validate output bounds"
+      ],
+      "notImplemented": "No live owner adapter, operation, recovery engine or global current-authority evaluator",
+      "auditEvidence": "Raw test result, exact input/output identities, phase counters, source/version/cutoff and byte counters",
+      "reasonHelpRequirement": "All native owner/phase codes preserved; projection issues in insights namespace; valid help/ref links"
+    },
+    {
+      "id": "J12",
+      "title": "Aggregate partialsource report",
+      "sourceRefs": [
+        "packages/mose-core/src/service.ts:1503",
+        "packages/mose-scanner/src/runtime.ts:1589",
+        "packages/mose-attention/src/runtime.ts:720"
+      ],
+      "input": "Explicit immutable owner-produced captured record where genuine evidence is asserted; otherwise labeled synthetic example of {'requiredFacets': ['P25-source', 'P26-requests', 'P27-floors'], 'p26Unavailable': True, 'p27Denominator': None}",
+      "implementationBinding": "Static catalogue entry/source manifest + ate.insights/1 evidence validator and expected projection fixture",
+      "expectedInvariant": "PARTIAL report with nativefacts/unknowns/readintervals; no allready/globalcomplete, no hidden dropped facet.",
+      "adverseVariants": [
+        {
+          "id": "J12-1",
+          "inputMutation": "PAGE_BUDGET",
+          "expectedInvariant": "Need9pages,cap8",
+          "reason": "Unvisited countunknown ifnotproven; partial"
+        },
+        {
+          "id": "J12-2",
+          "inputMutation": "CANCELLED_READ",
+          "expectedInvariant": "Cancelwhileawaitingowner",
+          "reason": "No NONE or fakecancel guarantee; no overlappingretry"
+        },
+        {
+          "id": "J12-3",
+          "inputMutation": "HEALTHY_HISTORY",
+          "expectedInvariant": "Pasthealthy butcurrentcontextmissing",
+          "reason": "Historicalfacetretained, currentauthorityUNKNOWN"
+        }
+      ],
+      "phaseControls": [
+        "Explicit offline fixture generation/capture before projection (if needed)",
+        "Authenticate identity, native fingerprint and source binding, record authority limitations",
+        "Snapshot setup-call counters",
+        "Run bounded foundation projection only",
+        "Assert zero owner call delta; no accepted source/fixture mutation",
+        "Check expected facts/unknowns/current-vs-historical and qualification refs",
+        "Compare deterministic bytes with golden projection and validate output bounds"
+      ],
+      "notImplemented": "No live owner adapter, operation, recovery engine or global current-authority evaluator",
+      "auditEvidence": "Raw test result, exact input/output identities, phase counters, source/version/cutoff and byte counters",
+      "reasonHelpRequirement": "All native owner/phase codes preserved; projection issues in insights namespace; valid help/ref links"
+    }
+  ],
+  "coverageClaim": "UNESTABLISHED",
+  "currentAuthority": "UNESTABLISHED",
+  "ownerCallsDuringProjection": 0
+}
