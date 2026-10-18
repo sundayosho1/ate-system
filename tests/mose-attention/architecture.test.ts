@@ -95,7 +95,10 @@ it("governance, capabilities, root version and dependency versions preserved", (
       expect(authorized.subarray(0, historical.length)).toEqual(historical);
       expect(authorized.length).toBeGreaterThan(historical.length);
       expect(current.subarray(0, historical.length)).toEqual(historical);
-      expect(current.subarray(historical.length)).toEqual(authorized.subarray(historical.length));
+      expect(current.subarray(historical.length, authorized.length)).toEqual(
+        authorized.subarray(historical.length),
+      );
+      verifyFoundationGovernance();
       expect(readFileSync(record)).toEqual(execFileSync("git", ["show", approved + ":" + record]));
     } else {
       expect(readFileSync(p, "utf8")).toBe(
@@ -118,3 +121,25 @@ it("governance, capabilities, root version and dependency versions preserved", (
     "packages/research-insights",
   ]);
 });
+
+const foundationGovernance = "538c2d564b9ad6df1d1b1d50016e5e75f89cb6c8";
+const foundationRecord = "docs/development/p1-p27-insights-foundation-conditional-acceptance.md";
+const verifyFoundationGovernance = () => {
+  expect(
+    execFileSync("git", ["rev-parse", foundationGovernance + "^"], { encoding: "utf8" }).trim(),
+  ).toBe("216f26d10eea057b62d14ec009d4c56d6f27993b");
+  expect(
+    execFileSync(
+      "git",
+      ["diff-tree", "--no-commit-id", "--name-only", "-r", foundationGovernance],
+      { encoding: "utf8" },
+    )
+      .trim()
+      .split("\n")
+      .sort(),
+  ).toEqual([foundationRecord, "docs/development/prompt-ledger.md"].sort());
+  for (const path of [foundationRecord, "docs/development/prompt-ledger.md"])
+    expect(readFileSync(path)).toEqual(
+      execFileSync("git", ["show", foundationGovernance + ":" + path]),
+    );
+};

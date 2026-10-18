@@ -124,7 +124,11 @@ it("accepted root/governance/capabilities bytepreserved", () => {
     "docs/development/prompt-ledger.md",
     "docs/development/prompt-27-conditional-acceptance.md",
   ])
-    expect(readFileSync(p)).toEqual(execFileSync("git", ["show", baseline + ":" + p]));
+    if (p === "docs/development/prompt-ledger.md") {
+      const historical = execFileSync("git", ["show", baseline + ":" + p]);
+      expect(readFileSync(p).subarray(0, historical.length)).toEqual(historical);
+      verifyFoundationGovernance();
+    } else expect(readFileSync(p)).toEqual(execFileSync("git", ["show", baseline + ":" + p]));
 });
 it("onlyfourworkspacekeysandoldentriesexact", () => {
   const old = JSON.parse(
@@ -148,3 +152,25 @@ it("all49qualificationrowsand12riskrestrictionsretained", () => {
   for (let i = 1; i <= 12; i++)
     expect(data.designRisks).toContain("B-R" + String(i).padStart(2, "0"));
 });
+
+const foundationGovernance = "538c2d564b9ad6df1d1b1d50016e5e75f89cb6c8";
+const foundationRecord = "docs/development/p1-p27-insights-foundation-conditional-acceptance.md";
+const verifyFoundationGovernance = () => {
+  expect(
+    execFileSync("git", ["rev-parse", foundationGovernance + "^"], { encoding: "utf8" }).trim(),
+  ).toBe("216f26d10eea057b62d14ec009d4c56d6f27993b");
+  expect(
+    execFileSync(
+      "git",
+      ["diff-tree", "--no-commit-id", "--name-only", "-r", foundationGovernance],
+      { encoding: "utf8" },
+    )
+      .trim()
+      .split("\n")
+      .sort(),
+  ).toEqual([foundationRecord, "docs/development/prompt-ledger.md"].sort());
+  for (const path of [foundationRecord, "docs/development/prompt-ledger.md"])
+    expect(readFileSync(path)).toEqual(
+      execFileSync("git", ["show", foundationGovernance + ":" + path]),
+    );
+};
