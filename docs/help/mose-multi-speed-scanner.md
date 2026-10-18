@@ -640,3 +640,47 @@ requires separate explicit authorization and qualification.
 All 25 inherited entries above remain separate and verbatim. Historical references to future-prompt
 authorization are historical context; only separately explicit owner authorization permits
 progression. This proposal does not authorize Prompt 26.
+
+## Cadence receipts, contiguous progress and continuation
+
+For SECONDS and SCHEDULE, a direct DEADLINE request acknowledges only its own boundary. It does not
+certify earlier slots. The runtime derives a contiguous represented prefix from authenticated
+request receipts, starting at the governed anchor. A valid explicit schedule skip also represents
+its slot. The legacy schema-v1 `deadlines` field retains its historical last-request meaning and
+grants no prefix authority. No journal migration or rewriting is performed.
+
+`coverage().cadence` separates `latestRequestedBoundary`, `contiguousThrough`, `requiredDue`,
+`representedDue`, `nextBoundary` (epoch milliseconds), and `unrepresentedDue` per cadence
+subscription. `unrepresentedCadenceDue` totals missing due receipts separately from acknowledged
+pending owner work. Counts use bounded retained receipts and arithmetic over the schedule, rather
+than iterating all elapsed slots. Future slots and slots beyond a schedule's end are excluded. A
+cadence becomes active after START. A historical STOPPED view uses its recorded STOP time; later
+logical time does not create new obligations in a stopped run.
+
+`advance()` captures one logical-time cutoff and admits the earliest missing slots. Already
+represented later direct requests are retained and not admitted again. Existing catch-up, queue,
+history, owner-call and checkpoint limits still apply. Represented slots can share the same genuine
+MOSE observation; the scanner does not manufacture market events to fill timing gaps.
+
+`remainingNotProcessed=true` means due cadence receipts remain unrepresented at that batch's cutoff.
+This includes a failed attempted slot that needs retry and any unattempted due slots. A false value
+certifies only that no due receipts are missing, not that pending work has completed or every child
+operation succeeded. Always inspect child Results/dispositions. Preview/source failure, NONE,
+UNKNOWN and capacity deferral retain their own outcomes. UNKNOWN requires reconciliation; it is
+never normalized to NONE. PAUSED, STOP-fenced, uninitialized and reentrant advance calls return a
+failing outer Result, not an empty successful batch.
+
+Missing due receipts produce NOT_READY/DEGRADED diagnostics without converting normal pending
+schedule work into corruption. STOP rejects missing cadence debt before installing its ordinary
+retained-work fence, so a caller can advance the missing slots, drain actual owner work, and retry
+STOP. Once the existing STOP fence has been installed by a concurrent/in-flight operation, fresh
+recovery may be required to admit further receipts. Repeated STOP cannot erase unresolved debt. A
+historical STOPPED journal with gaps is preserved as historical evidence but cannot obtain a new
+successful shutdown certification. It is not resumed or silently repaired; use a separately governed
+research run if needed.
+
+Queue round robin applies to admitted work. Admission across subscriptions remains lexicographic and
+does not promise global fairness under continuously advancing time. For finite catch-up, hold
+logical time fixed, handle child failures and repeatedly drain until continuation is false. This
+operational restriction does not excuse missing receipts or false continuation. All inherited
+offline-only, trusted-owner, single-writer, Windows and durability qualifications still apply.

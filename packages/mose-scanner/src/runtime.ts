@@ -397,6 +397,8 @@ export class MultiSpeedScannerRuntime {
       throw Error("CLOCK_REGRESSION");
     if (this.stopping && !["STOP", "ATTEMPT", "RESULT"].includes(kind)) throw Error("STOP_FENCE");
     this.budget(state);
+    if (kind === "STOP" && this.cadencePending(this.now(), state))
+      throw Error("CADENCE_OBLIGATIONS_UNRESOLVED");
     const body = {
       schemaVersion: 1 as const,
       generation: this.history.length + 1,
@@ -1270,6 +1272,54 @@ export class MultiSpeedScannerRuntime {
       return { results, affected, remainingNotProcessed: this.stopping || !!this.uncertainty };
     });
   }
+  /** Derive cadence authority from bounded authenticated receipts, never the legacy
+   * deadlines field (which records the last request, including out-of-order ones).
+   * Arithmetic counts gaps without iterating an unbounded elapsed-time range. */
+  private cadence(asOf = this.now(), state = this.state) {
+    const active = this.history.some((c) => c.operation.kind === "START");
+    const cutoff =
+      state.phase === "STOPPED"
+        ? (this.history.find((c) => c.operation.kind === "STOP")?.at ?? asOf)
+        : asOf;
+    return (state.plan?.subscriptions ?? [])
+      .filter((sub) => ["SECONDS", "SCHEDULE"].includes(sub.mode))
+      .map((sub) => {
+        const anchor = Date.parse(sub.anchor),
+          step = sub.cadenceMs!;
+        const end = Math.min(
+          Date.parse(cutoff),
+          sub.schedule ? Date.parse(sub.schedule.end) : Infinity,
+        );
+        const boundaries = [
+          ...new Set(
+            state.requests
+              .filter((q) => q.trigger.subscriptionId === sub.id && q.trigger.kind === "DEADLINE")
+              .map((q) => Date.parse(q.trigger.boundary)),
+          ),
+        ].sort((a, b) => a - b);
+        let next = anchor;
+        for (const at of boundaries) {
+          if (at === next) next += step;
+          else if (at > next) break;
+        }
+        const required = active && end >= anchor ? Math.floor((end - anchor) / step) + 1 : 0;
+        const represented = boundaries.filter((at) => at <= end).length;
+        return {
+          subscriptionId: sub.id,
+          latestRequestedBoundary: boundaries.length
+            ? new Date(boundaries.at(-1)!).toISOString()
+            : null,
+          contiguousThrough: next > anchor ? new Date(next - step).toISOString() : null,
+          nextBoundary: next,
+          requiredDue: required,
+          representedDue: active ? represented : 0,
+          unrepresentedDue: Math.max(0, required - (active ? represented : 0)),
+        };
+      });
+  }
+  private cadencePending(asOf = this.now(), state = this.state) {
+    return this.cadence(asOf, state).some((row) => row.unrepresentedDue > 0);
+  }
   async advance(): Promise<
     ScannerResult<{ results: readonly unknown[]; remainingNotProcessed: boolean }>
   > {
@@ -1288,15 +1338,15 @@ export class MultiSpeedScannerRuntime {
     try {
       this.gate();
       const result: unknown[] = [];
+      const batchAt = this.now();
       let remaining = this.policy.maxCatchup;
       for (const sub of [...this.state.plan.subscriptions].sort((a, b) =>
         a.id < b.id ? -1 : a.id > b.id ? 1 : 0,
       )) {
         if (!["SECONDS", "SCHEDULE"].includes(sub.mode)) continue;
-        const last = this.state.deadlines[sub.id];
-        let at = last ? Date.parse(last) + sub.cadenceMs! : Date.parse(sub.anchor);
+        let at = this.cadence(batchAt).find((row) => row.subscriptionId === sub.id)!.nextBoundary;
         const end = Math.min(
-          Date.parse(this.now()),
+          Date.parse(batchAt),
           sub.schedule ? Date.parse(sub.schedule.end) : Infinity,
         );
         while (at <= end) {
@@ -1343,7 +1393,7 @@ export class MultiSpeedScannerRuntime {
             })();
             result.push(receipt);
             if (!receipt.ok) break;
-            at += sub.cadenceMs!;
+            at = this.cadence(batchAt).find((row) => row.subscriptionId === sub.id)!.nextBoundary;
             continue;
           }
           let preview: ScannerResult<{ evidence: string }>;
@@ -1384,10 +1434,12 @@ export class MultiSpeedScannerRuntime {
           }
           result.push(receipt);
           if (!receipt.ok) break;
-          at += sub.cadenceMs!;
+          at = this.cadence(batchAt).find((row) => row.subscriptionId === sub.id)!.nextBoundary;
         }
       }
-      return success(frozen({ results: result, remainingNotProcessed: false }));
+      return success(
+        frozen({ results: result, remainingNotProcessed: this.cadencePending(batchAt) }),
+      );
     } catch (e) {
       return failure(
         err(e),
@@ -1645,6 +1697,8 @@ export class MultiSpeedScannerRuntime {
       completed: all.filter((w) => w.status === "COMPLETED").length,
       deferred: all.filter((w) => w.status === "DEFERRED").length,
       pending: p.length,
+      cadence: this.cadence(),
+      unrepresentedCadenceDue: this.cadence().reduce((n, row) => n + row.unrepresentedDue, 0),
       coalesced: this.state.requests.filter((q) => q.disposition === "COALESCED").length,
       skipped: this.state.requests.filter((q) => q.disposition === "SKIPPED").length,
       observationCountMeaning: "DISTINCT_REAL_P25_OBSERVATIONS_REFERENCED_NOT_NEW_PUBLICATIONS",
@@ -1688,11 +1742,17 @@ export class MultiSpeedScannerRuntime {
         !this.busy &&
         !this.uncertainty &&
         sourcesReady &&
-        !obligations.length
+        !obligations.length &&
+        !this.cadencePending()
           ? "READY"
           : "NOT_READY",
       health:
-        valid && this.initialized && !this.uncertainty && sourcesReady && !obligations.length
+        valid &&
+        this.initialized &&
+        !this.uncertainty &&
+        sourcesReady &&
+        !obligations.length &&
+        !this.cadencePending()
           ? "HEALTHY"
           : "DEGRADED",
       phase: this.state.phase,
@@ -1715,6 +1775,7 @@ export class MultiSpeedScannerRuntime {
       busy: this.busy,
       uncertainty: this.uncertainty,
       pending: obligations.length,
+      unrepresentedCadenceDue: this.cadence().reduce((n, row) => n + row.unrepresentedDue, 0),
       sources: sourceBindings.map((key) => ({
         key,
         status: this.sourceChecks.get(key) ?? { ready: false, checkedAt: null },
@@ -1734,13 +1795,17 @@ export class MultiSpeedScannerRuntime {
     });
   }
   async stop(): Promise<ScannerResult<void>> {
-    if (this.stopped) return success(undefined);
+    if (this.stopped)
+      return this.cadencePending() ? failure("CADENCE_OBLIGATIONS_UNRESOLVED") : success(undefined);
     if (this.busy) {
       this.stopping = true;
       return failure("PENDING_OPERATION", "UNKNOWN");
     }
     if (this.uncertainty) return failure("RECOVERY_REQUIRED", "UNKNOWN");
     if (!this.initialized) return failure("RUNTIME_NOT_READY");
+    // A missing receipt must remain drainable through advance; do not install the
+    // STOP fence until schedule accounting is complete.
+    if (this.cadencePending()) return failure("CADENCE_OBLIGATIONS_UNRESOLVED");
     this.stopping = true;
     this.busy = true;
     try {
