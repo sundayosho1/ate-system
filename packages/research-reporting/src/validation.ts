@@ -28,11 +28,24 @@ export function freeze<T>(x: T): T {
   }
   return x;
 }
+/** Internal operation budget; never exported from the package root. */
+export interface TraversalMeter {
+  visit(depth: number): void;
+  readonly remainingNodes: number;
+}
 /** Projector DTOs only: native selected discriminator is captured separately. No accessors/hooks. */
-export function data(raw: unknown, maxBytes = 65536, maxDepth = 16, maxNodes = 10000): JsonValue {
+export function data(
+  raw: unknown,
+  maxBytes = 65536,
+  maxDepth = 16,
+  maxNodes = 10000,
+  meter?: TraversalMeter,
+  logicalDepth = 0,
+): JsonValue {
   let nodes = 0;
   const seen = new Set<object>();
   const visit = (x: unknown, depth: number): JsonValue => {
+    meter?.visit(depth + logicalDepth);
     demand(++nodes <= maxNodes && depth <= maxDepth, "REPORTING:BUDGET_EXHAUSTED");
     if (x === null || typeof x === "boolean" || typeof x === "string") return x;
     if (typeof x === "number") {
@@ -43,7 +56,11 @@ export function data(raw: unknown, maxBytes = 65536, maxDepth = 16, maxNodes = 1
     seen.add(x);
     const result: JsonValue = Array.isArray(x) ? [] : {};
     const keys = Reflect.ownKeys(x);
-    demand(keys.length <= maxNodes, "REPORTING:BUDGET_EXHAUSTED");
+    demand(
+      keys.length <= maxNodes &&
+        (!meter || keys.length <= meter.remainingNodes + (Array.isArray(x) ? 1 : 0)),
+      "REPORTING:BUDGET_EXHAUSTED",
+    );
     if (Array.isArray(x)) {
       const len = Object.getOwnPropertyDescriptor(x, "length")?.value as unknown;
       demand(
@@ -104,8 +121,10 @@ export const unknownFact = (reason = "REPORTING:EVIDENCE_UNAVAILABLE"): Fact =>
   freeze({ kind: "UNKNOWN", reasonIds: [reason] });
 export const known = (value: JsonValue, evidenceIds: readonly string[]): Fact =>
   freeze({ kind: "KNOWN", value, evidenceIds });
-export function digest(raw: unknown): string {
-  const b = canonicalInsightBytes(raw, "REPORT");
+export function digest(raw: unknown, meter?: TraversalMeter, logicalDepth = 0): string {
+  // Charge a bounded argument traversal before the accepted pure serializer; its own ceilings still apply.
+  const prepared = meter ? data(raw, 4194304, 32, 50000, meter, logicalDepth) : raw;
+  const b = canonicalInsightBytes(prepared, "REPORT");
   demand(b.ok, "REPORTING:INPUT_INVALID");
   const h = insightFingerprint(b.value, {
     contractVersion: "ate.reporting/1",
@@ -117,8 +136,15 @@ export function digest(raw: unknown): string {
 }
 export const byteSize = (raw: unknown) => Buffer.byteLength(JSON.stringify(raw));
 export function validateReportRequest(raw: unknown): ReportingResult<ReportRequest> {
+  return validateRequestWithinBudget(raw);
+}
+export function validateRequestWithinBudget(
+  raw: unknown,
+  meter?: TraversalMeter,
+  logicalDepth = 0,
+): ReportingResult<ReportRequest> {
   return guard(() => {
-    const r = object(data(raw));
+    const r = object(data(raw, 65536, 16, 10000, meter, logicalDepth));
     exact(r, ["schema", "id", "baseline", "purpose", "mode", "asOf", "knowledgeCutoff", "facets"]);
     demand(r.schema === "ate.reporting.request/1");
     id(r.id);

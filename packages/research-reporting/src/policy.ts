@@ -69,3 +69,24 @@ export function checkedPolicy(raw: unknown): ReportingPolicy {
     retries: 0,
   }) as ReportingPolicy;
 }
+
+/** Internal minima; no operation can weaken an embedded policy. */
+export function effectivePolicy(
+  embedded: ReportingPolicy,
+  override?: ReportingPolicy,
+): ReportingPolicy {
+  const a = checkedPolicy(embedded),
+    b = override === undefined ? a : checkedPolicy(override);
+  const limits: Record<string, number> = {};
+  for (const k of Object.keys(D1) as (keyof typeof D1)[]) limits[k] = Math.min(a[k], b[k]);
+  const result = createReportingPolicy(limits);
+  demand(result.ok, "REPORTING:POLICY_INVALID");
+  return result.value;
+}
+export function embeddedPolicy(raw: unknown): ReportingPolicy {
+  demand(raw !== null && typeof raw === "object", "REPORTING:POLICY_INVALID");
+  const descriptor = Object.getOwnPropertyDescriptor(raw, "policy");
+  demand(descriptor && "value" in descriptor && descriptor.enumerable, "REPORTING:POLICY_INVALID");
+  const value: unknown = descriptor.value;
+  return checkedPolicy(value);
+}

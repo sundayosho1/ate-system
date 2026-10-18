@@ -18,6 +18,7 @@ import {
   digest,
   known,
   unknownFact,
+  type TraversalMeter,
 } from "./validation.js";
 export const promptOwners = Object.freeze([
   "repository",
@@ -48,8 +49,12 @@ export const promptOwners = Object.freeze([
   "mose-scanner",
   "mose-attention",
 ]);
-export function validateArtifact(raw: unknown): EvidenceArtifact {
-  const a = object(data(raw, 1048576, 32, 50000));
+export function validateArtifact(
+  raw: unknown,
+  meter?: TraversalMeter,
+  logicalDepth = 0,
+): EvidenceArtifact {
+  const a = object(data(raw, 1048576, 32, 50000, meter, logicalDepth));
   exact(a, [
     "id",
     "prompt",
@@ -153,11 +158,12 @@ export function qualifyEvidence(
   a: EvidenceArtifact,
   request: ReportRequest,
   anchors: readonly EvidenceAnchor[],
+  meter?: TraversalMeter,
 ): QualifiedObservation {
-  const captureDigest = digest(a);
+  const captureDigest = digest(a, meter, 2);
   let anchor: EvidenceAnchor | undefined;
   for (const raw of anchors) {
-    const x = object(data(raw));
+    const x = object(data(raw, 65536, 16, 10000, meter));
     exact(x, ["artifactId", "captureDigest", "sourceCommit", "owner", "reference"]);
     for (const k of Object.keys(x)) id(x[k]);
     if (x.artifactId === a.id) {
@@ -194,3 +200,36 @@ export function captureDigest(artifact: EvidenceArtifact) {
   return digest(validateArtifact(artifact));
 }
 export type { CapturedNative };
+
+/** Compare full source scopes, never supplied capture IDs or rewritten native fingerprints. */
+export function ensureConsistentEvidence(
+  artifacts: readonly EvidenceArtifact[],
+  meter?: TraversalMeter,
+  capturedDepth = 3,
+): void {
+  const scopes = new Map<string, Map<string, string>>();
+  for (const a of artifacts) {
+    const scope = JSON.stringify([
+      a.owner,
+      a.ownerVersion,
+      a.sourceCommit,
+      a.nativeIdentity,
+      a.subject,
+      a.unit,
+      a.effectiveAt,
+      a.availableAt,
+    ]);
+    const fp = object(a.nativeFingerprint);
+    if (fp.kind === "KNOWN") demand(typeof fp.value === "string");
+    const pin = fp.kind === "KNOWN" && typeof fp.value === "string" ? fp.value : "UNKNOWN";
+    const payload = digest(a.captured, meter, capturedDepth);
+    const pins = scopes.get(scope) ?? new Map<string, string>();
+    for (const [existingPin, existingPayload] of pins) {
+      // Unknown provenance cannot prove a distinct generation. Distinct known native hashes can.
+      if (pin === existingPin || pin === "UNKNOWN" || existingPin === "UNKNOWN")
+        demand(payload === existingPayload, "REPORTING:EVIDENCE_IDENTITY_CONFLICT");
+    }
+    pins.set(pin, payload);
+    scopes.set(scope, pins);
+  }
+}

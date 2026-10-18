@@ -110,3 +110,33 @@ and12B-R/12D-Rrisks remain binding. Historical ACK is not current readiness; a q
 trading suitability. CODEX-014E and Prompts 28–30,frontend/API/listener/remoteIAM,live
 broker/execution/production remain unauthorized. Independent technical and governance acceptance are
 PENDING.
+
+## Effective policy and conflict troubleshooting
+
+`queryReport(bundle, query, stricterPolicy?)` remains compatible with two arguments. Query and
+export cannot weaken the embedded report policy. Malformed policy input fails closed. A lower
+depth/node ceiling applies to actual readback work, not just export size; policy admission itself
+remains fixed, bounded control validation. Valid lower policies are accepted, but an operation that
+cannot fit fails with REPORTING:BUDGET_EXHAUSTED. Do not retry with a falsely enlarged embedded
+policy or rewrite an old fingerprint.
+
+For depth/node failures, inspect the effective minima and the complete operation: input snapshot,
+repeated helper validation, source-anchor qualification, conflict comparison, generated envelope and
+serializer preflight arguments all consume one non-refundable reporting traversal budget. Smaller
+input size alone is insufficient to prove the operation fits. Cancellation or rejection creates no
+COMPLETE output. Accepted upstream pure helpers retain their own stricter bounds; this budget is not
+a CPU/preemption guarantee.
+
+For REPORTING:EVIDENCE_IDENTITY_CONFLICT, compare full owner/version/commit/native identity/native
+fingerprint/subject/unit/effective/availability context. The same immutable pin cannot support
+different captured payloads. Do not discard one record or rewrite a native fingerprint to
+manufacture consistency. Identical repeated payloads are allowed; distinguish real generation and
+scope changes using existing source fields. An UNKNOWN fingerprint cannot prove conflicting records
+came from different immutable generations. Review missing evidence manually; reporting does not
+refresh owners.
+
+Historical integrity is separate from admissibility: an early resource rejection makes no claim that
+a stored self-hash was verified or invalid. For an admissible import the original self-hash is
+checked without mutation. Historical clock-call usage is validated against its original governing
+policy; query/export do not count historical calls as fresh calls. Current authority and cross-owner
+consistency remain unestablished. Four passive routes remain DISABLED.

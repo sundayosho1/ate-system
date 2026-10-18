@@ -46,7 +46,7 @@ const sources = [
   "packages/research-reporting/src/report.ts",
   "packages/research-reporting/src/validation.ts",
 ];
-const expected = "7b6aed1850a6844cd5906258b4dfa1fad4f83a4d9472ce8e2640e0853473e4b9";
+const expected = "dfa9870fad6883f075ac6184a30200fdd5d6a9552d4af0e49505c15a3d82da02";
 const allowed = [
   "docs/architecture/research-reporting.md",
   "docs/help/research-reporting.md",
@@ -171,16 +171,47 @@ it("no unapproved source private import network clock or execution", () => {
     expect(s).not.toMatch(pattern);
 });
 it("exact37path maximum does not confer directory-wide permission", () => {
-  const tracked = execFileSync("git", ["diff", "--name-only", baseline], { encoding: "utf8" })
-      .trim()
-      .split("\n")
-      .filter(Boolean),
-    untracked = execFileSync("git", ["ls-files", "--others", "--exclude-standard"], {
-      encoding: "utf8",
-    })
-      .trim()
-      .split("\n")
-      .filter(Boolean);
-  for (const p of [...tracked, ...untracked]) expect(allowed).toContain(p);
-  expect(new Set([...tracked, ...untracked]).size).toBeLessThanOrEqual(37);
+  const implementation = "fdb9326ad158642e48ce3c3fedeba663e31e364e";
+  expect(
+    execFileSync("git", ["rev-parse", implementation + "^"], { encoding: "utf8" }).trim(),
+  ).toBe(baseline);
+  const original = execFileSync("git", ["diff", "--name-only", baseline, implementation], {
+    encoding: "utf8",
+  })
+    .trim()
+    .split("\n")
+    .filter(Boolean);
+  for (const path of original) expect(allowed).toContain(path);
+  expect(new Set(original).size).toBe(37);
+  const remediationAllowed = [
+    "docs/architecture/research-reporting.md",
+    "docs/help/research-reporting.md",
+    "docs/knowledge/reporting-contract-guide.md",
+    "packages/research-reporting/README.md",
+    "packages/research-reporting/src/budgets.ts",
+    "packages/research-reporting/src/charts.ts",
+    "packages/research-reporting/src/evidence.ts",
+    "packages/research-reporting/src/export.ts",
+    "packages/research-reporting/src/policy.ts",
+    "packages/research-reporting/src/projection.ts",
+    "packages/research-reporting/src/report.ts",
+    "packages/research-reporting/src/validation.ts",
+    "tests/research-reporting/architecture.test.ts",
+    "tests/research-reporting/cross-finding-remediation.test.ts",
+    "tests/research-reporting/immutable-evidence-remediation.test.ts",
+    "tests/research-reporting/readback-policy-remediation.test.ts",
+    "tests/research-reporting/resource-policy-remediation.test.ts",
+  ];
+  const tracked = execFileSync("git", ["diff", "--name-only", implementation], { encoding: "utf8" })
+    .trim()
+    .split("\n")
+    .filter(Boolean);
+  const untracked = execFileSync("git", ["ls-files", "--others", "--exclude-standard"], {
+    encoding: "utf8",
+  })
+    .trim()
+    .split("\n")
+    .filter(Boolean);
+  for (const path of [...tracked, ...untracked]) expect(remediationAllowed).toContain(path);
+  expect(new Set([...tracked, ...untracked]).size).toBeLessThanOrEqual(17);
 });

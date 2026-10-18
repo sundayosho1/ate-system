@@ -1,15 +1,57 @@
 import { validateInsightRecord } from "@ate/research-insight-contracts";
 import type { Chart, QualifiedObservation, ReportingPolicy } from "./contracts.js";
 import { checkedPolicy } from "./policy.js";
-import { array, data, object, exact, id, utc, demand, guard, freeze } from "./validation.js";
+import {
+  array,
+  data,
+  object,
+  exact,
+  id,
+  utc,
+  demand,
+  guard,
+  freeze,
+  digest,
+} from "./validation.js";
+import { TraversalBudget } from "./budgets.js";
+import { ensureConsistentEvidence, validateArtifact } from "./evidence.js";
 export function buildChartMetadata(
   raw: unknown,
   observations: readonly QualifiedObservation[],
   policy: ReportingPolicy,
 ) {
   return guard(() => {
+    const result = buildChartsWithinBudget(
+      raw,
+      observations,
+      policy,
+      new TraversalBudget(checkedPolicy(policy)),
+    );
+    demand(result.ok, result.ok ? undefined : result.issues[0]?.code);
+    return result.value;
+  });
+}
+export function buildChartsWithinBudget(
+  raw: unknown,
+  observations: readonly QualifiedObservation[],
+  policy: ReportingPolicy,
+  work: TraversalBudget,
+  artifactDepth = 2,
+  chartDepth = 0,
+) {
+  return guard(() => {
     const p = checkedPolicy(policy),
-      charts = data(raw, p.maxReportBytes, 32, 50000);
+      charts = data(raw, p.maxReportBytes, 32, 50000, work, chartDepth);
+    demand(
+      observations.length <= p.maxArtifacts && observations.length <= p.maxEvidenceRefs,
+      "REPORTING:BUDGET_EXHAUSTED",
+    );
+    const artifacts = observations.map((o) => {
+      const a = validateArtifact(o.artifact, work, artifactDepth);
+      demand(o.captureDigest === digest(a, work, artifactDepth), "REPORTING:FINGERPRINT_MISMATCH");
+      return a;
+    });
+    ensureConsistentEvidence(artifacts, work, artifactDepth + 1);
     demand(Array.isArray(charts) && charts.length <= p.maxCharts, "REPORTING:BUDGET_EXHAUSTED");
     let total = 0;
     const chartIds = new Set<string>();
@@ -64,7 +106,12 @@ export function buildChartMetadata(
             typeof x.finality === "string" &&
               ["FINAL", "PROVISIONAL", "UNKNOWN"].includes(x.finality),
           );
-          demand(validateInsightRecord("Fact", x.value).ok);
+          demand(
+            validateInsightRecord(
+              "Fact",
+              data(x.value, p.maxReportBytes, 32, 50000, work, chartDepth + 6),
+            ).ok,
+          );
           const o = observations.find((o) => o.artifact.id === x.evidenceId);
           demand(
             o &&

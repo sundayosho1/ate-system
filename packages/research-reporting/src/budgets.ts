@@ -34,3 +34,19 @@ export class ReadBudgetLedger {
     });
   }
 }
+
+/** Internal, monotonic per-operation traversal work. Not a new public root API or serialized budget claim. */
+export class TraversalBudget {
+  private consumed = 0;
+  constructor(private readonly limits: ReportingPolicy) {}
+  visit(depth: number): void {
+    this.consumed++;
+    demand(
+      this.consumed <= this.limits.maxNodes && depth <= this.limits.maxDepth,
+      "REPORTING:BUDGET_EXHAUSTED",
+    );
+  }
+  get remainingNodes(): number {
+    return Math.max(0, this.limits.maxNodes - this.consumed);
+  }
+}

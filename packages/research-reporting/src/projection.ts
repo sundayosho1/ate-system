@@ -6,6 +6,7 @@ import type {
 } from "./contracts.js";
 import type { JsonValue } from "@ate/research-insight-contracts";
 import { freeze, known, unknownFact, demand, object } from "./validation.js";
+/** Caller must establish whole-vector immutable consistency before projecting individual facets. */
 export function projectFacet(
   f: FacetRequest,
   o: QualifiedObservation | undefined,

@@ -10,7 +10,7 @@ import type {
 } from "./contracts.js";
 import {
   array,
-  validateReportRequest,
+  validateRequestWithinBudget,
   data,
   object,
   exact,
@@ -23,12 +23,12 @@ import {
   byteSize,
   unknownFact,
 } from "./validation.js";
-import { checkedPolicy, createReportingPolicy } from "./policy.js";
-import { ReadBudgetLedger } from "./budgets.js";
-import { validateArtifact, qualifyEvidence } from "./evidence.js";
+import { checkedPolicy, createReportingPolicy, effectivePolicy, embeddedPolicy } from "./policy.js";
+import { ReadBudgetLedger, TraversalBudget } from "./budgets.js";
+import { validateArtifact, qualifyEvidence, ensureConsistentEvidence } from "./evidence.js";
 import { projectFacet } from "./projection.js";
 import { consistencyEvidence } from "./consistency.js";
-import { buildChartMetadata } from "./charts.js";
+import { buildChartsWithinBudget } from "./charts.js";
 import { projectImprovementRegister } from "./improvements.js";
 const activeClocks = new WeakSet<object>();
 export function composeReport(input: unknown, context: ReportingContext, policy?: ReportingPolicy) {
@@ -36,9 +36,12 @@ export function composeReport(input: unknown, context: ReportingContext, policy?
     const defaults = createReportingPolicy();
     demand(defaults.ok);
     const p = checkedPolicy(policy ?? defaults.value);
-    const envelope = object(data(input, Math.min(p.maxNativeBytes + 65536, 1114112), 32, 50000));
+    const work = new TraversalBudget(p);
+    const envelope = object(
+      data(input, Math.min(p.maxNativeBytes + 65536, 1114112), 32, 50000, work),
+    );
     exact(envelope, ["request", "evidence", "charts", "improvements"]);
-    const parsed = validateReportRequest(envelope.request);
+    const parsed = validateRequestWithinBudget(envelope.request, work, 1);
     demand(parsed.ok);
     const request: ReportRequest = parsed.value;
     demand(request.facets.length <= p.maxFacets, "REPORTING:BUDGET_EXHAUSTED");
@@ -65,17 +68,21 @@ export function composeReport(input: unknown, context: ReportingContext, policy?
         "REPORTING:BUDGET_EXHAUSTED",
       );
       budget.evidence(byteSize(envelope.evidence));
-      const anchors = data(context.anchors, 65536, 16, 10000);
+      const anchors = data(context.anchors, 65536, 16, 10000, work);
       demand(Array.isArray(anchors) && anchors.length <= 32);
       const ids = new Set<string>();
       const observations = envelope.evidence
         .map((raw) => {
-          const a = validateArtifact(raw);
+          const a = validateArtifact(raw, work, 2);
           demand(!ids.has(a.id), "REPORTING:EVIDENCE_IDENTITY_CONFLICT");
           ids.add(a.id);
-          return qualifyEvidence(a, request, anchors as ReportingContext["anchors"]);
+          return qualifyEvidence(a, request, anchors as ReportingContext["anchors"], work);
         })
         .sort((a, b) => (a.artifact.id < b.artifact.id ? -1 : 1));
+      ensureConsistentEvidence(
+        observations.map((o) => o.artifact),
+        work,
+      );
       const facets = request.facets
         .map((f) =>
           projectFacet(
@@ -85,10 +92,10 @@ export function composeReport(input: unknown, context: ReportingContext, policy?
           ),
         )
         .sort((a, b) => (a.facet.id < b.facet.id ? -1 : 1));
-      const charts = buildChartMetadata(envelope.charts!, observations, p);
+      const charts = buildChartsWithinBudget(envelope.charts!, observations, p, work, 2, 1);
       demand(charts.ok);
       const improvements = projectImprovementRegister(
-        envelope.improvements!,
+        data(envelope.improvements!, 1048576, 32, 50000, work, 1),
         observations
           .filter((o) => o.provenance === "TRUSTED_CONTEXT_ANCHOR")
           .map((o) => o.artifact.id),
@@ -118,13 +125,13 @@ export function composeReport(input: unknown, context: ReportingContext, policy?
         currentAuthority: unknownFact("REPORTING:CURRENT_AUTHORITY_UNESTABLISHED"),
         budget: budget.snapshot(),
       };
-      const reportFingerprint = digest({ body, generatedAt: end });
+      const reportFingerprint = digest({ body, generatedAt: end }, work);
       const manifest: ReportManifest = {
         schema: "ate.insights.report/1",
         id: reportFingerprint,
         baseline: request.baseline,
         projectionVersion: "0.1.0-reporting-projection.1",
-        requestFingerprint: digest(request),
+        requestFingerprint: digest(request, work, 1),
         generatedAt: end,
         sourceObservationIds: observations.map((o) => o.artifact.id),
         exactEvidenceVector: observations.map((o) => ({
@@ -143,6 +150,7 @@ export function composeReport(input: unknown, context: ReportingContext, policy?
       for (const f of facets) demand(validateInsightRecord("DiagnosticFacet", f.facet).ok);
       demand(validateInsightRecord("ConsistencyEvidence", consistency).ok);
       const result = freeze({ ...body, manifest });
+      data(result, p.maxReportBytes, 32, 50000, work);
       demand(byteSize(result) <= p.maxReportBytes - 4096, "REPORTING:BUDGET_EXHAUSTED");
       return result;
     } finally {
@@ -151,8 +159,15 @@ export function composeReport(input: unknown, context: ReportingContext, policy?
   });
 }
 /** Verify all report bytes before any detached query/export; no re-import can acquire current authority. */
-export function validateBundle(raw: unknown): ReportBundle {
-  const b = object(data(raw, 4194304, 32, 50000));
+export function validateBundle(
+  raw: unknown,
+  operationPolicy?: ReportingPolicy,
+  sharedWork?: TraversalBudget,
+): ReportBundle {
+  const originalPolicy = embeddedPolicy(raw);
+  const p = effectivePolicy(originalPolicy, operationPolicy);
+  const work = sharedWork ?? new TraversalBudget(p);
+  const b = object(data(raw, 4194304, 32, 50000, work));
   exact(b, [
     "schema",
     "request",
@@ -173,25 +188,24 @@ export function validateBundle(raw: unknown): ReportBundle {
     b.schema === "ate.reporting.bundle/1" &&
       b.improvementAuthority === "SUPPLIED_RECORDS_NOT_AUTHENTICATED_DECISIONS",
   );
-  const p = checkedPolicy(b.policy),
-    m = object(b.manifest!);
+  const m = object(b.manifest!);
   demand(validateInsightRecord("ReportManifest", m).ok);
   const { manifest: _manifest, ...body } = b;
   demand(
-    m.reportFingerprint === digest({ body, generatedAt: m.generatedAt }) &&
+    m.reportFingerprint === digest({ body, generatedAt: m.generatedAt }, work) &&
       m.id === m.reportFingerprint,
     "REPORTING:FINGERPRINT_MISMATCH",
   );
-  const parsed = validateReportRequest(b.request);
+  const parsed = validateRequestWithinBudget(b.request, work, 1);
   demand(parsed.ok);
   const r = parsed.value;
   demand(
     m.baseline === r.baseline &&
-      m.requestFingerprint === digest(r) &&
+      m.requestFingerprint === digest(r, work) &&
       m.projectionVersion === "0.1.0-reporting-projection.1" &&
       m.exportStatus === "BLOCKED",
   );
-  demand(digest(m.qualifications) === digest(reportQualifications));
+  demand(digest(m.qualifications, work) === digest(reportQualifications, work));
   demand(
     JSON.stringify(b.currentAuthority) ===
       JSON.stringify(unknownFact("REPORTING:CURRENT_AUTHORITY_UNESTABLISHED")),
@@ -212,8 +226,8 @@ export function validateBundle(raw: unknown): ReportBundle {
       "anchorReference",
       "pointInTime",
     ]);
-    const a = validateArtifact(o.artifact);
-    demand(o.captureDigest === digest(a), "REPORTING:FINGERPRINT_MISMATCH");
+    const a = validateArtifact(o.artifact, work, 3);
+    demand(o.captureDigest === digest(a, work, 3), "REPORTING:FINGERPRINT_MISMATCH");
     demand(o.provenance === "TRUSTED_CONTEXT_ANCHOR" || o.provenance === "UNESTABLISHED");
     demand(
       o.qualification === "SOURCE_DECLARED_AVAILABILITY_NOT_INDEPENDENTLY_VERIFIED" &&
@@ -232,8 +246,15 @@ export function validateBundle(raw: unknown): ReportBundle {
   });
   demand(new Set(observations.map((o) => o.artifact.id)).size === observations.length);
   demand(
-    digest(observations.map((o) => o.artifact.id)) ===
-      digest([...observations.map((o) => o.artifact.id)].sort()),
+    digest(
+      observations.map((o) => o.artifact.id),
+      work,
+    ) === digest([...observations.map((o) => o.artifact.id)].sort(), work),
+  );
+  ensureConsistentEvidence(
+    observations.map((o) => o.artifact),
+    work,
+    4,
   );
   const expectedFacets = r.facets
     .map((f) =>
@@ -244,28 +265,39 @@ export function validateBundle(raw: unknown): ReportBundle {
       ),
     )
     .sort((a, b) => (a.facet.id < b.facet.id ? -1 : 1));
-  demand(digest(b.facets) === digest(expectedFacets), "REPORTING:CONTEXT_MISMATCH");
+  demand(digest(b.facets, work) === digest(expectedFacets, work), "REPORTING:CONTEXT_MISMATCH");
   const complete = expectedFacets.every((f) => f.status === "OBSERVED");
   demand(
     b.projectionRequestComplete === complete && b.status === (complete ? "COMPLETE" : "PARTIAL"),
   );
   demand(
-    digest(m.missingFacets) ===
-      digest(expectedFacets.filter((f) => f.status !== "OBSERVED").map((f) => f.facet.id)) &&
-      digest(m.requestedFacets) === digest(r.facets.map((f) => f.id)),
+    digest(m.missingFacets, work) ===
+      digest(
+        expectedFacets.filter((f) => f.status !== "OBSERVED").map((f) => f.facet.id),
+        work,
+      ) &&
+      digest(m.requestedFacets, work) ===
+        digest(
+          r.facets.map((f) => f.id),
+          work,
+        ),
   );
   demand(
-    digest(m.sourceObservationIds) === digest(observations.map((o) => o.artifact.id)) &&
-      observations.length <= p.maxEvidenceRefs,
+    digest(m.sourceObservationIds, work) ===
+      digest(
+        observations.map((o) => o.artifact.id),
+        work,
+      ) && observations.length <= p.maxEvidenceRefs,
   );
   demand(
-    digest(m.exactEvidenceVector) ===
+    digest(m.exactEvidenceVector, work) ===
       digest(
         observations.map((o) => ({
           id: o.artifact.id,
           digest: o.captureDigest,
           origin: o.provenance,
         })),
+        work,
       ),
   );
   const consistency = object(b.consistency!),
@@ -276,8 +308,8 @@ export function validateBundle(raw: unknown): ReportBundle {
     interval.end === m.generatedAt && r.asOf <= m.generatedAt && r.knowledgeCutoff <= m.generatedAt,
   );
   demand(
-    digest(consistency) ===
-      digest(consistencyEvidence(observations, interval.start, m.generatedAt)),
+    digest(consistency, work) ===
+      digest(consistencyEvidence(observations, interval.start, m.generatedAt), work),
   );
   const budget = object(b.budget!);
   exact(budget, ["calls", "clockReads", "nativeBytes"]);
@@ -285,26 +317,28 @@ export function validateBundle(raw: unknown): ReportBundle {
     Number.isSafeInteger(budget.calls) &&
       budget.calls === budget.clockReads &&
       Number(budget.calls) >= 2 &&
-      Number(budget.calls) <= p.maxCalls &&
-      Number(budget.clockReads) <= p.maxClockReads,
+      Number(budget.calls) <= originalPolicy.maxCalls &&
+      Number(budget.clockReads) <= originalPolicy.maxClockReads,
   );
   demand(
     budget.nativeBytes === byteSize(observations.map((o) => o.artifact)) &&
       Number(budget.nativeBytes) <= p.maxNativeBytes &&
-      digest(m.budgetUsage) === digest(budget),
+      digest(m.budgetUsage, work) === digest(budget, work),
   );
-  demand(buildChartMetadata(b.charts, observations, p).ok);
+  demand(buildChartsWithinBudget(b.charts, observations, p, work, 3, 1).ok);
   const improvements = projectImprovementRegister(
-    b.improvements,
+    data(b.improvements, 1048576, 32, 50000, work, 1),
     observations.filter((o) => o.provenance === "TRUSTED_CONTEXT_ANCHOR").map((o) => o.artifact.id),
   );
   demand(improvements.ok && improvements.value.records.length <= p.maxImprovements);
   return b as unknown as ReportBundle;
 }
-export function queryReport(raw: unknown, query: unknown) {
+export function queryReport(raw: unknown, query: unknown, policy?: ReportingPolicy) {
   return guard(() => {
-    const b = validateBundle(raw),
-      q = object(data(query));
+    const effective = effectivePolicy(embeddedPolicy(raw), policy);
+    const work = new TraversalBudget(effective);
+    const b = validateBundle(raw, effective, work),
+      q = object(data(query, 65536, 16, 10000, work));
     exact(q, ["offset", "limit", "owner"]);
     demand(
       Number.isSafeInteger(q.offset) &&

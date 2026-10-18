@@ -60,3 +60,33 @@ guide with their source-time meaning. No qualification is silently closed. No or
 independent certification is claimed by a participating assistant. No frontend, server, remote IAM,
 financial execution, autonomous remediation, production deployment or next development prompt is
 authorized.
+
+## Remediation: shared traversal domains and source consistency
+
+One internal TraversalBudget is created for each composition, standalone chart build, query or
+export. Helper calls share the same instance. The node unit is a reporting-owned descriptor visit,
+including bounded argument preflight for accepted pure serializers; repeated copies/validation are
+charged again. There is no refund after failure. This is not a count of CPU instructions or hard
+preemption; accepted upstream helpers keep their own fixed ceilings. Policy descriptors use
+separately bounded control admission before any operation data traversal.
+
+Logical depth roots are explicit: composition input is depth0; request depth1; incoming evidence
+artifact depth2, captured payload wrapper depth3. On report import, the bundle is depth0, request1,
+observation artifact3 and captured wrapper4. Embedded chart arrays retain depth1 (standalone chart
+argument depth0); chart Fact values are six levels below that array root. Anchors are a separate
+bounded input root0. Generated report/hash/export envelopes have their own explicit root0 but share
+the same cumulative node ledger. Helpers cannot erase incoming structural depth by re-rooting a
+subtree.
+
+Re-import first reads an own data policy descriptor, rejecting accessors. It selects minima of
+admitted original/override ceilings, then snapshots under the effective budget. Invalid old policy
+compliance cannot be washed through query/export. No old report bytes/hash are rewritten. Historical
+call counts remain historical rather than new operation consumption. The optional query-policy
+parameter grants no new authority.
+
+Whole-vector conflict validation precedes facets/completion and is repeated on import and chart
+source processing. A pin uses existing full source/scope fields, with known native fingerprint
+values distinguished from capture/derived hashes. Different known native fingerprints can identify
+separate generations; UNKNOWN cannot prove that distinction. Identical payload repeats remain valid.
+No global consistency barrier, native evidence rewriting, owner mutation or new public
+ate.insights/1 schema is introduced.

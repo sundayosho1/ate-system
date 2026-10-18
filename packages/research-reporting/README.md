@@ -6,8 +6,8 @@ governance acceptance PENDING.
 This package composes detached, non-authoritative reports. All four passive diagnostic routes are
 DISABLED. It has no network, filesystem access, broker connection, commands, refresh, native state
 reconciliation or automatic remediation. The P6 clock is a distinct bounded dependency. Start with
-[the reporting help](../../../docs/help/research-reporting.md) and
-[architecture](../../../docs/architecture/research-reporting.md).
+[the reporting help](../../docs/help/research-reporting.md) and
+[architecture](../../docs/architecture/research-reporting.md).
 
 Public operations: validateReportRequest, createReportingPolicy, admitReadBinding (always denies),
 captureNativeEvidence, captureDigest, composeReport, queryReport, explainDiagnostic,
@@ -19,3 +19,12 @@ A trusted-context evidence anchor binds an exact captured digest/source identity
 projection under T01. It is not a signature, independent source verification, current owner approval
 or source truth. Current-authority and cross-owner consistency remain unestablished. Self-hashed
 imported reports are historical views, not authenticated current service state.
+
+## Resource and immutable-evidence corrections
+
+The reporting operation now enforces admitted lower depth/node ceilings with one cumulative internal
+traversal budget. Query accepts an optional third policy parameter; query/export use minima with the
+stored report policy. A historical self-hash does not establish current policy admissibility. Fully
+qualified immutable source-pin conflicts reject rather than producing COMPLETE; identical repeat
+evidence and genuinely distinct generations remain separate. See the help and reporting contract
+guide for domains and troubleshooting. Technical/governance acceptance remain PENDING.

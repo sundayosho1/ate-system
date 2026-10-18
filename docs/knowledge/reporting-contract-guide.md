@@ -595,3 +595,25 @@ and M02current registry restrictions are unchanged. All historical failed assert
 failed harness model and separately corrected results remain historical evidence. This
 implementation does not perform its own independent technical acceptance or governance approval.
 Reviewer participation and absence of organizationally independent certification remain disclosed.
+
+## Controlled three-finding remediation notes
+
+D-A-M01 is corrected through operation-wide traversal accounting and effective policy minima rather
+than by disabling lower configurations. Required nodes are cumulative visits, not unique object
+identities; exact-limit oracles must include repeated helper/serialization argument traversals.
+Depth domains and policy-control admission are documented in the architecture page. Stored report
+integrity/current admissibility are separate; rejection preserves historical bytes and does not
+certify a hash that could not be checked within the budget.
+
+D-A-M02 is corrected by comparing fully qualified immutable native pins before local completion and
+on query/export/chart readback. A complete historical request cannot contain contradictory payloads
+under one pin. Different generation/scope evidence and identical repeated records must stay
+distinguishable and retained. Partial/unknown fingerprints provide no invented generation proof.
+Existing units, times, availability, lineage, source qualifications and native fingerprints stay
+intact.
+
+D-A-L01 corrects only package navigation links. All49 preservation rows,12 B-R risks,12 D-R
+risks,C-Q01–04 and OPEN A26-Q01/A26C-L01/C-OP01 remain binding. This remediation is implementation,
+not independent technical or governance acceptance; both remain PENDING. The separate re-audit
+criterion remains required. No accepted owner, capability, root version or governance record
+changes.

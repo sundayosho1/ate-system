@@ -1,15 +1,15 @@
 import { canonicalInsightBytes } from "@ate/research-insights";
-import { checkedPolicy, createReportingPolicy } from "./policy.js";
+import { effectivePolicy, embeddedPolicy } from "./policy.js";
+import { TraversalBudget } from "./budgets.js";
 import { validateBundle } from "./report.js";
-import { guard, freeze, digest, demand, unknownFact } from "./validation.js";
+import { guard, freeze, digest, demand, unknownFact, data } from "./validation.js";
 import type { ReportingPolicy } from "./contracts.js";
 /** Explicit safe field allowlist: no raw native values, paths, labels, source text or credential refs. */
 export function serializeReportExport(raw: unknown, policy?: ReportingPolicy) {
   return guard(() => {
-    const defaultPolicy = createReportingPolicy();
-    demand(defaultPolicy.ok);
-    const p = checkedPolicy(policy ?? defaultPolicy.value),
-      b = validateBundle(raw);
+    const p = effectivePolicy(embeddedPolicy(raw), policy);
+    const work = new TraversalBudget(p);
+    const b = validateBundle(raw, p, work);
     const projection = {
       schema: "ate.reporting.export/1",
       originalReportFingerprint: b.manifest.reportFingerprint,
@@ -37,9 +37,15 @@ export function serializeReportExport(raw: unknown, policy?: ReportingPolicy) {
       ],
       currentAuthority: unknownFact("REPORTING:HISTORICAL_REPORT_NOT_CURRENT_AUTHORITY"),
     };
-    const fingerprint = digest(projection),
+    const fingerprint = digest(projection, work),
       bytes = canonicalInsightBytes(
-        { ...projection, projectionFingerprint: fingerprint },
+        data(
+          { ...projection, projectionFingerprint: fingerprint },
+          p.maxExportBytes,
+          32,
+          50000,
+          work,
+        ),
         "EXPORT",
       );
     demand(bytes.ok && bytes.value.byteLength <= p.maxExportBytes, "REPORTING:BUDGET_EXHAUSTED");
