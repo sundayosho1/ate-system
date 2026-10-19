@@ -15,6 +15,7 @@ const args = (base: string) => [
   ":(exclude)packages/research-insight-contracts",
   ":(exclude)packages/research-insights",
   ":(exclude)packages/research-reporting",
+  ":(exclude)packages/research-workspace",
 ];
 const owners = readdirSync("packages", { withFileTypes: true })
   .filter(
@@ -24,7 +25,8 @@ const owners = readdirSync("packages", { withFileTypes: true })
       d.name !== "mose-attention" &&
       d.name !== "research-insight-contracts" &&
       d.name !== "research-insights" &&
-      d.name !== "research-reporting",
+      d.name !== "research-reporting" &&
+      d.name !== "research-workspace",
   )
   .map((d) => d.name)
   .sort();
@@ -80,7 +82,9 @@ it("P25 governance and capability declarations remain unchanged", () => {
     "config/capabilities.json",
   ]) {
     expect(readFileSync(file, "utf8")).toBe(
-      execFileSync("git", ["show", baseline + ":" + file], { encoding: "utf8" }),
+      execFileSync("git", ["show", baseline + ":" + file], {
+        encoding: "utf8",
+      }),
     );
   }
 });

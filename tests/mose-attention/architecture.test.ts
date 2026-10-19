@@ -1,5 +1,6 @@
 import { it, expect } from "vitest";
 import { strictEqual } from "node:assert";
+import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { readdirSync, readFileSync, mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -15,6 +16,7 @@ const args = (base: string) => [
   ":(exclude)packages/research-insight-contracts",
   ":(exclude)packages/research-insights",
   ":(exclude)packages/research-reporting",
+  ":(exclude)packages/research-workspace",
 ];
 const owners = readdirSync("packages", { withFileTypes: true })
   .filter(
@@ -23,7 +25,8 @@ const owners = readdirSync("packages", { withFileTypes: true })
       d.name !== "mose-attention" &&
       d.name !== "research-insight-contracts" &&
       d.name !== "research-insights" &&
-      d.name !== "research-reporting",
+      d.name !== "research-reporting" &&
+      d.name !== "research-workspace",
   )
   .map((d) => d.name)
   .sort();
@@ -109,9 +112,15 @@ it("governance, capabilities, root version and dependency versions preserved", (
     }
   }
   const old = JSON.parse(
-    execFileSync("git", ["show", baseline + ":package-lock.json"], { encoding: "utf8" }),
+    execFileSync("git", ["show", baseline + ":package-lock.json"], {
+      encoding: "utf8",
+    }),
   ) as { packages: Record<string, unknown> };
-  const current = JSON.parse(readFileSync("package-lock.json", "utf8")) as typeof old;
+  const current = JSON.parse(
+    execFileSync("git", ["show", "fe587fb12d9eefe41e4d2234b9d7962fb323bab9:package-lock.json"], {
+      encoding: "utf8",
+    }),
+  ) as typeof old;
   for (const [key, value] of Object.entries(old.packages))
     expect(current.packages[key]).toEqual(value);
   expect(Object.keys(current.packages).filter((k) => !(k in old.packages))).toEqual([
@@ -124,13 +133,16 @@ it("governance, capabilities, root version and dependency versions preserved", (
     "packages/research-insights",
     "packages/research-reporting",
   ]);
+  verifyWorkspaceLock();
 });
 
 const foundationGovernance = "538c2d564b9ad6df1d1b1d50016e5e75f89cb6c8";
 const foundationRecord = "docs/development/p1-p27-insights-foundation-conditional-acceptance.md";
 const verifyFoundationGovernance = () => {
   expect(
-    execFileSync("git", ["rev-parse", foundationGovernance + "^"], { encoding: "utf8" }).trim(),
+    execFileSync("git", ["rev-parse", foundationGovernance + "^"], {
+      encoding: "utf8",
+    }).trim(),
   ).toBe("216f26d10eea057b62d14ec009d4c56d6f27993b");
   expect(
     execFileSync(
@@ -155,7 +167,9 @@ const reportingGovernance = "7c6445e78b9e8c2e817e22099baab15846292ca5";
 const reportingRecord = "docs/development/p1-p27-reporting-conditional-acceptance.md";
 const verifyReportingGovernance = () => {
   expect(
-    execFileSync("git", ["rev-parse", reportingGovernance + "^"], { encoding: "utf8" }).trim(),
+    execFileSync("git", ["rev-parse", reportingGovernance + "^"], {
+      encoding: "utf8",
+    }).trim(),
   ).toBe("e651349ede0ab6b3babd533e95c157052ca67cfa");
   expect(
     execFileSync("git", ["diff-tree", "--no-commit-id", "--name-only", "-r", reportingGovernance], {
@@ -177,4 +191,24 @@ const verifyReportingGovernance = () => {
     expect(readFileSync(path)).toEqual(
       execFileSync("git", ["show", reportingGovernance + ":" + path]),
     );
+};
+
+const verifyWorkspaceLock = () => {
+  const accepted = JSON.parse(
+    execFileSync("git", ["show", "fe587fb12d9eefe41e4d2234b9d7962fb323bab9:package-lock.json"], {
+      encoding: "utf8",
+    }),
+  ) as { packages: Record<string, unknown>; [key: string]: unknown };
+  const proposed = JSON.parse(readFileSync("package-lock.json", "utf8")) as typeof accepted;
+  for (const [key, value] of Object.entries(accepted))
+    if (key !== "packages") expect(proposed[key]).toEqual(value);
+  for (const [key, value] of Object.entries(accepted.packages))
+    expect(proposed.packages[key]).toEqual(value);
+  expect(Object.keys(proposed.packages).filter((key) => !(key in accepted.packages))).toEqual([
+    "node_modules/@ate/research-workspace",
+    "packages/research-workspace",
+  ]);
+  expect(createHash("sha256").update(readFileSync("package-lock.json")).digest("hex")).toBe(
+    "8467e34ca12656c67eb7ad38219b5c931c19bb8843ace056b9ad830dda084ce0",
+  );
 };

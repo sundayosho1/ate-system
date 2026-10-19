@@ -166,6 +166,7 @@ it("unchanged upstream packages retain their exact baseline bytes", () => {
         ":(exclude)packages/research-insight-contracts",
         ":(exclude)packages/research-insights",
         ":(exclude)packages/research-reporting",
+        ":(exclude)packages/research-workspace",
       ],
       { encoding: "utf8" },
     ),
@@ -211,7 +212,11 @@ it("recovery enforces lifecycle resource bounds as well as live admission", asyn
     ...f.ports,
     repository: {
       load: () => Promise.resolve({ ok: true, value: [s] }),
-      commit: () => Promise.resolve({ ok: false, error: { code: "NO", commitment: "NONE" } }),
+      commit: () =>
+        Promise.resolve({
+          ok: false,
+          error: { code: "NO", commitment: "NONE" },
+        }),
     },
   });
   expect(take(await reader.initialize())?.fingerprint).toBe(s.fingerprint);
@@ -285,7 +290,12 @@ it("a reentrant owner callback during synchronous current query cannot stop the 
     nested = f.service.stop();
     return original(r);
   };
-  const result = f.service.query({ kind: "RECONCILIATION", scope: "CURRENT", offset: 0, limit: 1 });
+  const result = f.service.query({
+    kind: "RECONCILIATION",
+    scope: "CURRENT",
+    offset: 0,
+    limit: 1,
+  });
   expect(result.ok).toBe(true);
   expect(await nested).toMatchObject({ ok: false, error: { code: "BUSY" } });
   expect(f.service.diagnostics().readiness).toBe("READY");
@@ -344,7 +354,10 @@ it.each([
 it("an explicitly empty session schedule does not establish a complete session history", async () => {
   const f = await fixture(),
     r = f.request();
-  r.metadata.sessions.calendar = declared({ ...utcCalendar, kind: "EXPLICIT_SESSION_SCHEDULE" });
+  r.metadata.sessions.calendar = declared({
+    ...utcCalendar,
+    kind: "EXPLICIT_SESSION_SCHEDULE",
+  });
   r.metadata.sessions.effectiveFrom = declared(mustParseUtc("2026-10-01T00:00:00.000Z"));
   const s = take(await f.service.publish(r));
   expect(s.prepared.completeness.find((p) => p.profile === "SESSION_HISTORY")?.classification).toBe(

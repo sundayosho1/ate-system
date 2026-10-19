@@ -1,0 +1,17 @@
+{
+  "name": "@ate/research-workspace",
+  "version": "0.1.0-integration.1",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@ate/research-insight-contracts": "0.1.0-insights-foundation.1",
+    "@ate/research-insights": "0.1.0-insights-foundation.1",
+    "@ate/research-reporting": "0.1.0-reporting-projection.1",
+    "@ate/time": "0.6.0-time.1"
+  },
+  "license": "UNLICENSED"
+}
