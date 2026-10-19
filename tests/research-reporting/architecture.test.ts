@@ -349,17 +349,19 @@ it("exact37path maximum does not confer directory-wide permission", () => {
     "tests/research-workspace/relationships-contextual-links.test.ts",
     "tests/research-workspace/report-filter-remediation.test.ts",
   ];
-  const workspaceTracked = execFileSync("git", ["diff", "--name-only", workspaceImplementation], {
-    encoding: "utf8",
-  })
+  const historicalWorkspaceRemediation = execFileSync(
+    "git",
+    ["diff", "--name-only", workspaceImplementation, workspaceCandidate],
+    { encoding: "utf8" },
+  )
     .trim()
     .split("\n")
     .filter(Boolean);
-  for (const path of [...workspaceTracked, ...untracked])
-    expect(workspaceRemediationAllowed).toContain(path);
-  expect(new Set([...workspaceTracked, ...untracked]).size).toBeLessThanOrEqual(
-    workspaceRemediationAllowed.length,
+  expect([...historicalWorkspaceRemediation].sort()).toEqual(
+    [...workspaceRemediationAllowed].sort(),
   );
+  expect(historicalWorkspaceRemediation).toHaveLength(12);
+  verifyWorkspaceGovernance();
   expect(
     execFileSync(
       "git",
@@ -399,10 +401,13 @@ const verifyReportingGovernance = () => {
     approved = execFileSync("git", ["show", reportingGovernance + ":" + ledger]);
   expect(approved.subarray(0, historical.length)).toEqual(historical);
   expect(approved.length).toBeGreaterThan(historical.length);
-  for (const path of [reportingRecord, ledger])
-    expect(readFileSync(path)).toEqual(
-      execFileSync("git", ["show", reportingGovernance + ":" + path]),
-    );
+  for (const path of [reportingRecord, ledger]) {
+    const accepted = execFileSync("git", ["show", reportingGovernance + ":" + path]);
+    if (path === ledger) {
+      expect(readFileSync(path).subarray(0, accepted.length)).toEqual(accepted);
+      verifyWorkspaceGovernance();
+    } else expect(readFileSync(path)).toEqual(accepted);
+  }
 };
 
 const verifyWorkspaceLock = () => {
@@ -423,4 +428,54 @@ const verifyWorkspaceLock = () => {
   expect(createHash("sha256").update(readFileSync("package-lock.json")).digest("hex")).toBe(
     "8467e34ca12656c67eb7ad38219b5c931c19bb8843ace056b9ad830dda084ce0",
   );
+};
+
+const workspaceCandidate = "83ba497a30a1816403b1931b8701bfe00739fe2e";
+const workspaceGovernance = "aae07f1ae1b8bea634f057990ec59dea12fd3f5c";
+const workspaceRecord = "docs/development/p1-p27-research-workspace-conditional-acceptance.md";
+const verifyWorkspaceGovernance = () => {
+  expect(
+    execFileSync("git", ["rev-parse", workspaceCandidate + "^"], { encoding: "utf8" }).trim(),
+  ).toBe("09201f52a9d454ef142d2ca346a3a9dfc2fad66e");
+  expect(
+    execFileSync("git", ["rev-parse", workspaceGovernance + "^"], { encoding: "utf8" }).trim(),
+  ).toBe(workspaceCandidate);
+  execFileSync("git", ["merge-base", "--is-ancestor", workspaceGovernance, "HEAD"]);
+  expect(
+    execFileSync("git", ["diff-tree", "--no-commit-id", "--name-only", "-r", workspaceGovernance], {
+      encoding: "utf8",
+    })
+      .trim()
+      .split("\n")
+      .sort(),
+  ).toEqual([workspaceRecord, "docs/development/prompt-ledger.md"].sort());
+  const ledger = "docs/development/prompt-ledger.md";
+  const historical = execFileSync("git", ["show", workspaceCandidate + ":" + ledger]);
+  const approved = execFileSync("git", ["show", workspaceGovernance + ":" + ledger]);
+  expect(approved.subarray(0, historical.length)).toEqual(historical);
+  expect(approved.length).toBeGreaterThan(historical.length);
+  for (const path of [workspaceRecord, ledger])
+    expect(readFileSync(path)).toEqual(
+      execFileSync("git", ["show", workspaceGovernance + ":" + path]),
+    );
+  const compatibility = [
+    "tests/mose-attention/architecture.test.ts",
+    "tests/research-insights/architecture.test.ts",
+    "tests/research-reporting/architecture.test.ts",
+    "tests/research-workspace/architecture.test.ts",
+  ];
+  const tracked = execFileSync("git", ["diff", "--name-only", workspaceGovernance], {
+    encoding: "utf8",
+  })
+    .trim()
+    .split("\n")
+    .filter(Boolean);
+  const untracked = execFileSync("git", ["ls-files", "--others", "--exclude-standard"], {
+    encoding: "utf8",
+  })
+    .trim()
+    .split("\n")
+    .filter(Boolean);
+  for (const path of [...tracked, ...untracked]) expect(compatibility).toContain(path);
+  expect(new Set([...tracked, ...untracked]).size).toBeLessThanOrEqual(compatibility.length);
 };

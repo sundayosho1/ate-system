@@ -158,20 +158,17 @@ it("exact39path envelope includes no arbitrary new test or source", () => {
     "tests/research-workspace/relationships-contextual-links.test.ts",
     "tests/research-workspace/report-filter-remediation.test.ts",
   ];
-  const tracked = execFileSync("git", ["diff", "--name-only", implementation], {
-    encoding: "utf8",
-  })
+  const historicalRemediation = execFileSync(
+    "git",
+    ["diff", "--name-only", implementation, workspaceCandidate],
+    { encoding: "utf8" },
+  )
     .trim()
     .split("\n")
     .filter(Boolean);
-  const untracked = execFileSync("git", ["ls-files", "--others", "--exclude-standard"], {
-    encoding: "utf8",
-  })
-    .trim()
-    .split("\n")
-    .filter(Boolean);
-  for (const path of [...tracked, ...untracked]) expect(remediation).toContain(path);
-  expect(new Set([...tracked, ...untracked]).size).toBeLessThanOrEqual(remediation.length);
+  expect([...historicalRemediation].sort()).toEqual([...remediation].sort());
+  expect(historicalRemediation).toHaveLength(12);
+  verifyWorkspaceGovernance();
 });
 it("root config capabilities version and every governance record remain exact", () => {
   for (const p of [
@@ -183,7 +180,9 @@ it("root config capabilities version and every governance record remain exact", 
       .filter((n) => n.includes("conditional-acceptance"))
       .map((n) => "docs/development/" + n),
   ])
-    expect(readFileSync(p)).toEqual(execFileSync("git", ["show", baseline + ":" + p]));
+    if (p === "docs/development/prompt-ledger.md" || p === workspaceRecord)
+      verifyWorkspaceGovernance();
+    else expect(readFileSync(p)).toEqual(execFileSync("git", ["show", baseline + ":" + p]));
 });
 it("exact approved lock hash and219oldrecords preserved", () => {
   expect(createHash("sha256").update(readFileSync("package-lock.json")).digest("hex")).toBe(
@@ -214,3 +213,53 @@ it("new integration source cannot import private upstream code or execute financ
   ])
     expect(source).not.toMatch(re);
 });
+
+const workspaceCandidate = "83ba497a30a1816403b1931b8701bfe00739fe2e";
+const workspaceGovernance = "aae07f1ae1b8bea634f057990ec59dea12fd3f5c";
+const workspaceRecord = "docs/development/p1-p27-research-workspace-conditional-acceptance.md";
+const verifyWorkspaceGovernance = () => {
+  expect(
+    execFileSync("git", ["rev-parse", workspaceCandidate + "^"], { encoding: "utf8" }).trim(),
+  ).toBe("09201f52a9d454ef142d2ca346a3a9dfc2fad66e");
+  expect(
+    execFileSync("git", ["rev-parse", workspaceGovernance + "^"], { encoding: "utf8" }).trim(),
+  ).toBe(workspaceCandidate);
+  execFileSync("git", ["merge-base", "--is-ancestor", workspaceGovernance, "HEAD"]);
+  expect(
+    execFileSync("git", ["diff-tree", "--no-commit-id", "--name-only", "-r", workspaceGovernance], {
+      encoding: "utf8",
+    })
+      .trim()
+      .split("\n")
+      .sort(),
+  ).toEqual([workspaceRecord, "docs/development/prompt-ledger.md"].sort());
+  const ledger = "docs/development/prompt-ledger.md";
+  const historical = execFileSync("git", ["show", workspaceCandidate + ":" + ledger]);
+  const approved = execFileSync("git", ["show", workspaceGovernance + ":" + ledger]);
+  expect(approved.subarray(0, historical.length)).toEqual(historical);
+  expect(approved.length).toBeGreaterThan(historical.length);
+  for (const path of [workspaceRecord, ledger])
+    expect(readFileSync(path)).toEqual(
+      execFileSync("git", ["show", workspaceGovernance + ":" + path]),
+    );
+  const compatibility = [
+    "tests/mose-attention/architecture.test.ts",
+    "tests/research-insights/architecture.test.ts",
+    "tests/research-reporting/architecture.test.ts",
+    "tests/research-workspace/architecture.test.ts",
+  ];
+  const tracked = execFileSync("git", ["diff", "--name-only", workspaceGovernance], {
+    encoding: "utf8",
+  })
+    .trim()
+    .split("\n")
+    .filter(Boolean);
+  const untracked = execFileSync("git", ["ls-files", "--others", "--exclude-standard"], {
+    encoding: "utf8",
+  })
+    .trim()
+    .split("\n")
+    .filter(Boolean);
+  for (const path of [...tracked, ...untracked]) expect(compatibility).toContain(path);
+  expect(new Set([...tracked, ...untracked]).size).toBeLessThanOrEqual(compatibility.length);
+};
