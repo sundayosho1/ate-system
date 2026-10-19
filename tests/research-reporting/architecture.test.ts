@@ -277,6 +277,7 @@ it("exact37path maximum does not confer directory-wide permission", () => {
     .trim()
     .split("\n")
     .filter(Boolean);
+  expect(untracked).toEqual([]);
   for (const path of tracked) expect(compatibilityAllowed).toContain(path);
   expect(new Set(tracked).size).toBeLessThanOrEqual(3);
   const workspaceAllowed = [
