@@ -1,9 +1,28 @@
 import { validateInsightRecord } from "@ate/research-insight-contracts";
 import type { ImprovementProposal } from "@ate/research-insight-contracts";
-import { array, data, object, demand, guard, freeze, digest, id } from "./validation.js";
+import {
+  array,
+  data,
+  object,
+  demand,
+  guard,
+  freeze,
+  digest,
+  id,
+  type TraversalMeter,
+} from "./validation.js";
 export function projectImprovementRegister(raw: unknown, evidenceIds: readonly string[]) {
+  return projectImprovementRegisterWithinBudget(raw, evidenceIds);
+}
+/** Internal operation context only; standalone public validation retains its fixed ceilings. */
+export function projectImprovementRegisterWithinBudget(
+  raw: unknown,
+  evidenceIds: readonly string[],
+  meter?: TraversalMeter,
+  logicalDepth = 0,
+) {
   return guard(() => {
-    const rows = data(raw, 1048576, 32, 50000);
+    const rows = data(raw, 1048576, 32, 50000, meter, logicalDepth);
     demand(Array.isArray(rows) && rows.length <= 256, "REPORTING:BUDGET_EXHAUSTED");
     const ids = new Set<string>();
     for (const entry of array(rows)) {

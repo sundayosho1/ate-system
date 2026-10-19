@@ -46,7 +46,7 @@ const sources = [
   "packages/research-reporting/src/report.ts",
   "packages/research-reporting/src/validation.ts",
 ];
-const expected = "dfa9870fad6883f075ac6184a30200fdd5d6a9552d4af0e49505c15a3d82da02";
+const expected = "3dc66866bca68ac28531fb9b889a5f4335f6b31d939f0108b7d6be0b732452eb";
 const allowed = [
   "docs/architecture/research-reporting.md",
   "docs/help/research-reporting.md",
@@ -202,7 +202,31 @@ it("exact37path maximum does not confer directory-wide permission", () => {
     "tests/research-reporting/readback-policy-remediation.test.ts",
     "tests/research-reporting/resource-policy-remediation.test.ts",
   ];
-  const tracked = execFileSync("git", ["diff", "--name-only", implementation], { encoding: "utf8" })
+  const previousRemediation = "ca7495fdc42e1da260617563d0aa90d6935e91a1";
+  expect(
+    execFileSync("git", ["rev-parse", previousRemediation + "^"], { encoding: "utf8" }).trim(),
+  ).toBe(implementation);
+  const previousPaths = execFileSync(
+    "git",
+    ["diff", "--name-only", implementation, previousRemediation],
+    { encoding: "utf8" },
+  )
+    .trim()
+    .split("\n")
+    .filter(Boolean);
+  expect([...previousPaths].sort()).toEqual([...remediationAllowed].sort());
+  const cumulativeAllowed = [
+    "docs/architecture/research-reporting.md",
+    "docs/help/research-reporting.md",
+    "packages/research-reporting/src/improvements.ts",
+    "packages/research-reporting/src/report.ts",
+    "tests/research-reporting/architecture.test.ts",
+    "tests/research-reporting/cumulative-improvement-budget.test.ts",
+    "tests/research-reporting/resource-policy-remediation.test.ts",
+  ];
+  const tracked = execFileSync("git", ["diff", "--name-only", previousRemediation], {
+    encoding: "utf8",
+  })
     .trim()
     .split("\n")
     .filter(Boolean);
@@ -212,6 +236,6 @@ it("exact37path maximum does not confer directory-wide permission", () => {
     .trim()
     .split("\n")
     .filter(Boolean);
-  for (const path of [...tracked, ...untracked]) expect(remediationAllowed).toContain(path);
-  expect(new Set([...tracked, ...untracked]).size).toBeLessThanOrEqual(17);
+  for (const path of [...tracked, ...untracked]) expect(cumulativeAllowed).toContain(path);
+  expect(new Set([...tracked, ...untracked]).size).toBeLessThanOrEqual(7);
 });

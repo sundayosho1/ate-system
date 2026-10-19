@@ -29,7 +29,7 @@ import { validateArtifact, qualifyEvidence, ensureConsistentEvidence } from "./e
 import { projectFacet } from "./projection.js";
 import { consistencyEvidence } from "./consistency.js";
 import { buildChartsWithinBudget } from "./charts.js";
-import { projectImprovementRegister } from "./improvements.js";
+import { projectImprovementRegisterWithinBudget } from "./improvements.js";
 const activeClocks = new WeakSet<object>();
 export function composeReport(input: unknown, context: ReportingContext, policy?: ReportingPolicy) {
   return guard(() => {
@@ -94,13 +94,15 @@ export function composeReport(input: unknown, context: ReportingContext, policy?
         .sort((a, b) => (a.facet.id < b.facet.id ? -1 : 1));
       const charts = buildChartsWithinBudget(envelope.charts!, observations, p, work, 2, 1);
       demand(charts.ok);
-      const improvements = projectImprovementRegister(
+      const improvements = projectImprovementRegisterWithinBudget(
         data(envelope.improvements!, 1048576, 32, 50000, work, 1),
         observations
           .filter((o) => o.provenance === "TRUSTED_CONTEXT_ANCHOR")
           .map((o) => o.artifact.id),
+        work,
+        1,
       );
-      demand(improvements.ok);
+      demand(improvements.ok, improvements.ok ? undefined : improvements.issues[0]?.code);
       demand(improvements.value.records.length <= p.maxImprovements, "REPORTING:BUDGET_EXHAUSTED");
       demand(observations.length <= p.maxEvidenceRefs, "REPORTING:BUDGET_EXHAUSTED");
       budget.clock();
@@ -326,11 +328,14 @@ export function validateBundle(
       digest(m.budgetUsage, work) === digest(budget, work),
   );
   demand(buildChartsWithinBudget(b.charts, observations, p, work, 3, 1).ok);
-  const improvements = projectImprovementRegister(
+  const improvements = projectImprovementRegisterWithinBudget(
     data(b.improvements, 1048576, 32, 50000, work, 1),
     observations.filter((o) => o.provenance === "TRUSTED_CONTEXT_ANCHOR").map((o) => o.artifact.id),
+    work,
+    1,
   );
-  demand(improvements.ok && improvements.value.records.length <= p.maxImprovements);
+  demand(improvements.ok, improvements.ok ? undefined : improvements.issues[0]?.code);
+  demand(improvements.value.records.length <= p.maxImprovements, "REPORTING:BUDGET_EXHAUSTED");
   return b as unknown as ReportBundle;
 }
 export function queryReport(raw: unknown, query: unknown, policy?: ReportingPolicy) {

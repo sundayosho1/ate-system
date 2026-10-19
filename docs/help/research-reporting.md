@@ -140,3 +140,25 @@ a stored self-hash was verified or invalid. For an admissible import the origina
 checked without mutation. Historical clock-call usage is validated against its original governing
 policy; query/export do not count historical calls as fresh calls. Current authority and cross-owner
 consistency remain unestablished. Four passive routes remain DISABLED.
+
+## Cumulative improvement validation
+
+The outer improvement-input snapshot and the helper's subsequent descriptor validation are two
+actual traversals. Both use the same operation meter at logical depth1 during composition and report
+reconstruction. The internal helper receives that context; it does not allocate a fresh operation
+budget. Empty collections still require one visit on each actual traversal. Repeated proposal
+revisions and multiple records each consume their actual visits again.
+
+The public standalone improvement validator retains its existing two-argument contract and fixed
+ceilings. Its pure accepted-owner schema/serialization internals remain separately bounded; no
+additional reporting preflight is invented or charged when no such traversal occurs. Existing
+bookkeeping on already validated DTOs is not redefined as arbitrary CPU accounting.
+
+Query/export use minima of the stored and supplied policies through reconstruction and retain the
+same shared meter. Exhaustion propagates REPORTING:BUDGET_EXHAUSTED and cannot produce COMPLETE.
+Historical self-hash validity is separate from current operation admissibility. No stored report,
+source fingerprint, native commitment or owner authority is rewritten. Cancellation remains
+synchronous and cooperative; no hard CPU preemption or live consistency guarantee is introduced.
+
+All inherited qualifications, four disabled passive routes and pending technical/governance
+acceptance remain unchanged. This correction is not independent acceptance.

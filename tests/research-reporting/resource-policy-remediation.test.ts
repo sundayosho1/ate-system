@@ -186,6 +186,8 @@ function _cost(
   }
   for (const a of input.evidence) add(a.captured, 3);
   add(input.improvements, 1);
+  // The internal helper performs a second actual descriptor validation of this input.
+  add(input.improvements, 1);
   const { manifest, ...body } = b;
   add({ body, generatedAt: manifest.generatedAt });
   add(input.request, 1);
