@@ -290,3 +290,31 @@ manifest |
 | P25    | mose-core                 | Source-linked static metadata and supplied evidence; no owner invocation |
 | P26    | mose-scanner              | Source-linked static metadata and supplied evidence; no owner invocation |
 | P27    | mose-attention            | Source-linked static metadata and supplied evidence; no owner invocation |
+
+## Reconstruction integrity remediation
+
+Views now retain `knowledgeSourceEvidence`: the original source manifest, source qualification IDs,
+normalized historical source bindings and contextual-link qualification IDs. This material remains
+supplied historical evidence, not independent external authentication. Legacy views without required
+reconstruction evidence reject; consumers must recompose from genuine original inputs rather than
+inventing a manifest or rewriting historical identities.
+
+Every view-based read revalidates exact catalogue/header shapes, fixed baselines, source bindings,
+accepted public catalogue identities/revisions/relationships and contextual links. Distinct valid
+revisions remain supported. Recomputed hashes cannot waive schema or relationship checks. Historical
+budget fields are bounded descriptive evidence and never replenish the current operation ledger. All
+added validation, retained-data serialization and filter work share the existing W1 budget; stricter
+accepted R1/D1 and caller/embedded minima remain authoritative.
+
+REPORT filters derive owner/axis/id from the validated nested facet and prompt from its validated
+request mapping. They return original facet rows and preserve the report fingerprint. Filtering
+precedes deterministic ordering and explicit total/offset continuation. KNOWLEDGE and IMPROVEMENTS
+have no general owner/prompt/axis contract: those filters reject explicitly rather than manufacture
+identity or silently return false absence. DIAGNOSTICS retains its qualified flattened axis model.
+This correction adds no owner read, current authority, frontend or remediation executor.
+
+The retained `catalogueFingerprint` identifies the originally composed catalogue for lineage
+consistency. A changed catalogue must not retain a conflicting original identity. Matching all
+self-declared hashes still does not authenticate explanatory wording or external truth; accepted
+schema, source-reference and relationship validation always runs independently of that consistency
+check. Genuine corrections are recomposed from qualified inputs with their own catalogue identity.

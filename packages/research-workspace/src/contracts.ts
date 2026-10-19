@@ -157,6 +157,7 @@ export type WorkspaceView = ObjectValue &
     reportFingerprint: string | null;
     report: JsonValue;
     knowledge: JsonValue;
+    knowledgeSourceEvidence: JsonValue;
     links: readonly JsonValue[];
     diagnostics: readonly JsonValue[];
     qualifications: readonly JsonValue[];

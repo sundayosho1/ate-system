@@ -12,6 +12,7 @@ import { guard, object, array, exact, text, utc, demand, freeze } from "./valida
 import { snapshot, fingerprint, cost } from "./serialization.js";
 import { W1, checkedPolicy, minima } from "./policy.js";
 import { begin } from "./budgets.js";
+import type { Budget } from "./budgets.js";
 import { overlayWithin } from "./release-overlay.js";
 import { knowledgeWithin } from "./knowledge-links.js";
 import { reportWithin } from "./report-links.js";
@@ -19,6 +20,64 @@ import { diagnosticRows } from "./diagnostics.js";
 import { improvementsWithin } from "./improvement-view.js";
 import { consistency } from "./consistency.js";
 import { administration } from "./administration.js";
+function validateLinks(
+  links: readonly JsonValue[],
+  knowledge: ReturnType<typeof knowledgeWithin>,
+  report: ReturnType<typeof reportWithin>,
+  qualifications: readonly JsonValue[],
+  work: Budget,
+) {
+  work.reserve(links, 2);
+  const linkIds = new Set<string>();
+  for (const v of links) {
+    const l = object(v);
+    exact(l, [
+      "id",
+      "knowledgeEntryId",
+      "knowledgeRevision",
+      "knowledgeFingerprint",
+      "reportFingerprint",
+      "facetId",
+      "owner",
+      "sourceCommit",
+      "qualificationIds",
+      "relationship",
+    ]);
+    text(l.id);
+    demand(!linkIds.has(l.id));
+    linkIds.add(l.id);
+    text(l.owner);
+    demand(typeof l.sourceCommit === "string" && /^[a-f0-9]{40}$/.test(l.sourceCommit));
+    demand(array(l.qualificationIds).every((id) => qualifications.includes(id)));
+    demand(
+      l.relationship === "CONTEXT_ONLY" &&
+        l.knowledgeFingerprint === knowledge.fingerprint &&
+        report !== null &&
+        l.reportFingerprint === report.originalReportFingerprint &&
+        array(object(report.report).observations).some((v) => {
+          const a = object(object(v).artifact!);
+          return a.owner === l.owner && a.sourceCommit === l.sourceCommit;
+        }),
+      "WORKSPACE:REFERENCE_UNAVAILABLE",
+    );
+    if (l.facetId !== null)
+      demand(
+        report !== null &&
+          array(object(report.report).facets).some((v) => {
+            const f = object(object(v).facet!);
+            return f.id === l.facetId && f.owner === l.owner;
+          }),
+        "WORKSPACE:REFERENCE_UNAVAILABLE",
+      );
+    demand(
+      knowledge.catalogue.entries.some(
+        (e) => e.id === l.knowledgeEntryId && e.revision === l.knowledgeRevision,
+      ),
+      "WORKSPACE:REFERENCE_UNAVAILABLE",
+    );
+  }
+}
+
 export function composeWorkspace(
   raw: unknown,
   context: WorkspaceContext,
@@ -95,54 +154,7 @@ export function composeWorkspace(
       utc(m.generatedAt);
       demand(m.generatedAt <= generatedAt, "WORKSPACE:SOURCE_BINDING_MISMATCH");
     }
-    const linkIds = new Set<string>();
-    for (const v of links) {
-      const l = object(v);
-      exact(l, [
-        "id",
-        "knowledgeEntryId",
-        "knowledgeRevision",
-        "knowledgeFingerprint",
-        "reportFingerprint",
-        "facetId",
-        "owner",
-        "sourceCommit",
-        "qualificationIds",
-        "relationship",
-      ]);
-      text(l.id);
-      demand(!linkIds.has(l.id));
-      linkIds.add(l.id);
-      text(l.owner);
-      demand(typeof l.sourceCommit === "string" && /^[a-f0-9]{40}$/.test(l.sourceCommit));
-      demand(array(l.qualificationIds).every((id) => array(overlay.qualifications).includes(id)));
-      demand(
-        l.relationship === "CONTEXT_ONLY" &&
-          l.knowledgeFingerprint === knowledge.fingerprint &&
-          report !== null &&
-          l.reportFingerprint === report.originalReportFingerprint &&
-          array(object(report.report).observations).some((v) => {
-            const a = object(object(v).artifact!);
-            return a.owner === l.owner && a.sourceCommit === l.sourceCommit;
-          }),
-        "WORKSPACE:REFERENCE_UNAVAILABLE",
-      );
-      if (l.facetId !== null)
-        demand(
-          report !== null &&
-            array(object(report.report).facets).some((v) => {
-              const f = object(object(v).facet!);
-              return f.id === l.facetId && f.owner === l.owner;
-            }),
-          "WORKSPACE:REFERENCE_UNAVAILABLE",
-        );
-      demand(
-        knowledge.catalogue.entries.some(
-          (e) => e.id === l.knowledgeEntryId && e.revision === l.knowledgeRevision,
-        ),
-        "WORKSPACE:REFERENCE_UNAVAILABLE",
-      );
-    }
+    validateLinks(links, knowledge, report, array(overlay.qualifications), work);
     exact(object(x.handoverRequest!), []);
     const reportValue = report?.report ?? null,
       diagnostics = diagnosticRows(reportValue);
@@ -169,6 +181,18 @@ export function composeWorkspace(
       knowledgeFingerprint: knowledge.fingerprint,
       reportFingerprint: report?.originalReportFingerprint ?? null,
       knowledge: knowledge.catalogue,
+      knowledgeSourceEvidence: {
+        catalogueFingerprint: knowledge.fingerprint,
+        sourceManifest: knowledgeInput.sourceManifest!,
+        qualificationIds: knowledgeInput.qualificationIds!,
+        sourceBindings: Object.values(sources)
+          .filter((v, i, all) => all.findIndex((x) => object(x).path === object(v).path) === i)
+          .map((v) => {
+            const source = object(v);
+            return { path: source.path!, commit: baselines.knowledge, sha256: source.sha256! };
+          }),
+        linkQualificationIds: overlay.qualifications!,
+      },
       report: reportValue,
       links,
       diagnostics,
@@ -213,6 +237,7 @@ export function readWorkspace(raw: unknown, policy?: WorkspacePolicy) {
     "knowledgeFingerprint",
     "reportFingerprint",
     "knowledge",
+    "knowledgeSourceEvidence",
     "report",
     "links",
     "diagnostics",
@@ -253,7 +278,97 @@ export function readWorkspace(raw: unknown, policy?: WorkspacePolicy) {
       array(v.qualifications).length === new Set(qualificationIds).size &&
       array(v.qualifications).every((q) => typeof q === "string" && qualificationIds.includes(q)),
   );
+  text(v.id);
+  for (const h of [v.releaseOverlayFingerprint, v.knowledgeFingerprint])
+    demand(typeof h === "string" && /^sha256:[a-f0-9]{64}$/.test(h));
+  utc(v.generatedAt);
+  const historical = object(v.budget!);
+  exact(historical, ["nodes", "bytes", "calls", "clockReads"]);
+  const originalPolicy = checkedPolicy(v.policy);
+  for (const [key, ceiling] of [
+    ["nodes", originalPolicy.maxNodes],
+    ["bytes", originalPolicy.maxInputBytes],
+    ["calls", originalPolicy.maxCalls],
+    ["clockReads", originalPolicy.maxClockReads],
+  ] as const)
+    demand(
+      Number.isSafeInteger(historical[key]) &&
+        Number(historical[key]) >= 0 &&
+        Number(historical[key]) <= ceiling,
+    );
+  demand(
+    Number(historical.clockReads) === 1 &&
+      Number(historical.calls) >= Number(historical.clockReads),
+  );
+  const source = object(v.knowledgeSourceEvidence!);
+  exact(source, [
+    "catalogueFingerprint",
+    "sourceManifest",
+    "qualificationIds",
+    "sourceBindings",
+    "linkQualificationIds",
+  ]);
+  demand(
+    source.catalogueFingerprint === v.knowledgeFingerprint,
+    "WORKSPACE:SOURCE_BINDING_MISMATCH",
+  );
+  const catalogue = object(v.knowledge!);
+  exact(catalogue, ["schema", "generatedAt", "baseline", "entries"]);
+  demand(
+    catalogue.schema === "ate.insights.catalogue/1" && catalogue.generatedAt === v.generatedAt,
+  );
+  const manifest = object(source.sourceManifest!);
+  demand(catalogue.baseline === baselines.knowledge && manifest.baseline === baselines.knowledge);
+  const bindings = array(source.sourceBindings),
+    sources = object(manifest.sources!);
+  work.reserve(source, 2);
+  const bindingIds = new Set<string>();
+  for (const rawBinding of bindings) {
+    const b = object(rawBinding);
+    exact(b, ["path", "commit", "sha256"]);
+    demand(
+      b.commit === baselines.knowledge &&
+        typeof b.path === "string" &&
+        typeof b.sha256 === "string",
+    );
+    demand(!bindingIds.has(b.path));
+    bindingIds.add(b.path);
+    demand(
+      Object.values(sources).some((v) => {
+        const s = object(v);
+        return s.path === b.path && s.sha256 === b.sha256;
+      }),
+    );
+  }
+  for (const rawSource of Object.values(sources)) {
+    const s = object(rawSource);
+    demand(
+      bindings.some((v) => {
+        const b = object(v);
+        return b.path === s.path && b.sha256 === s.sha256;
+      }),
+      "WORKSPACE:RELEASE_AUTHENTICATION_UNESTABLISHED",
+    );
+  }
+  demand(array(source.qualificationIds).every((q) => typeof q === "string"));
+  demand(
+    array(source.linkQualificationIds).every(
+      (q) => typeof q === "string" && qualificationIds.includes(q),
+    ),
+  );
+  const knowledge = knowledgeWithin(
+    { catalogue, sourceManifest: manifest, qualificationIds: source.qualificationIds! },
+    v.generatedAt,
+    work,
+  );
+  demand(knowledge.fingerprint === v.knowledgeFingerprint, "WORKSPACE:SOURCE_BINDING_MISMATCH");
   const report = reportWithin(v.report!, work);
+  if (report !== null)
+    demand(
+      object(object(report.report).manifest!).generatedAt! <= v.generatedAt,
+      "WORKSPACE:SOURCE_BINDING_MISMATCH",
+    );
+  validateLinks(array(v.links), knowledge, report, array(source.linkQualificationIds), work);
   demand(v.reportFingerprint === (report?.originalReportFingerprint ?? null));
   demand(fingerprint(v.diagnostics, work) === fingerprint(diagnosticRows(v.report!), work));
   demand(v.scope === scope);
@@ -336,18 +451,37 @@ function querySection(
             : view.report === null
               ? []
               : array(object(view.report!).facets);
+    if (section === "KNOWLEDGE" || section === "IMPROVEMENTS")
+      demand(q.owner === undefined && q.prompt === undefined && q.axis === undefined);
+    const requestFacets =
+      view.report === null ? [] : array(object(object(view.report!).request!).facets);
+    const keys = (value: JsonValue): Readonly<Record<string, JsonValue | undefined>> => {
+      const row = object(value);
+      if (section !== "REPORT") return row;
+      const facet = object(row.facet!);
+      const request = object(requestFacets.find((v) => object(v).id === facet.id)!);
+      return {
+        section: "REPORT",
+        owner: facet.owner,
+        prompt: request.prompt,
+        axis: facet.axis,
+        id: facet.id,
+      };
+    };
+    // Explicit bounded charge for key extraction, comparisons and stable sorting.
+    work.charge(cost(rows) * 2, Buffer.byteLength(JSON.stringify(rows)) * 2);
     rows = rows
       .filter((v) => {
-        const r = object(v);
+        const k = keys(v);
         return (
-          (q.owner === undefined || r.owner === q.owner) &&
-          (q.prompt === undefined || r.prompt === q.prompt) &&
-          (q.axis === undefined || r.axis === q.axis)
+          (q.owner === undefined || k.owner === q.owner) &&
+          (q.prompt === undefined || k.prompt === q.prompt) &&
+          (q.axis === undefined || k.axis === q.axis)
         );
       })
       .sort((a, b) => {
-        const x = object(a),
-          y = object(b);
+        const x = keys(a),
+          y = keys(b);
         for (const key of ["section", "owner", "prompt", "id", "revision"]) {
           const av = x[key],
             bv = y[key];

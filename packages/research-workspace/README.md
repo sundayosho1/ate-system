@@ -26,3 +26,9 @@ version, capability or governance update is part of this implementation.
 Run frozen `npm ci`, `VITEST_MAX_WORKERS=2 npm run verify`, full/production-only audit and
 `npm ls --all`. New tests are under `tests/research-workspace`; inherited guards have only the exact
 owner-approved seven-test compatibility patch.
+
+Reconstruction requires retained historical `knowledgeSourceEvidence`; views lacking it fail closed.
+Public reads revalidate catalogue structure, source references, relationships, links and headers.
+REPORT owner/prompt/axis filtering preserves matching original facets; unsupported such filters on
+KNOWLEDGE/IMPROVEMENTS reject explicitly. See the architecture/help links above for migration and
+resource qualifications. Technical and governance acceptance remain pending separate review.

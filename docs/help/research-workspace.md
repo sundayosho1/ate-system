@@ -56,3 +56,17 @@ Use root exports. Keep new tests and code within the39approvedpaths. Run frozen 
 verify, full/prod audits, dependency graph, secret hygiene and architecture/mutation controls.
 Preserve all existing source fingerprints and accepted governance bytes. Technical/governance
 acceptance are PENDING; production, Windows durability and live trading are not certified.
+
+## Reconstructed views and section filters
+
+Keep original bounded `knowledgeSourceEvidence` with a workspace view. Missing source evidence,
+invalid catalogue relationships, contextual links or headers reject on query, diagnostics,
+improvement views, handover and export. Rehashing invalid data does not validate it. Recompose a
+legacy view only from its genuine retained original source inputs; never fabricate missing history.
+
+Use owner/prompt/axis filters for REPORT or DIAGNOSTICS. REPORT uses the accepted nested facet and
+validated request mapping; records and original report fingerprints remain intact. KNOWLEDGE and
+IMPROVEMENTS reject those unsupported filters. Query without them to enumerate the supplied subset.
+An empty matching set remains a supplied-subset result, not authoritative owner absence. Extra
+reconstruction work may exhaust a lower admitted budget; retrying or supplying a weaker caller
+policy does not erase embedded limits. Historical budget counters are not fresh execution credits.

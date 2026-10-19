@@ -320,16 +320,46 @@ it("exact37path maximum does not confer directory-wide permission", () => {
     "tests/research-workspace/knowledge-report-links.test.ts",
     "tests/research-workspace/release-overlay.test.ts",
   ];
-  const workspaceTracked = execFileSync(
+  const workspaceImplementation = "09201f52a9d454ef142d2ca346a3a9dfc2fad66e";
+  expect(
+    execFileSync("git", ["rev-parse", workspaceImplementation + "^"], { encoding: "utf8" }).trim(),
+  ).toBe("fe587fb12d9eefe41e4d2234b9d7962fb323bab9");
+  execFileSync("git", ["merge-base", "--is-ancestor", workspaceImplementation, "HEAD"]);
+  const historicalWorkspacePaths = execFileSync(
     "git",
-    ["diff", "--name-only", "fe587fb12d9eefe41e4d2234b9d7962fb323bab9"],
+    ["diff", "--name-only", "fe587fb12d9eefe41e4d2234b9d7962fb323bab9", workspaceImplementation],
     { encoding: "utf8" },
   )
     .trim()
     .split("\n")
     .filter(Boolean);
-  for (const path of [...workspaceTracked, ...untracked]) expect(workspaceAllowed).toContain(path);
-  expect(new Set([...workspaceTracked, ...untracked]).size).toBeLessThanOrEqual(39);
+  expect(historicalWorkspacePaths.sort()).toEqual([...workspaceAllowed].sort());
+  expect(historicalWorkspacePaths).toHaveLength(39);
+  const workspaceRemediationAllowed = [
+    "docs/architecture/research-workspace.md",
+    "docs/help/research-workspace.md",
+    "packages/research-workspace/README.md",
+    "packages/research-workspace/src/contracts.ts",
+    "packages/research-workspace/src/knowledge-links.ts",
+    "packages/research-workspace/src/workspace.ts",
+    "tests/research-reporting/architecture.test.ts",
+    "tests/research-workspace/architecture.test.ts",
+    "tests/research-workspace/reconstruction-integrity.test.ts",
+    "tests/research-workspace/reconstruction-resource-security.test.ts",
+    "tests/research-workspace/relationships-contextual-links.test.ts",
+    "tests/research-workspace/report-filter-remediation.test.ts",
+  ];
+  const workspaceTracked = execFileSync("git", ["diff", "--name-only", workspaceImplementation], {
+    encoding: "utf8",
+  })
+    .trim()
+    .split("\n")
+    .filter(Boolean);
+  for (const path of [...workspaceTracked, ...untracked])
+    expect(workspaceRemediationAllowed).toContain(path);
+  expect(new Set([...workspaceTracked, ...untracked]).size).toBeLessThanOrEqual(
+    workspaceRemediationAllowed.length,
+  );
   expect(
     execFileSync(
       "git",

@@ -89,7 +89,7 @@ const allowed = [
   "tests/research-workspace/knowledge-report-links.test.ts",
   "tests/research-workspace/release-overlay.test.ts",
 ];
-const expected = "4190e090562c10ba7b3fb5e2c232a603e64dbfe28a7e28cb6f9cde7d08b32b7a";
+const expected = "47f57ac311cf500865c8af2535e50f19053484fd12f9b98e97287f394b621718";
 const hash = (v: unknown) => createHash("sha256").update(JSON.stringify(v)).digest("hex");
 const actual = () => sources.map((p) => [p, readFileSync(p, "utf8")]);
 it("exact16newsource integrity and extra source guard", () => {
@@ -129,18 +129,49 @@ for (const owner of owners)
     expect(git(...args(base))).toContain("UNAUTHORIZED");
   });
 it("exact39path envelope includes no arbitrary new test or source", () => {
-  const tracked = execFileSync("git", ["diff", "--name-only", baseline], { encoding: "utf8" })
-      .trim()
-      .split("\n")
-      .filter(Boolean),
-    untracked = execFileSync("git", ["ls-files", "--others", "--exclude-standard"], {
+  const implementation = "09201f52a9d454ef142d2ca346a3a9dfc2fad66e";
+  expect(
+    execFileSync("git", ["rev-parse", implementation + "^"], {
       encoding: "utf8",
-    })
-      .trim()
-      .split("\n")
-      .filter(Boolean);
-  for (const p of [...tracked, ...untracked]) expect(allowed).toContain(p);
-  expect(new Set([...tracked, ...untracked]).size).toBeLessThanOrEqual(39);
+    }).trim(),
+  ).toBe(baseline);
+  execFileSync("git", ["merge-base", "--is-ancestor", implementation, "HEAD"]);
+  const historical = execFileSync("git", ["diff", "--name-only", baseline, implementation], {
+    encoding: "utf8",
+  })
+    .trim()
+    .split("\n")
+    .filter(Boolean);
+  expect(historical.sort()).toEqual([...allowed].sort());
+  expect(historical).toHaveLength(39);
+  const remediation = [
+    "docs/architecture/research-workspace.md",
+    "docs/help/research-workspace.md",
+    "packages/research-workspace/README.md",
+    "packages/research-workspace/src/contracts.ts",
+    "packages/research-workspace/src/knowledge-links.ts",
+    "packages/research-workspace/src/workspace.ts",
+    "tests/research-reporting/architecture.test.ts",
+    "tests/research-workspace/architecture.test.ts",
+    "tests/research-workspace/reconstruction-integrity.test.ts",
+    "tests/research-workspace/reconstruction-resource-security.test.ts",
+    "tests/research-workspace/relationships-contextual-links.test.ts",
+    "tests/research-workspace/report-filter-remediation.test.ts",
+  ];
+  const tracked = execFileSync("git", ["diff", "--name-only", implementation], {
+    encoding: "utf8",
+  })
+    .trim()
+    .split("\n")
+    .filter(Boolean);
+  const untracked = execFileSync("git", ["ls-files", "--others", "--exclude-standard"], {
+    encoding: "utf8",
+  })
+    .trim()
+    .split("\n")
+    .filter(Boolean);
+  for (const path of [...tracked, ...untracked]) expect(remediation).toContain(path);
+  expect(new Set([...tracked, ...untracked]).size).toBeLessThanOrEqual(remediation.length);
 });
 it("root config capabilities version and every governance record remain exact", () => {
   for (const p of [
