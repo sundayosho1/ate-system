@@ -1003,3 +1003,56 @@ qualification remains unchanged. Any test compatibility correction requires sepa
 distinct successor commit. CODEX-014E and Prompts28–30 remain NOT AUTHORIZED. No automatic
 remediation, live financial execution or production deployment. STOP after separately authorized
 Stage B publication and reporting.
+
+## CODEX-014E-D — research workspace conditional governance record
+
+**OWNER-AUTHORIZED CONDITIONAL GOVERNANCE ACCEPTANCE — EFFECTIVE SUBJECT TO SUCCESSFUL FINAL
+COMMITTED-SOURCE VERIFICATION AND STAGE B PUBLICATION.**
+
+Owner governance decision: A. ACCEPT — CONDITIONAL GOVERNANCE ACCEPTANCE. Owner technical
+acceptance: ACCEPTED within audited bounded scope; qualifications retained. Signatory: Sunday Osho.
+Role/designation: Owner of the ATE System (Autonomous Trading Engine), Project Owner and Development
+Governance Approver. Capacity/authority: Owner of ATE, Project Owner and Development Governance
+Approver. Approval/effective date: 19 October 2026. Stage B publication authorization: OWNER
+AUTHORIZED, subject to final committed-source verification and authenticated publication. Separate
+test compatibility approval: APPROVED exact four-test procedure, distinct successor required. Only
+the reviewed pending fields/status are finalized; effectiveness still requires every mandatory gate
+and authorized publication.
+
+Immutable implementation `83ba497a30a1816403b1931b8701bfe00739fe2e`, parent
+`09201f52a9d454ef142d2ca346a3a9dfc2fad66e`, accepted governance ancestor
+`fe587fb12d9eefe41e4d2234b9d7962fb323bab9`; @ate/research-workspace `0.1.0-integration.1`.
+CODEX-014E-C technical verdict: **B. TECHNICAL RE-AUDIT PASSED WITH QUALIFICATIONS — READY FOR
+SEPARATE GOVERNANCE REVIEW.** C index SHA256
+`fa1c9d2be88d0d2f0cb6367d3f98bc8247551825e49c31c7f823a0186112dfd1`. Authenticated C results: 4,471
+tests/186 files, zero failures/skips; 476 new scenarios; 379 historical scenarios including 53
+original failed invariants now passing on target; 143 remediation regressions, 24 journeys and 32
+qualified acceptance checks passing; verification/security passed and local/remote target
+authenticated. These are C observations, not fresh D Stage A full-suite execution claims.
+
+Proposed technical closure: E-A-M01 within bounded structural/source-binding/contextual-link
+validation; E-A-M02 within supplied REPORT filtering/pagination. Owner review ACCEPTED within the
+audited bounded scope. Source hashes do not prove external authenticity or current authority.
+Coherently rewritten metadata remains supplied, historical, UNKNOWN/self-hash-only. No new
+operational grant arises.
+
+Proposed scope: bounded offline historical/synthetic static knowledge/help, supplied-evidence
+reporting/diagnostics, qualified release overlay, reconstruction, deterministic query/export, W1
+logical resources, administration guidance, human-governed improvement views and frontend/Cursor
+descriptors. All four passive owner-read routes remain DISABLED. No global completeness, coherent
+operational snapshot, live owner refresh or automatic improvement execution is accepted.
+
+Preserve all 49 inherited rows, 12 B-R risks, 12 D-R risks, C-Q01–C-Q04 and eight E-G01–E-G08
+planning gaps. OPEN A26-Q01, A26C-L01, C-OP01 and D-E-L01 remain OPEN. Preserve all P1–P27
+source/authority/timing/recovery/publication restrictions, native NONE/UNKNOWN, PIT cutoffs,
+qualified denominators, historical ACK limitations, Windows/open-handle, throughput/durability,
+trusted-root/single-writer, logical resource and reviewer-participation qualifications. No
+organizational independence, scientific verification or production certification is claimed.
+
+Preserve original failures, separate harness corrections and approved compatibility exceptions. Full
+details and reopening conditions: `p1-p27-research-workspace-conditional-acceptance.md`. No earlier
+ledger byte, record or accepted scope is rewritten. Only an explicit later decision and successful
+publication can supersede earlier pending integration-governance status. Test compatibility requires
+separate approval and a distinct successor commit. Prompts 28–30 remain NOT AUTHORIZED. No frontend,
+server, remote IAM, broker connectivity, trading, execution, autonomous remediation or production
+deployment is authorized.
