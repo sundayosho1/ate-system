@@ -171,8 +171,39 @@ const verifyFoundationGovernance = () => {
       .split("\n")
       .sort(),
   ).toEqual([foundationRecord, "docs/development/prompt-ledger.md"].sort());
-  for (const path of [foundationRecord, "docs/development/prompt-ledger.md"])
+  for (const path of [foundationRecord, "docs/development/prompt-ledger.md"]) {
+    const approved = execFileSync("git", ["show", foundationGovernance + ":" + path]);
+    if (path === "docs/development/prompt-ledger.md") {
+      expect(readFileSync(path).subarray(0, approved.length)).toEqual(approved);
+      verifyReportingGovernance();
+    } else expect(readFileSync(path)).toEqual(approved);
+  }
+};
+
+const reportingGovernance = "7c6445e78b9e8c2e817e22099baab15846292ca5";
+const reportingRecord = "docs/development/p1-p27-reporting-conditional-acceptance.md";
+const verifyReportingGovernance = () => {
+  expect(
+    execFileSync("git", ["rev-parse", reportingGovernance + "^"], { encoding: "utf8" }).trim(),
+  ).toBe("e651349ede0ab6b3babd533e95c157052ca67cfa");
+  expect(
+    execFileSync("git", ["diff-tree", "--no-commit-id", "--name-only", "-r", reportingGovernance], {
+      encoding: "utf8",
+    })
+      .trim()
+      .split("\n")
+      .sort(),
+  ).toEqual([reportingRecord, "docs/development/prompt-ledger.md"].sort());
+  const ledger = "docs/development/prompt-ledger.md",
+    historical = execFileSync("git", [
+      "show",
+      "e651349ede0ab6b3babd533e95c157052ca67cfa:" + ledger,
+    ]),
+    approved = execFileSync("git", ["show", reportingGovernance + ":" + ledger]);
+  expect(approved.subarray(0, historical.length)).toEqual(historical);
+  expect(approved.length).toBeGreaterThan(historical.length);
+  for (const path of [reportingRecord, ledger])
     expect(readFileSync(path)).toEqual(
-      execFileSync("git", ["show", foundationGovernance + ":" + path]),
+      execFileSync("git", ["show", reportingGovernance + ":" + path]),
     );
 };

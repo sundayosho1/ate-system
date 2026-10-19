@@ -139,7 +139,8 @@ it("root configuration and all governance bytes remain pinned", () => {
     "docs/development/prompt-ledger.md",
     "docs/development/p1-p27-insights-foundation-conditional-acceptance.md",
   ])
-    expect(readFileSync(p)).toEqual(execFileSync("git", ["show", baseline + ":" + p]));
+    if (p === "docs/development/prompt-ledger.md") verifyReportingGovernance();
+    else expect(readFileSync(p)).toEqual(execFileSync("git", ["show", baseline + ":" + p]));
 });
 it("whole lock top-level and all old entries exact with only2new workspace records", () => {
   const old = JSON.parse(
@@ -224,7 +225,26 @@ it("exact37path maximum does not confer directory-wide permission", () => {
     "tests/research-reporting/cumulative-improvement-budget.test.ts",
     "tests/research-reporting/resource-policy-remediation.test.ts",
   ];
-  const tracked = execFileSync("git", ["diff", "--name-only", previousRemediation], {
+  const candidate = "e651349ede0ab6b3babd533e95c157052ca67cfa";
+  expect(execFileSync("git", ["rev-parse", candidate + "^"], { encoding: "utf8" }).trim()).toBe(
+    previousRemediation,
+  );
+  const cumulativePaths = execFileSync(
+    "git",
+    ["diff", "--name-only", previousRemediation, candidate],
+    { encoding: "utf8" },
+  )
+    .trim()
+    .split("\n")
+    .filter(Boolean);
+  expect([...cumulativePaths].sort()).toEqual([...cumulativeAllowed].sort());
+  verifyReportingGovernance();
+  const compatibilityAllowed = [
+    "tests/mose-attention/architecture.test.ts",
+    "tests/research-insights/architecture.test.ts",
+    "tests/research-reporting/architecture.test.ts",
+  ];
+  const tracked = execFileSync("git", ["diff", "--name-only", reportingGovernance], {
     encoding: "utf8",
   })
     .trim()
@@ -236,6 +256,34 @@ it("exact37path maximum does not confer directory-wide permission", () => {
     .trim()
     .split("\n")
     .filter(Boolean);
-  for (const path of [...tracked, ...untracked]) expect(cumulativeAllowed).toContain(path);
-  expect(new Set([...tracked, ...untracked]).size).toBeLessThanOrEqual(7);
+  for (const path of [...tracked, ...untracked]) expect(compatibilityAllowed).toContain(path);
+  expect(new Set([...tracked, ...untracked]).size).toBeLessThanOrEqual(3);
 });
+
+const reportingGovernance = "7c6445e78b9e8c2e817e22099baab15846292ca5";
+const reportingRecord = "docs/development/p1-p27-reporting-conditional-acceptance.md";
+const verifyReportingGovernance = () => {
+  expect(
+    execFileSync("git", ["rev-parse", reportingGovernance + "^"], { encoding: "utf8" }).trim(),
+  ).toBe("e651349ede0ab6b3babd533e95c157052ca67cfa");
+  expect(
+    execFileSync("git", ["diff-tree", "--no-commit-id", "--name-only", "-r", reportingGovernance], {
+      encoding: "utf8",
+    })
+      .trim()
+      .split("\n")
+      .sort(),
+  ).toEqual([reportingRecord, "docs/development/prompt-ledger.md"].sort());
+  const ledger = "docs/development/prompt-ledger.md",
+    historical = execFileSync("git", [
+      "show",
+      "e651349ede0ab6b3babd533e95c157052ca67cfa:" + ledger,
+    ]),
+    approved = execFileSync("git", ["show", reportingGovernance + ":" + ledger]);
+  expect(approved.subarray(0, historical.length)).toEqual(historical);
+  expect(approved.length).toBeGreaterThan(historical.length);
+  for (const path of [reportingRecord, ledger])
+    expect(readFileSync(path)).toEqual(
+      execFileSync("git", ["show", reportingGovernance + ":" + path]),
+    );
+};
