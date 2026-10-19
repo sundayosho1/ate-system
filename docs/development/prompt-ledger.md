@@ -956,3 +956,50 @@ disclosure. A26-Q01/A26C-L01 remain OPEN. No prior status or historical record i
 Acceptance is bounded offline historical/synthetic research and static foundation metadata only; no
 authenticated running-owner reporting, operational diagnostics, frontend or trading authority.
 CODEX-014D/E and Prompts 28–30 remain NOT AUTHORIZED.
+
+## CODEX-014D-F — unified reporting conditional governance record
+
+**OWNER-AUTHORIZED CONDITIONAL GOVERNANCE ACCEPTANCE — SUBJECT TO SUCCESSFUL FINAL VERIFICATION AND
+STAGE B PUBLICATION.** Owner decision: A. ACCEPT — CONDITIONAL GOVERNANCE ACCEPTANCE. Signatory:
+Sunday Osho. Role/designation: Owner of the ATE System (Autonomous Trading Engine), Project Owner
+and Development Governance Approver. Capacity/authority: I am the Owner of ATE and hold
+responsibility for approving its development milestones, technical acceptance, governance baselines
+and progression between development stages.. Approval/effective date: 19 October 2026. Publication
+status: Owner-authorized conditional governance acceptance; effective subject to successful final
+committed-source verification and Stage B publication.. A subsequent explicit owner decision is
+required; this proposed appendix does not itself accept or authorize publication. Effectiveness
+requires final committed-source gates and separately authorized publication.
+
+Immutable candidate `e651349ede0ab6b3babd533e95c157052ca67cfa`, @ate/research-reporting
+`0.1.0-reporting-projection.1`, parent `ca7495fdc42e1da260617563d0aa90d6935e91a1`, accepted upstream
+governance `2cb81c1d33462f20ce15a4616eb971296d2d44ee`. Technical basis CODEX-014D-E: **B. TECHNICAL
+RE-AUDIT PASSED WITH QUALIFICATIONS.** E observed3988tests/173files, zero permanent
+failures/skips;266new scenarios with258safe/qualified outcomes and8genuine LOW diagnostic failures;
+27journeys and original counterexamples passing; verification/security passed and zero dependency
+vulnerabilities. These are authenticated E results, not fresh F Stage A executions.
+
+D-A-M01/D-C-M01, D-A-M02 and D-A-L01 are technically CLOSED within audited scope. **D-E-L01 stays
+OPEN,LOW,NONBLOCKING**: request/chart budget exhaustion may report INPUT_INVALID; operations reject
+safely, but not all diagnostic reason-code requirements are satisfied. Preserve all8failures and
+operational restrictions. Governance cannot close or silently authorize remediation of this issue.
+
+Proposed scope is bounded offline historical/synthetic supplied-evidence reporting and diagnostics,
+resource-limited projections/charts/improvement views/query/export and deterministic serialization.
+No running-owner integration, global completeness/consistency, current-health certification,
+frontend, network service, broker integration, trading or production authority. All4passive
+owner-read routes remain DISABLED. Historical ACKs and report hashes never confer current
+eligibility/readiness.
+
+All49preservation rows,12B-Rrisks,12D-Rrisks,C-Q01–04,OPEN A26-Q01/A26C-L01/C-OP01/D-E-L01 and
+E-Q01–04 remain binding. Preserve original failures, separate oracle/harness corrections, the
+disclosed premature local commit and final-source verification chronology, and reviewer
+implementation/audit participation without organizational independence. The full record is
+`p1-p27-reporting-conditional-acceptance.md`; E index SHA256
+`27464f775c4efc4427b76196e293ff010e400221d5c36dead70b9965daf19876`.
+
+If subsequently approved and published, this appendix supersedes only earlier pending reporting
+governance status within this narrow scope. Every prior ledger byte, accepted decision and upstream
+qualification remains unchanged. Any test compatibility correction requires separate approval and a
+distinct successor commit. CODEX-014E and Prompts28–30 remain NOT AUTHORIZED. No automatic
+remediation, live financial execution or production deployment. STOP after separately authorized
+Stage B publication and reporting.
