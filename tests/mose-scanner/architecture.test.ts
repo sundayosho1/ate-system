@@ -16,6 +16,7 @@ const args = (base: string) => [
   ":(exclude)packages/research-insights",
   ":(exclude)packages/research-reporting",
   ":(exclude)packages/research-workspace",
+  ":(exclude)packages/mose-opportunities",
 ];
 const owners = readdirSync("packages", { withFileTypes: true })
   .filter(
@@ -26,7 +27,8 @@ const owners = readdirSync("packages", { withFileTypes: true })
       d.name !== "research-insight-contracts" &&
       d.name !== "research-insights" &&
       d.name !== "research-reporting" &&
-      d.name !== "research-workspace",
+      d.name !== "research-workspace" &&
+      d.name !== "mose-opportunities",
   )
   .map((d) => d.name)
   .sort();

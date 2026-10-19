@@ -26,6 +26,7 @@ const acceptedOwners = (base: string) => [
   ":(exclude)packages/research-insights",
   ":(exclude)packages/research-reporting",
   ":(exclude)packages/research-workspace",
+  ":(exclude)packages/mose-opportunities",
 ];
 it("A24-M02 all sixteen accepted upstream owners, including P23, retain exact bytes", () => {
   expect(

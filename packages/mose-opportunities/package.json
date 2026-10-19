@@ -1,0 +1,31 @@
+{
+  "name": "@ate/mose-opportunities",
+  "version": "0.28.0-opportunity-state.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@ate/domain": "0.13.0-market-data-contracts.1",
+    "@ate/time": "0.6.0-time.1",
+    "@ate/configuration": "0.12.0-config-promotion.1",
+    "@ate/persistence": "0.5.0-persistence.1",
+    "@ate/multitimeframe": "0.18.0-multitimeframe.1",
+    "@ate/market-replay": "0.19.0-market-replay.1",
+    "@ate/instrument-eligibility": "0.24.0-instrument-eligibility.1",
+    "@ate/mose-core": "0.25.0-mose-core.1",
+    "@ate/mose-scanner": "0.26.0-multi-speed-scanner.1",
+    "@ate/mose-attention": "0.27.0-adaptive-surveillance.1",
+    "@ate/research-insight-contracts": "0.1.0-insights-foundation.1",
+    "@ate/research-insights": "0.1.0-insights-foundation.1",
+    "@ate/research-reporting": "0.1.0-reporting-projection.1",
+    "@ate/research-workspace": "0.1.0-integration.1",
+    "zod": "^4.1.13",
+    "@ate/data-quality": "0.15.0-data-quality.1",
+    "@ate/instrument-registry": "0.20.0-instrument-registry.1",
+    "@ate/instrument-specifications": "0.23.0-instrument-specifications.1"
+  },
+  "sideEffects": false,
+  "license": "UNLICENSED"
+}

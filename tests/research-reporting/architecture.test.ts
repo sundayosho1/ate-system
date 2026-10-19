@@ -277,7 +277,8 @@ it("exact37path maximum does not confer directory-wide permission", () => {
     .trim()
     .split("\n")
     .filter(Boolean);
-  expect(untracked).toEqual([]);
+  for (const path of untracked) expect(opportunityPaths).toContain(path);
+  verifyOpportunityEnvelope();
   for (const path of tracked) expect(compatibilityAllowed).toContain(path);
   expect(new Set(tracked).size).toBeLessThanOrEqual(3);
   const workspaceAllowed = [
@@ -372,6 +373,7 @@ it("exact37path maximum does not confer directory-wide permission", () => {
         "--",
         "packages",
         ":(exclude)packages/research-workspace",
+        ":(exclude)packages/mose-opportunities",
       ],
       { encoding: "utf8" },
     ),
@@ -417,7 +419,9 @@ const verifyWorkspaceLock = () => {
       encoding: "utf8",
     }),
   ) as { packages: Record<string, unknown>; [key: string]: unknown };
-  const proposed = JSON.parse(readFileSync("package-lock.json", "utf8")) as typeof accepted;
+  const proposed = JSON.parse(
+    execFileSync("git", ["show", opportunityBaseline + ":package-lock.json"], { encoding: "utf8" }),
+  ) as typeof accepted;
   for (const [key, value] of Object.entries(accepted))
     if (key !== "packages") expect(proposed[key]).toEqual(value);
   for (const [key, value] of Object.entries(accepted.packages))
@@ -426,9 +430,11 @@ const verifyWorkspaceLock = () => {
     "node_modules/@ate/research-workspace",
     "packages/research-workspace",
   ]);
-  expect(createHash("sha256").update(readFileSync("package-lock.json")).digest("hex")).toBe(
-    "8467e34ca12656c67eb7ad38219b5c931c19bb8843ace056b9ad830dda084ce0",
-  );
+  expect(
+    createHash("sha256")
+      .update(execFileSync("git", ["show", opportunityBaseline + ":package-lock.json"]))
+      .digest("hex"),
+  ).toBe("8467e34ca12656c67eb7ad38219b5c931c19bb8843ace056b9ad830dda084ce0");
 };
 
 const workspaceCandidate = "83ba497a30a1816403b1931b8701bfe00739fe2e";
@@ -465,7 +471,104 @@ const verifyWorkspaceGovernance = () => {
     "tests/research-reporting/architecture.test.ts",
     "tests/research-workspace/architecture.test.ts",
   ];
-  const tracked = execFileSync("git", ["diff", "--name-only", workspaceGovernance], {
+  const tracked = execFileSync(
+    "git",
+    ["diff", "--name-only", workspaceGovernance, opportunityBaseline],
+    {
+      encoding: "utf8",
+    },
+  )
+    .trim()
+    .split("\n")
+    .filter(Boolean);
+  const untracked = execFileSync("git", ["ls-files", "--others", "--exclude-standard"], {
+    encoding: "utf8",
+  })
+    .trim()
+    .split("\n")
+    .filter(Boolean);
+  for (const path of tracked) expect(compatibility).toContain(path);
+  for (const path of untracked) expect(opportunityPaths).toContain(path);
+  expect(new Set(tracked).size).toBeLessThanOrEqual(compatibility.length);
+  verifyOpportunityEnvelope();
+};
+
+// P28 proposal: pin historical compatibility separately from new exact paths.
+const opportunityBaseline = "610193e2479c28d0bd32eebff2bd16f550b0643b";
+const opportunityPaths = [
+  "packages/mose-opportunities/src/index.ts",
+  "packages/mose-opportunities/src/contracts.ts",
+  "packages/mose-opportunities/src/validation.ts",
+  "packages/mose-opportunities/src/canonical.ts",
+  "packages/mose-opportunities/src/identity.ts",
+  "packages/mose-opportunities/src/policy.ts",
+  "packages/mose-opportunities/src/evidence.ts",
+  "packages/mose-opportunities/src/predicates.ts",
+  "packages/mose-opportunities/src/transitions.ts",
+  "packages/mose-opportunities/src/time-policy.ts",
+  "packages/mose-opportunities/src/journal.ts",
+  "packages/mose-opportunities/src/memory-repository.ts",
+  "packages/mose-opportunities/src/filesystem-repository.ts",
+  "packages/mose-opportunities/src/recovery.ts",
+  "packages/mose-opportunities/src/runtime.ts",
+  "packages/mose-opportunities/src/query.ts",
+  "packages/mose-opportunities/src/diagnostics.ts",
+  "packages/mose-opportunities/src/handover.ts",
+  "packages/mose-opportunities/package.json",
+  "packages/mose-opportunities/tsconfig.json",
+  "packages/mose-opportunities/README.md",
+  "tests/mose-opportunities/contracts.test.ts",
+  "tests/mose-opportunities/identity.test.ts",
+  "tests/mose-opportunities/transition-matrix.test.ts",
+  "tests/mose-opportunities/evidence.test.ts",
+  "tests/mose-opportunities/temporal.test.ts",
+  "tests/mose-opportunities/predicates.test.ts",
+  "tests/mose-opportunities/journal-recovery.test.ts",
+  "tests/mose-opportunities/resource-policy.test.ts",
+  "tests/mose-opportunities/runtime-lifecycle.test.ts",
+  "tests/mose-opportunities/handover-help.test.ts",
+  "tests/mose-opportunities/integration-journeys.test.ts",
+  "tests/mose-opportunities/architecture.test.ts",
+  "docs/architecture/mose-opportunities.md",
+  "docs/help/mose-opportunities.md",
+  "docs/help/mose-opportunities-administration.md",
+  "docs/help/mose-opportunities-developer.md",
+  "docs/help/mose-opportunities-glossary.md",
+  "package-lock.json",
+];
+const opportunityTests = [
+  "tests/instrument-specifications/temporal-architecture.test.ts",
+  "tests/instrument-eligibility/architecture-guard-remediation.test.ts",
+  "tests/mose-core/architecture.test.ts",
+  "tests/mose-scanner/architecture.test.ts",
+  "tests/mose-attention/architecture.test.ts",
+  "tests/research-insights/architecture.test.ts",
+  "tests/research-reporting/architecture.test.ts",
+  "tests/research-workspace/architecture.test.ts",
+];
+// BEGIN OPPORTUNITY COMPATIBILITY HASHES
+const opportunityCompatibilityHashes: Readonly<Record<string, string>> = {
+  "tests/instrument-specifications/temporal-architecture.test.ts":
+    "2123ea461970b4a0796947055d19c456f0c76953280f556d19be0a634b48793a",
+  "tests/instrument-eligibility/architecture-guard-remediation.test.ts":
+    "0426a934b3bf12013987d37b46888a82913aa7f3c61688e46338bc173480fafe",
+  "tests/mose-core/architecture.test.ts":
+    "f0ebaf7595db4b80cf28c260f8f983243c6d596240202b43b18d8eaf7c7b0842",
+  "tests/mose-scanner/architecture.test.ts":
+    "6249bce635389090dd7d78d960319ac7702cc3082fe9195d0511e2050435d93d",
+  "tests/mose-attention/architecture.test.ts":
+    "102786ed69819ad262a62bc344bd4a310d1409959c9c6285c1047d46b6e54d49",
+  "tests/research-insights/architecture.test.ts":
+    "1553f7c2245214ac9db50349dd34295b5fd79865f40fbecfed42df498566ad08",
+  "tests/research-reporting/architecture.test.ts":
+    "46e29af67d220cdf19441e01d272ea64472a04e1ab81c5fe371bbc7ee929f721",
+  "tests/research-workspace/architecture.test.ts":
+    "736cd5c7311a2d564214e063b4bfb20c587423ec3c9b0431bf10640933a6d70c",
+};
+// END OPPORTUNITY COMPATIBILITY HASHES
+const verifyOpportunityEnvelope = () => {
+  execFileSync("git", ["merge-base", "--is-ancestor", opportunityBaseline, "HEAD"]);
+  const tracked = execFileSync("git", ["diff", "--name-only", opportunityBaseline], {
     encoding: "utf8",
   })
     .trim()
@@ -477,6 +580,42 @@ const verifyWorkspaceGovernance = () => {
     .trim()
     .split("\n")
     .filter(Boolean);
-  for (const path of [...tracked, ...untracked]) expect(compatibility).toContain(path);
-  expect(new Set([...tracked, ...untracked]).size).toBeLessThanOrEqual(compatibility.length);
+  const allowedPaths = [...opportunityPaths, ...opportunityTests];
+  for (const path of [...tracked, ...untracked]) expect(allowedPaths).toContain(path);
+  expect(new Set([...tracked, ...untracked]).size).toBeLessThanOrEqual(47);
+  for (const path of opportunityPaths) expect(readFileSync(path).byteLength).toBeGreaterThan(0);
+  expect(readdirSync("packages/mose-opportunities/src").sort()).toEqual(
+    opportunityPaths
+      .filter((p) => p.startsWith("packages/mose-opportunities/src/"))
+      .map((p) => p.split("/").at(-1))
+      .sort(),
+  );
+  expect(Object.keys(opportunityCompatibilityHashes).sort()).toEqual([...opportunityTests].sort());
+  for (const [path, digest] of Object.entries(opportunityCompatibilityHashes)) {
+    const bytes = readFileSync(path, "utf8").replace(
+      /\/\/ BEGIN OPPORTUNITY COMPATIBILITY HASHES[\s\S]*?\/\/ END OPPORTUNITY COMPATIBILITY HASHES/u,
+      "OPPORTUNITY_COMPATIBILITY_HASHES",
+    );
+    expect(createHash("sha256").update(bytes).digest("hex")).toBe(digest);
+  }
+  for (const [path, digest] of Object.entries({
+    "packages/mose-opportunities/package.json":
+      "524699d77b647418f3fc47e2c7ab3f4dbf37286f4d3ce2cf4da6c17225946120",
+    "packages/mose-opportunities/tsconfig.json":
+      "c4ef5588f4e0e442aa72db545d02653e9ac2144621d081a486ee64879a5f5dcd",
+    "package-lock.json": "d384695eee21a2761673da521799aae752dcaf4374def46f4e2737aa9b7b73f4",
+  }))
+    expect(createHash("sha256").update(readFileSync(path)).digest("hex")).toBe(digest);
+  const oldLock = JSON.parse(
+    execFileSync("git", ["show", opportunityBaseline + ":package-lock.json"], { encoding: "utf8" }),
+  ) as { packages: Record<string, unknown>; [key: string]: unknown };
+  const newLock = JSON.parse(readFileSync("package-lock.json", "utf8")) as typeof oldLock;
+  for (const [key, value] of Object.entries(oldLock))
+    if (key !== "packages") expect(newLock[key]).toEqual(value);
+  for (const [key, value] of Object.entries(oldLock.packages))
+    expect(newLock.packages[key]).toEqual(value);
+  expect(Object.keys(newLock.packages).filter((key) => !(key in oldLock.packages))).toEqual([
+    "node_modules/@ate/mose-opportunities",
+    "packages/mose-opportunities",
+  ]);
 };

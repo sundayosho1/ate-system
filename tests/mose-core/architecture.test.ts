@@ -16,6 +16,7 @@ const ownerDiff = (base: string) => [
   ":(exclude)packages/research-insights",
   ":(exclude)packages/research-reporting",
   ":(exclude)packages/research-workspace",
+  ":(exclude)packages/mose-opportunities",
 ];
 it("all17 accepted owner packages including P24 retain exact bytes", () => {
   expect(execFileSync("git", ownerDiff(baseline), { encoding: "utf8" })).toBe("");
@@ -90,7 +91,8 @@ const owners = readdirSync("packages", { withFileTypes: true })
       d.name !== "research-insight-contracts" &&
       d.name !== "research-insights" &&
       d.name !== "research-reporting" &&
-      d.name !== "research-workspace",
+      d.name !== "research-workspace" &&
+      d.name !== "mose-opportunities",
   )
   .map((d) => d.name);
 expect(owners).toHaveLength(17);

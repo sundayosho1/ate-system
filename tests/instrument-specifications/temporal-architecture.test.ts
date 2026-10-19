@@ -167,6 +167,7 @@ it("unchanged upstream packages retain their exact baseline bytes", () => {
         ":(exclude)packages/research-insights",
         ":(exclude)packages/research-reporting",
         ":(exclude)packages/research-workspace",
+        ":(exclude)packages/mose-opportunities",
       ],
       { encoding: "utf8" },
     ),
