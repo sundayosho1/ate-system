@@ -166,3 +166,38 @@ original ACK without a write or new mutation grant. Historical details, hashes, 
 remain unchanged. This is not current eligibility, readiness or trading authority. Unknown
 publication and unresolved obligations still require genuine recovery. All work shares the existing
 O1 budget; a read or retry can fail closed when simultaneous limits are exhausted.
+
+## Query resource accounting
+
+A public runtime query keeps one cumulative operation meter from before supplied-policy validation
+through request validation, every retained-row filter visit and output capture. A supplied policy's
+node, depth and request-byte ceilings are inspected through own data descriptors and tightened
+before its full policy capture. The captured effective ceilings must agree with the inspected
+effective ceilings; changing property responses reject, while inert structural representations
+remain supported. Complete policy validation still applies; a weaker supplied value cannot enlarge
+the hard, original or inherited enclosing ceiling.
+
+Page size, default page size, offset, query-key bytes and output bytes also use the minimum of the
+query policy and the actual enclosing P28 limits. Node/depth/request counters retain earlier
+consumption through the existing operation infrastructure. No automatic cross-owner budget bridge or
+unsupported owner read is inferred; an external applicable bound must be provided by an accepted
+policy or supported enclosing context. Journal storage, replay and evidence-admission limits remain
+with their original owner operations; a read does not rewrite historical records under a new policy.
+
+The logical query cost is the captured supplied policy when present, captured query input, one
+reservation per retained row visited, and the complete returned page graph. Nonmatching and
+offset-skipped rows still consume a visit. Pagination retains only the bounded output page rather
+than building an uncharged all-matches array. Rejected construction returns no successful partial
+page. The empty supplied-policy example requires 51 capture nodes; an omitted already validated
+policy does not incur a new policy-input capture. These are simultaneous bounds, not guaranteed
+minimum capacities.
+
+Nested validation, asynchronous enclosing work and query-plus-export composition retain consumed
+work and the lowest effective ceiling. A failed operation does not refund the shared meter. A new
+independent request may start a new meter; no automatic retry or refresh is introduced. Historical
+records, native fingerprints, journal ACKs and current-authority disclaimers remain unchanged.
+
+This query correction does not resolve the separately recorded diagnostic-meter and help-output
+limitations (G-AD01, G-AD02 and G-AD03). Trusted-host callback cost and synchronous cancellation
+remain qualified; logical counters do not certify wall-clock bounds, production durability or
+readiness.

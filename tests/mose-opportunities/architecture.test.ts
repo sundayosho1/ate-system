@@ -49,7 +49,7 @@ const owners = [
   "runtime",
   "time",
 ];
-const expected = "3e1b5fe2301db37b7c90d0ddccfba6f89ecf62885599df6b21d9026507609419";
+const expected = "3fc836d493d118873e5954cc8654134a61cee6db3e598e45ba9111c8929f5fc3";
 const digest = (override?: { name: string; bytes: Buffer }) => {
   const h = createHash("sha256");
   for (const name of files)

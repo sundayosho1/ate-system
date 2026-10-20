@@ -273,7 +273,11 @@ const verifyWorkspaceGovernance = () => {
     .split("\n")
     .filter(Boolean);
   for (const path of tracked) expect(compatibility).toContain(path);
-  for (const path of untracked) expect(opportunityPaths).toContain(path);
+  for (const path of untracked)
+    expect([
+      ...opportunityPaths,
+      "tests/mose-opportunities/query-resource-accounting.test.ts",
+    ]).toContain(path);
   expect(new Set(tracked).size).toBeLessThanOrEqual(compatibility.length);
   verifyOpportunityEnvelope();
 };
@@ -333,7 +337,7 @@ const opportunityTests = [
   "tests/research-workspace/architecture.test.ts",
 ];
 // BEGIN OPPORTUNITY COMPATIBILITY HASHES
-const opportunityCompatibilityHashes: Readonly<Record<string, string>> = {
+const opportunityCompatibilityHashes: Record<string, string> = {
   "tests/instrument-specifications/temporal-architecture.test.ts":
     "2123ea461970b4a0796947055d19c456f0c76953280f556d19be0a634b48793a",
   "tests/instrument-eligibility/architecture-guard-remediation.test.ts":
@@ -343,13 +347,13 @@ const opportunityCompatibilityHashes: Readonly<Record<string, string>> = {
   "tests/mose-scanner/architecture.test.ts":
     "6249bce635389090dd7d78d960319ac7702cc3082fe9195d0511e2050435d93d",
   "tests/mose-attention/architecture.test.ts":
-    "1aa3c5ebfa5b7cf5ea2b9a5312fcd3c8a9abaad9a84c02c1a5795fa0a1e8280a",
+    "8812df5c4b33e2779fae42f37f378aefac463295761655cae124a82b9a4b1409",
   "tests/research-insights/architecture.test.ts":
-    "ba559f6fa1ffb9b746bf2be91a0d6c26d4957405e82a325656cb8ce0b4c8ba38",
+    "93c323ba270db1f08e7dad48c4085685ac0019b6e46ee2001b6e1d30a59dec53",
   "tests/research-reporting/architecture.test.ts":
-    "a5157ae9f8c14629591f7dd801597c0b996cde45af81a09c43016998d3c69122",
+    "eca3c65abbcb38430bb4c39a8b5b95e3fde6b3acc19c29d892eab0b284c703c9",
   "tests/research-workspace/architecture.test.ts":
-    "f8785b4b57fdad544e7e7515df0c6c0d88da23ca66668aaf81ddbf22c2927009",
+    "ee847a13e521230ab3891a36a114933d1c047bea03bd886c18db79864de98690",
 };
 // END OPPORTUNITY COMPATIBILITY HASHES
 const opportunityImplementation = "6103ca13670d6a75f85b03c24bec567f86a5e467";
@@ -363,6 +367,17 @@ const remediationPaths = [
   "tests/mose-opportunities/architecture.test.ts",
   "tests/mose-opportunities/evidence-canonicalization.test.ts",
   "docs/help/mose-opportunities-developer.md",
+  "tests/mose-attention/architecture.test.ts",
+  "tests/research-insights/architecture.test.ts",
+  "tests/research-reporting/architecture.test.ts",
+  "tests/research-workspace/architecture.test.ts",
+];
+const queryRemediationBaseline = "a72f7b98e045d05b4164609475b56c8cde9ee0ff";
+const queryRemediationPaths = [
+  "packages/mose-opportunities/src/query.ts",
+  "tests/mose-opportunities/query-resource-accounting.test.ts",
+  "docs/help/mose-opportunities-developer.md",
+  "tests/mose-opportunities/architecture.test.ts",
   "tests/mose-attention/architecture.test.ts",
   "tests/research-insights/architecture.test.ts",
   "tests/research-reporting/architecture.test.ts",
@@ -387,9 +402,13 @@ const verifyOpportunityEnvelope = () => {
     ].sort(),
   );
   expect(historical).toHaveLength(47);
-  const remediation = execFileSync("git", ["diff", "--name-only", opportunityImplementation], {
-    encoding: "utf8",
-  })
+  const remediation = execFileSync(
+    "git",
+    ["diff", "--name-only", opportunityImplementation, queryRemediationBaseline],
+    {
+      encoding: "utf8",
+    },
+  )
     .trim()
     .split("\n")
     .filter(Boolean);
@@ -399,12 +418,29 @@ const verifyOpportunityEnvelope = () => {
     .trim()
     .split("\n")
     .filter(Boolean);
-  for (const path of [...remediation, ...newPaths]) expect(remediationPaths).toContain(path);
-  expect(new Set([...remediation, ...newPaths]).size).toBeLessThanOrEqual(remediationPaths.length);
-  execFileSync("git", ["merge-base", "--is-ancestor", opportunityBaseline, "HEAD"]);
-  const tracked = execFileSync("git", ["diff", "--name-only", opportunityBaseline], {
+  // Authenticate the completed 015E envelope independently from the proposed query correction.
+  expect(remediation.sort()).toEqual([...remediationPaths].sort());
+  expect(remediation).toHaveLength(13);
+  execFileSync("git", ["merge-base", "--is-ancestor", queryRemediationBaseline, "HEAD"]);
+  const queryChanges = execFileSync("git", ["diff", "--name-only", queryRemediationBaseline], {
     encoding: "utf8",
   })
+    .trim()
+    .split("\n")
+    .filter(Boolean);
+  expect([...new Set([...queryChanges, ...newPaths])].sort()).toEqual(
+    [...queryRemediationPaths].sort(),
+  );
+  for (const path of queryRemediationPaths)
+    expect(readFileSync(path).byteLength).toBeGreaterThan(0);
+  execFileSync("git", ["merge-base", "--is-ancestor", opportunityBaseline, "HEAD"]);
+  const tracked = execFileSync(
+    "git",
+    ["diff", "--name-only", opportunityBaseline, queryRemediationBaseline],
+    {
+      encoding: "utf8",
+    },
+  )
     .trim()
     .split("\n")
     .filter(Boolean);
@@ -415,8 +451,9 @@ const verifyOpportunityEnvelope = () => {
     .split("\n")
     .filter(Boolean);
   const allowedPaths = [...opportunityPaths, ...opportunityTests];
-  for (const path of [...tracked, ...untracked]) expect(allowedPaths).toContain(path);
-  expect(new Set([...tracked, ...untracked]).size).toBeLessThanOrEqual(48);
+  for (const path of tracked) expect(allowedPaths).toContain(path);
+  expect(new Set(tracked).size).toBe(48);
+  for (const path of untracked) expect(queryRemediationPaths).toContain(path);
   for (const path of opportunityPaths) expect(readFileSync(path).byteLength).toBeGreaterThan(0);
   expect(readdirSync("packages/mose-opportunities/src").sort()).toEqual(
     opportunityPaths
