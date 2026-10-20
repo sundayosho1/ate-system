@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import { O1, effectivePolicy } from "./policy.js";
 import { operationBudget, inOperation } from "./validation.js";
 import { observationSchema } from "@ate/mose-core";
@@ -27,6 +28,11 @@ import { subjectFingerprint } from "./identity.js";
 import type { Budget } from "./validation.js";
 import { demand, object, freeze } from "./validation.js";
 import { checkEvidenceTime, milliseconds } from "./time-policy.js";
+const legacyOrder = new AsyncLocalStorage<boolean>();
+/** Internal, synchronous journal-validation scope; never exported by the package root. */
+export function withLegacyEvidenceOrder<T>(validate: () => T): T {
+  return legacyOrder.run(true, validate);
+}
 const captures = new WeakMap<object, NativeCapture>();
 const proposals = new WeakMap<object, ProposalDetails>();
 export function captureNativeResult(
@@ -451,8 +457,27 @@ export function admitEvidence(
     }
   }
   return result.sort((a, b) => {
-    const x = canonical([a.availableAt, a.eventAt, a.namespace, a.recordId, a.fingerprint]),
-      y = canonical([b.availableAt, b.eventAt, b.namespace, b.recordId, b.fingerprint]);
+    // Preserve temporal priority, then totally order the complete immutable reference identity.
+    // Same-identity contradictions were rejected above; native ordered payloads remain untouched.
+    const key = (e: CapturedEvidence) => {
+      const primary = [e.availableAt, e.eventAt, e.namespace, e.recordId, e.fingerprint];
+      // Legacy order is used only while validating an attested retained prefix, never new input.
+      if (legacyOrder.getStore() === true) return canonical(primary);
+      return canonical([
+        e.availableAt,
+        e.eventAt,
+        e.namespace,
+        e.recordId,
+        e.fingerprint,
+        e.owner,
+        e.ownerVersion,
+        e.runtimeId,
+        e.generation,
+        e.sourceOriginFingerprint,
+      ]);
+    };
+    const x = key(a),
+      y = key(b);
     return x < y ? -1 : x > y ? 1 : 0;
   });
 }

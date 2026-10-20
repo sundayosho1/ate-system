@@ -1,13 +1,23 @@
-import type { JournalRecord, Policy, OpportunitySnapshot } from "./contracts.js";
+import type {
+  JournalRecord,
+  Policy,
+  OpportunitySnapshot,
+  TrustedHostAuthorization,
+} from "./contracts.js";
 import { checkedRecord, makeJournalRecord } from "./journal.js";
 import { canonical } from "./canonical.js";
-import { demand, freeze, operationBudget, inOperation } from "./validation.js";
-import { sealProposal } from "./evidence.js";
+import { demand, freeze, operationBudget, inOperation, object } from "./validation.js";
+import { sealProposal, captureNativeResult } from "./evidence.js";
 
+const legacyRecords = new WeakSet<object>();
+export const isVerifiedLegacyRecord = (record: JournalRecord) => legacyRecords.has(record);
+const legacyImplementation = "6103ca13670d6a75f85b03c24bec567f86a5e467";
 export function recoverJournal(
   raw: readonly unknown[],
   root: string,
   policy: Policy,
+  host: TrustedHostAuthorization | null = null,
+  maximumLegacyGeneration = raw.length,
 ): readonly JournalRecord[] {
   return inOperation(policy.limits, () => {
     demand(
@@ -16,12 +26,60 @@ export function recoverJournal(
     );
     const meter = operationBudget(policy.limits),
       records: JournalRecord[] = [];
+    let legacyGeneration = 0,
+      legacyFingerprint: string | null = null;
+    if (host?.verifyLegacyJournalPrefix !== undefined) {
+      demand(host.reviewReference.length > 0, "AUTHORITY_UNESTABLISHED");
+      const answer = captureNativeResult(
+        host.verifyLegacyJournalPrefix({ root, sourceImplementation: legacyImplementation }),
+      );
+      demand(answer.ok, "LEGACY_AUTHORITY_UNESTABLISHED");
+      const anchor = object(meter.capture(answer.value));
+      demand(
+        Object.keys(anchor).sort().join() ===
+          [
+            "root",
+            "sourceImplementation",
+            "journalGeneration",
+            "journalFingerprint",
+            "issuerRef",
+            "approvalReference",
+            "acknowledgementProofRef",
+          ]
+            .sort()
+            .join(),
+        "LEGACY_AUTHORITY_UNESTABLISHED",
+      );
+      demand(
+        anchor.root === root &&
+          anchor.sourceImplementation === legacyImplementation &&
+          typeof anchor.journalGeneration === "number" &&
+          Number.isSafeInteger(anchor.journalGeneration) &&
+          anchor.journalGeneration >= 1 &&
+          anchor.journalGeneration <= raw.length &&
+          anchor.journalGeneration <= maximumLegacyGeneration &&
+          typeof anchor.journalFingerprint === "string" &&
+          /^sha256:[a-f0-9]{64}$/u.test(anchor.journalFingerprint),
+        "LEGACY_AUTHORITY_UNESTABLISHED",
+      );
+      for (const field of ["issuerRef", "approvalReference", "acknowledgementProofRef"]) {
+        const value = anchor[field];
+        demand(
+          typeof value === "string" &&
+            value.length > 0 &&
+            Buffer.byteLength(value) <= policy.limits.maxIdentifierBytes,
+          "LEGACY_AUTHORITY_UNESTABLISHED",
+        );
+      }
+      legacyGeneration = anchor.journalGeneration;
+      legacyFingerprint = anchor.journalFingerprint;
+    }
     const latest = new Map<string, OpportunitySnapshot>();
     const lastEvent = new Map<string, string>();
     const commands = new Set<string>();
     let bytes = 0;
     for (const value of raw) {
-      const record = checkedRecord(value, policy, meter);
+      const record = checkedRecord(value, policy, meter, records.length < legacyGeneration);
       bytes += Buffer.byteLength(canonical(record));
       demand(bytes <= policy.limits.maxRetainedJournalBytes, "BUDGET_EXHAUSTED");
       demand(
@@ -81,6 +139,13 @@ export function recoverJournal(
           .length <= policy.limits.maxLiveKeys,
         "CAPACITY_EXHAUSTED",
       );
+    }
+    if (legacyGeneration > 0) {
+      demand(
+        records[legacyGeneration - 1]?.fingerprint === legacyFingerprint,
+        "LEGACY_ACK_MISMATCH",
+      );
+      for (const record of records.slice(0, legacyGeneration)) legacyRecords.add(record);
     }
     return freeze(records);
   });

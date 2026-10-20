@@ -16,7 +16,7 @@ import { evaluateOpportunity } from "./transitions.js";
 import { expiryAt } from "./time-policy.js";
 import { commandFingerprint } from "./identity.js";
 import { createOpportunityPolicy } from "./policy.js";
-import { rehydrateCapture, proposalDetails } from "./evidence.js";
+import { rehydrateCapture, proposalDetails, withLegacyEvidenceOrder } from "./evidence.js";
 export function proposalDto(proposal: DecisionProposal): DecisionProposal {
   return Object.fromEntries(Object.entries(proposal)) as DecisionProposal;
 }
@@ -82,6 +82,7 @@ export function checkedRecord(
   raw: unknown,
   policy: Policy,
   meter = operationBudget(policy.limits),
+  legacyPrefix = false,
 ): JournalRecord {
   const data = object(meter.reuseCaptured(raw, policy.limits.maxRecordBytes));
   demand(
@@ -120,7 +121,8 @@ export function checkedRecord(
   meter.tighten(original.value.limits);
   const details = info as ProposalDetails;
   const context = rehydrateCapture(details.context, details.capture, original.value);
-  const reevaluated = evaluateOpportunity(details.input, context, original.value);
+  const evaluate = () => evaluateOpportunity(details.input, context, original.value);
+  const reevaluated = legacyPrefix ? withLegacyEvidenceOrder(evaluate) : evaluate();
   demand(
     reevaluated.ok && canonical(proposalDto(reevaluated.value)) === canonical(data.proposal),
     !reevaluated.ok && reevaluated.error.code === "OPP:BUDGET_EXHAUSTED"

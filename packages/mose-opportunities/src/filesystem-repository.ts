@@ -8,6 +8,7 @@ import {
   type OpportunityRepository,
   type JournalRecord,
   type Policy,
+  type TrustedHostAuthorization,
 } from "./contracts.js";
 import { defaultOpportunityPolicy, effectivePolicy } from "./policy.js";
 import { canonical, checkedCanonicalText } from "./canonical.js";
@@ -23,7 +24,11 @@ export class FilesystemOpportunityRepository implements OpportunityRepository {
   readonly storageMode = "OFFLINE_FILESYSTEM" as const;
   readonly policy: Policy;
   private busy = false;
-  constructor(root: string, policy: Policy = defaultOpportunityPolicy) {
+  constructor(
+    root: string,
+    policy: Policy = defaultOpportunityPolicy,
+    private readonly legacyHost: TrustedHostAuthorization | null = null,
+  ) {
     demand(
       typeof root === "string" &&
         root.length > 0 &&
@@ -126,7 +131,14 @@ export class FilesystemOpportunityRepository implements OpportunityRepository {
 
       try {
         const records = await this.read();
-        const record = recoverJournal([...records, raw], this.root, this.policy).at(-1)!;
+        // The prefix ceiling excludes the appended row from legacy validation.
+        const record = recoverJournal(
+          [...records, raw],
+          this.root,
+          this.policy,
+          this.legacyHost,
+          records.length,
+        ).at(-1)!;
         const text = canonical(record);
         demand(Buffer.byteLength(text) <= this.policy.limits.maxRecordBytes, "BUDGET_EXHAUSTED");
         await this.ancestors();

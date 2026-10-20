@@ -314,6 +314,23 @@ export interface OpportunityRepository {
   compareAppend(record: JournalRecord): Promise<Result<CommitAck>>;
 }
 export interface TrustedHostAuthorization {
+  /** Optional reviewed-host attestation of an already acknowledged immutable legacy prefix.
+   * The host must authenticate original receipt provenance, never infer it from journal hashes.
+   * Historical read/retry evidence only: does not authorize any mutation or current readiness.
+   */
+  readonly verifyLegacyJournalPrefix?: (
+    request: Readonly<{ root: string; sourceImplementation: string }>,
+  ) => Result<
+    Readonly<{
+      root: string;
+      sourceImplementation: string;
+      journalGeneration: number;
+      journalFingerprint: string;
+      issuerRef: string;
+      approvalReference: string;
+      acknowledgementProofRef: string;
+    }>
+  >;
   readonly reviewReference: string;
   /** Already supplied, inert bounded evidence. Never an arbitrary owner invocation/read callback. */
   readonly captures: Readonly<Record<string, NativeCapture>>;

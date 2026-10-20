@@ -120,3 +120,49 @@ strings) and each flat JSON/CSV output representation. All consume the same oper
 no transformation resets the counter. An export rejected during construction returns failure with
 NONE and no successful partial value. Individual maxima remain subject to every simultaneous O1
 limit; they do not guarantee a minimum journal capacity.
+
+## Deterministic evidence-reference ordering
+
+The admitted outer evidence-reference collection is order-insensitive. Temporal priority
+(`availableAt`, then `eventAt`) and existing namespace, record and fingerprint keys are preserved;
+owner, owner version, runtime, generation and source origin break remaining ties across distinct
+immutable identities. Exact reference duplicates retain the existing deduplication rule, and
+contradictory bytes for one immutable identity still reject.
+
+This normalization does not reorder native event histories, temporal observations,
+revision/correction chains, quality-reference sequences or physical journal records. Materially
+changed evidence remains distinct. An equivalent reordered command retry returns its retained ACK
+without a new event, generation or mutation-authority grant; a genuine command conflict continues to
+reject. Historical ACKs do not establish current readiness, eligibility, trading authority or
+durable recovery beyond the accepted storage qualification. All O1 limits and trusted-host
+source-verification requirements remain binding.
+
+## Proposed legacy-prefix compatibility (owner review only)
+
+This detached proposal adds an optional `verifyLegacyJournalPrefix` method to the reviewed
+trusted-host contract. It must authenticate original ACK provenance and return the exact root,
+producer implementation SHA, prefix generation, physical journal fingerprint, issuer, approval
+reference and acknowledgement-proof reference. Returning echoed caller fields, a matching hash or a
+version flag is insufficient. No built-in production verifier, credential service or receipt
+authority is supplied.
+
+The only proposed legacy producer is `6103ca13670d6a75f85b03c24bec567f86a5e467`. Its attested prefix
+is fully replayed under the original evidence ordering and checked against the original event,
+command, physical journal ACK, subject, policy, native bindings and predecessor chain. The exact
+attested prefix head must match before any records receive internal legacy proof. Without a reviewed
+verifier, current canonical validation remains the default. A missing, unresolved, contradictory or
+incomplete attestation fails closed.
+
+A filesystem host must be supplied explicitly as the optional third constructor argument and as the
+runtime's existing host argument. The repository never permits an attested legacy boundary to
+include the next append. Every appended row follows the corrected canonical contract. Memory
+repositories retain strict canonical-only append behavior; volatile state is not a historical
+durability guarantee.
+
+An equivalent historical retry compares a current-canonical projection of the fully validated
+original details against the complete proposed command. Ordered native arrays and every
+non-reference context field remain significant. Only a genuinely equivalent retry returns the
+original ACK without a write or new mutation grant. Historical details, hashes, state and generation
+remain unchanged. This is not current eligibility, readiness or trading authority. Unknown
+publication and unresolved obligations still require genuine recovery. All work shares the existing
+O1 budget; a read or retry can fail closed when simultaneous limits are exhausted.

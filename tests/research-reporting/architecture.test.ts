@@ -529,6 +529,7 @@ const opportunityPaths = [
   "tests/mose-opportunities/handover-help.test.ts",
   "tests/mose-opportunities/integration-journeys.test.ts",
   "tests/mose-opportunities/architecture.test.ts",
+  "tests/mose-opportunities/evidence-canonicalization.test.ts",
   "docs/architecture/mose-opportunities.md",
   "docs/help/mose-opportunities.md",
   "docs/help/mose-opportunities-administration.md",
@@ -557,16 +558,64 @@ const opportunityCompatibilityHashes: Readonly<Record<string, string>> = {
   "tests/mose-scanner/architecture.test.ts":
     "6249bce635389090dd7d78d960319ac7702cc3082fe9195d0511e2050435d93d",
   "tests/mose-attention/architecture.test.ts":
-    "102786ed69819ad262a62bc344bd4a310d1409959c9c6285c1047d46b6e54d49",
+    "1aa3c5ebfa5b7cf5ea2b9a5312fcd3c8a9abaad9a84c02c1a5795fa0a1e8280a",
   "tests/research-insights/architecture.test.ts":
-    "1553f7c2245214ac9db50349dd34295b5fd79865f40fbecfed42df498566ad08",
+    "ba559f6fa1ffb9b746bf2be91a0d6c26d4957405e82a325656cb8ce0b4c8ba38",
   "tests/research-reporting/architecture.test.ts":
-    "46e29af67d220cdf19441e01d272ea64472a04e1ab81c5fe371bbc7ee929f721",
+    "a5157ae9f8c14629591f7dd801597c0b996cde45af81a09c43016998d3c69122",
   "tests/research-workspace/architecture.test.ts":
-    "736cd5c7311a2d564214e063b4bfb20c587423ec3c9b0431bf10640933a6d70c",
+    "f8785b4b57fdad544e7e7515df0c6c0d88da23ca66668aaf81ddbf22c2927009",
 };
 // END OPPORTUNITY COMPATIBILITY HASHES
+const opportunityImplementation = "6103ca13670d6a75f85b03c24bec567f86a5e467";
+const remediationPaths = [
+  "packages/mose-opportunities/src/evidence.ts",
+  "packages/mose-opportunities/src/contracts.ts",
+  "packages/mose-opportunities/src/journal.ts",
+  "packages/mose-opportunities/src/recovery.ts",
+  "packages/mose-opportunities/src/runtime.ts",
+  "packages/mose-opportunities/src/filesystem-repository.ts",
+  "tests/mose-opportunities/architecture.test.ts",
+  "tests/mose-opportunities/evidence-canonicalization.test.ts",
+  "docs/help/mose-opportunities-developer.md",
+  "tests/mose-attention/architecture.test.ts",
+  "tests/research-insights/architecture.test.ts",
+  "tests/research-reporting/architecture.test.ts",
+  "tests/research-workspace/architecture.test.ts",
+];
 const verifyOpportunityEnvelope = () => {
+  execFileSync("git", ["merge-base", "--is-ancestor", opportunityImplementation, "HEAD"]);
+  const historical = execFileSync(
+    "git",
+    ["diff", "--name-only", opportunityBaseline, opportunityImplementation],
+    { encoding: "utf8" },
+  )
+    .trim()
+    .split("\n")
+    .filter(Boolean);
+  expect(historical.sort()).toEqual(
+    [
+      ...opportunityPaths.filter(
+        (p) => p !== "tests/mose-opportunities/evidence-canonicalization.test.ts",
+      ),
+      ...opportunityTests,
+    ].sort(),
+  );
+  expect(historical).toHaveLength(47);
+  const remediation = execFileSync("git", ["diff", "--name-only", opportunityImplementation], {
+    encoding: "utf8",
+  })
+    .trim()
+    .split("\n")
+    .filter(Boolean);
+  const newPaths = execFileSync("git", ["ls-files", "--others", "--exclude-standard"], {
+    encoding: "utf8",
+  })
+    .trim()
+    .split("\n")
+    .filter(Boolean);
+  for (const path of [...remediation, ...newPaths]) expect(remediationPaths).toContain(path);
+  expect(new Set([...remediation, ...newPaths]).size).toBeLessThanOrEqual(remediationPaths.length);
   execFileSync("git", ["merge-base", "--is-ancestor", opportunityBaseline, "HEAD"]);
   const tracked = execFileSync("git", ["diff", "--name-only", opportunityBaseline], {
     encoding: "utf8",
@@ -582,7 +631,7 @@ const verifyOpportunityEnvelope = () => {
     .filter(Boolean);
   const allowedPaths = [...opportunityPaths, ...opportunityTests];
   for (const path of [...tracked, ...untracked]) expect(allowedPaths).toContain(path);
-  expect(new Set([...tracked, ...untracked]).size).toBeLessThanOrEqual(47);
+  expect(new Set([...tracked, ...untracked]).size).toBeLessThanOrEqual(48);
   for (const path of opportunityPaths) expect(readFileSync(path).byteLength).toBeGreaterThan(0);
   expect(readdirSync("packages/mose-opportunities/src").sort()).toEqual(
     opportunityPaths

@@ -30,7 +30,7 @@ import {
 } from "./evidence.js";
 import { evaluateOpportunity } from "./transitions.js";
 import { makeJournalRecord, exactAcknowledgement, acknowledgement } from "./journal.js";
-import { recoverJournal } from "./recovery.js";
+import { recoverJournal, isVerifiedLegacyRecord } from "./recovery.js";
 import { captureOpportunityClock, milliseconds } from "./time-policy.js";
 import { commandFingerprint } from "./identity.js";
 import { queryOpportunityHistory } from "./query.js";
@@ -62,7 +62,7 @@ export class OpportunityRuntime {
       try {
         const raw = captureNativeResult(await this.repository.load());
         demand(raw.ok && Array.isArray(raw.value), "RECOVERY_REQUIRED");
-        this.records = recoverJournal(raw.value, this.repository.root, this.policy);
+        this.records = recoverJournal(raw.value, this.repository.root, this.policy, this.host);
         this.phase = "READY";
         return success(this.records);
       } catch {
@@ -184,7 +184,24 @@ export class OpportunityRuntime {
             r.details.input.actorAuthorityRef === d.input.actorAuthorityRef,
         );
         if (old) {
-          demand(old.commandFingerprint === command, "COMMAND_CONFLICT");
+          if (old.commandFingerprint !== command) {
+            demand(isVerifiedLegacyRecord(old), "COMMAND_CONFLICT");
+            operationBudget(this.policy.limits).tighten(old.details.policy.limits);
+            // Canonicalize the validated original details only for comparison; never rewrite them.
+            const normalized = evaluateOpportunity(
+              old.details.input,
+              rehydrateCapture(old.details.context, old.details.capture, old.details.policy),
+              old.details.policy,
+            );
+            demand(normalized.ok, "COMMAND_CONFLICT");
+            const equivalent = commandFingerprint(
+              old.details.input.actorAuthorityRef,
+              old.proposal.key,
+              old.operationId,
+              proposalDetails(normalized.value),
+            );
+            demand(equivalent === command, "COMMAND_CONFLICT");
+          }
           return success(acknowledgement(old, this.repository.storageMode));
         }
         demand(canonical(d.policy) === canonical(this.policy), "SOURCE_CONTEXT_MISMATCH");
@@ -287,7 +304,7 @@ export class OpportunityRuntime {
         this.authorize(p.value, "RECOVER");
         const raw = captureNativeResult(await this.repository.load());
         demand(raw.ok && Array.isArray(raw.value), "RECOVERY_REQUIRED");
-        const records = recoverJournal(raw.value, this.repository.root, this.policy);
+        const records = recoverJournal(raw.value, this.repository.root, this.policy, this.host);
         const found = records.find((r) => r.fingerprint === pending.fingerprint);
         demand(found && canonical(found) === canonical(pending), "RECOVERY_REQUIRED");
         this.records = records;
